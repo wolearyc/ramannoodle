@@ -1,8 +1,12 @@
-Welcome to Lumache's documentation!
+Welcome to ramannoodle's documentation!
 ===================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
+**ramannoodle** is a Python library facilitating (relatively) fast generation of Raman spectra from molecular dynamics trajectories. 
+
+For now, this library interfaces only with VASP. This library also has a name which is very funny.
+
+
+
 It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
 and offers a *simple* and *intuitive* API.
 
