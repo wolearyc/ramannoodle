@@ -1,9 +1,8 @@
-Template for the Read the Docs tutorial
+ramannoodle
 =======================================
 
-This GitHub template includes fictional Python library
-with some basic Sphinx docs.
+Calculates Raman spectra from molecular dynamics simulations. Interfaces with VASP.
 
-Read the tutorial here:
+Instructions and documentation can be found here:
 
-https://docs.readthedocs.io/en/stable/tutorial/
+https://ramannooodle.readthedocs.io
