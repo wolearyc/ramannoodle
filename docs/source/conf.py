@@ -1,5 +1,6 @@
 # Configuration file for the Sphinx documentation builder.
 import sys
+import os
 
 # -- Project information
 
