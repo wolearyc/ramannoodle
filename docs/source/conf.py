@@ -1,9 +1,10 @@
 # Configuration file for the Sphinx documentation builder.
+import sys
 
 # -- Project information
 
 project = 'ramannoodle'
-copyright = '2021, Graziella'
+copyright = "2023, Willis O'Leary"
 author = "Willis O'Leary"
 
 release = '1.0'
