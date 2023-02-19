@@ -14,5 +14,6 @@ Contents
 
 .. toctree::
 
+   theory
    usage
    api
