@@ -13,7 +13,6 @@ setup(name='ramannoodle',
           'numpy',
           'scipy', 
           'matplotlib',
-          'spg',
           'ase',
           'phonopy',
           'spglib'
