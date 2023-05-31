@@ -87,7 +87,7 @@ def get_signal_correlation(signal):
     AF = AF[(len(AF)-1)//2:] # no normalization
     return AF
 
-def get_signal_spectrum(signal, potim = 1):
+def get_signal_spectrum(signal, potim):
     """Returns the (positive frequency) Fourier transform of the autocorrelation 
     of a signal.
 
@@ -335,8 +335,8 @@ class DielectricModel:
             max_dielectric = dielectric_tensors[np.argmax(displacements)]
             min_dielectric = dielectric_tensors[np.argmin(displacements)]
             derivative = (np.array(max_dielectric) - np.array(min_dielectric))/(np.max(displacements) - np.min(displacements))
-            displacements = [-0.2,0,0.2]
-            dielectric_tensors = [derivative * -0.2, derivative*0, derivative * 0.2]
+            displacements = [np.min(displacements),0,np.max(displacements)]
+            dielectric_tensors = [derivative * displacements[0], derivative*displacements[1], derivative * displacements[2]]
             interpolation_mode = 'linear'
         
         
@@ -744,15 +744,15 @@ def get_raman(traj, models, smearing = 0,
     Aprime = np.diff(A, axis=0)
     Aprime = np.append(Aprime,np.zeros((zero_padding,3,3)), axis=0)
                 
-    wavenumbers, _ = get_signal_spectrum(Aprime[:,0,0])        
+    wavenumbers, _ = get_signal_spectrum(Aprime[:,0,0], traj.potim)        
     
-    alpha2 = components[0] * 1/9* get_signal_spectrum(Aprime[:,0,0] + Aprime[:,1,1] + Aprime[:,2,2])[1]
-    gamma2 = components[1] * 1/2*get_signal_spectrum(Aprime[:,0,0] - Aprime[:,1,1])[1] + \
-             components[2] * 1/2*get_signal_spectrum(Aprime[:,1,1] - Aprime[:,2,2])[1] + \
-             components[3] * 1/2*get_signal_spectrum(Aprime[:,2,2] - Aprime[:,0,0])[1] + \
-             components[4] * 3 * get_signal_spectrum(Aprime[:,0,1])[1] + \
-             components[5] * 3 * get_signal_spectrum(Aprime[:,1,2])[1] + \
-             components[6] * 3 * get_signal_spectrum(Aprime[:,0,2])[1]
+    alpha2 = components[0] * 1/9* get_signal_spectrum(Aprime[:,0,0] + Aprime[:,1,1] + Aprime[:,2,2], traj.potim)[1]
+    gamma2 = components[1] * 1/2*get_signal_spectrum(Aprime[:,0,0] - Aprime[:,1,1], traj.potim)[1] + \
+             components[2] * 1/2*get_signal_spectrum(Aprime[:,1,1] - Aprime[:,2,2], traj.potim)[1] + \
+             components[3] * 1/2*get_signal_spectrum(Aprime[:,2,2] - Aprime[:,0,0], traj.potim)[1] + \
+             components[4] * 3 * get_signal_spectrum(Aprime[:,0,1], traj.potim)[1] + \
+             components[5] * 3 * get_signal_spectrum(Aprime[:,1,2], traj.potim)[1] + \
+             components[6] * 3 * get_signal_spectrum(Aprime[:,0,2], traj.potim)[1]
         
     intensities = (45.0*alpha2 + 7.0*gamma2)
     if intensity_correction_factors:
