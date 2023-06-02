@@ -61,7 +61,7 @@ Here, ``Atom1`` etc. serve as placemarkers. ``Atom1/x/m0.1`` will contain a diel
 
 .. note::
    
-   Raman noodle contains functions to help determine which atoms and directions are crystalographically equivalent. Documentation on this is coming soon...
+   To fully describe the system, one only needs dielectric models for crystallographically distinct atoms/displacement directions. To determine which atoms and displacement directions are distinct, use :py:func:`ramannoodle.SymmetricDielectricModel.print_specification`.
 
 To set up a dielectric displacement calculation, apply :py:func:`ramannoodle.setup_dielectric_displacement`
 
@@ -90,14 +90,14 @@ We then load in the relevant dielectric models and add them to ``model``:
     
    model1x = get_dielectric_model(root_dir = root_dir,
                                   atom_number = 1, 
-                                  directory_name = 'x')
+                                  direction = 'x')
    model1y = get_dielectric_model(root_dir = root_dir,
                                    atom_number = 1, 
-                                   directory_name = 'y')
+                                   direction = 'y')
    ...
    model20z = get_dielectric_model(root_dir = root_dir,
                                    atom_number = 20, 
-                                   directory_name = 'z')
+                                   direction = 'z')
 
    for dmodel in [model1x, model1y, ..., model20z]:
       model.add_dielectric_model(dmodel)

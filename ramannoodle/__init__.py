@@ -2,6 +2,7 @@
 from VASP molecular dynamics calculations."""
 
 import gc
+from tabulate import tabulate
 
 import numpy as np
 
@@ -19,9 +20,9 @@ import phonopy
 
 import spglib
 
-print_status  = True
-print_warning = True
-def set_print_verbosity(print_status = True, print_warning = True):
+print_status_msgs  = True
+print_warning_msgs = True
+def set_print_verbosity(print_status_msgs_ = True, print_warning_msgs_ = True):
     """Sets the printing verbosity.
 
     Parameters
@@ -31,8 +32,8 @@ def set_print_verbosity(print_status = True, print_warning = True):
     print_warning: bool
         If true, warning information will be printed. 
     """
-    print_status = print_status
-    print_warning = print_warning
+    print_status_msgs = print_status_msgs_
+    print_warning_msgs = print_warning_msgs_
 
 def print_status(msg, end = '\n'):
     """Prints status information (if allowed)
@@ -44,7 +45,7 @@ def print_status(msg, end = '\n'):
     end : str
         Terminating character (default is a new line)
     """
-    if print_status:
+    if print_status_msgs:
         print(msg, end = end)
 def print_warning(msg):
     """Prints warning information (if allowed)
@@ -54,7 +55,7 @@ def print_warning(msg):
     msg : str
         The message to print 
     """
-    if print_warning:
+    if print_warning_msgs:
         print('WARNING |', msg)
 def print_error(msg):
     print('ERROR |', msg)
@@ -598,7 +599,7 @@ class SymmetricDielectricModel:
                 if added_model.atom_index == trial_model.atom_index:
                     if np.dot(added_model.direction, trial_model.direction)**2 > 0.001:
                         add_model = False
-                        print('ERROR: Something is wrong!!!')       
+                        print('ERROR: Overspecified site.')       
             
             if add_model:
                 models_to_add.append(trial_model)
@@ -661,7 +662,95 @@ class SymmetricDielectricModel:
                 accounted_for.append(basis_index)
             else:
                 print(f'Atom # {basis_index+1} ({element}) underspecified. Directions so far {np.round(directions,2)}')
+    
+    def print_specification(self):
+        """Prints a table outlining distinct sites and displacement directions
+        alongside which displacement directions (DOFs) are accounted for in the
+        model. This function should be used to determine for which sites and displacement
+        directions dielectric displacement calculations should be performed. """
+        
+        def is_parallel(v1, v2):
+            v1 = np.array(v1) ; v2 = np.array(v2)
+            # Normalize the vectors
+            v1_normalized = np.linalg.norm(v1)
+            v2_normalized = np.linalg.norm(v2)
+            # Check if the normalized vectors are parallel
+            return np.isclose(v1_normalized * v2 / v2_normalized, v1).all() or \
+                   np.isclose(v1_normalized * -v2 / -v2_normalized, -v1).all()
+        
+        result_table = [['index', '#', 'element', 'distinct', 'present']]
+        
+        # For all crystolographically distinct atoms
+        sorted_equivalent_atoms = list(set(self.symmetry['equivalent_atoms']))
+        sorted_equivalent_atoms.sort()
+        for index in sorted_equivalent_atoms:
             
+            number = index + 1
+            element = self.ref_structure.get_chemical_symbols()[index]
+            basis_coord = self.ref_structure.get_scaled_positions()[index]
+            distinct_directions = []
+            
+            # 1) find all valid transformation/translation pairs that map to this site
+            rotations = []
+            for rot, trans in zip(self.symmetry['rotations'], self.symmetry['translations']):
+                coord = np.mod(np.dot(rot, basis_coord) + trans, 1.)
+                displacement = coord - basis_coord
+                displacement[displacement > 0.5] -= 1.0
+                displacement[displacement <-0.5] += 1.0
+                distance = np.sqrt(np.sum(displacement**2))
+                if distance < 0.0001:
+                    rotations.append(rot)
+            
+            # 2) determine all equivalent directions
+            def get_equivalent_directions(direction, rotations):
+                vector = {'x' : (1,0,0), 'y' : (0,1,0), 'z' : (0,0,1)}[direction]
+                equil_x = False; equil_y = False; equil_z = False
+                
+                for rot in rotations:
+                    rot_vec = rot.dot(np.array(vector).T)
+                    if is_parallel(rot_vec, (1,0,0)): equil_x = True
+                    if is_parallel(rot_vec, (0,1,0)): equil_y = True   
+                    if is_parallel(rot_vec, (0,0,1)): equil_z = True 
+                
+                equivalent_directions = []
+                if equil_x: equivalent_directions.append('x')
+                if equil_y: equivalent_directions.append('y')
+                if equil_z: equivalent_directions.append('z')
+                
+                return tuple(equivalent_directions)
+                
+            x_equivalents = get_equivalent_directions('x', rotations)
+            y_equivalents = get_equivalent_directions('y', rotations)
+            z_equivalents = get_equivalent_directions('z', rotations)
+            
+            #print(x_equivalents, y_equivalents, z_equivalents)
+            
+            # 3) Return list of distinct directions
+            spec_set = set([x_equivalents, y_equivalents, z_equivalents])
+            for spec in spec_set:
+                distinct_directions.append(spec[0])
+            
+            distinct_directions.sort()
+            
+            present_directions = set()
+            for dmodel in self.dielectric_models:
+                if dmodel.atom_number == number:
+                    for direction in ['x','y','z']:
+                        vector = {'x' : (1,0,0), 'y' : (0,1,0), 'z' : (0,0,1)}[direction]
+                        if is_parallel(vector, dmodel.direction):
+                            present_directions.add(direction)
+            present_directions = list(present_directions)
+            present_directions.sort()
+            
+            result_table.append([index, number, element, distinct_directions, present_directions])
+                          
+                          
+            
+            
+        print(tabulate(result_table, headers='firstrow', tablefmt='fancy_grid'))
+
+
+
 def betf(wavenumber, T):
     """Returns bose-Einstein correction factors for Raman intensities.
 
