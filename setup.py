@@ -15,6 +15,7 @@ setup(name='ramannoodle',
           'matplotlib',
           'ase',
           'phonopy',
-          'spglib'
+          'spglib',
+          'tabulate'
           ],
       )
