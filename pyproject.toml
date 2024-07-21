@@ -1,0 +1,16 @@
+[tool.pylint.MASTER]
+ignore-paths = [ "^docs/.*$",
+                 "setup.py" ]
+
+[tool.black]
+line-length = 88
+force-exclude = '''
+
+(
+  /(
+      \.git          # root of the project
+    | docs
+  )/
+  | setup.py
+)
+'''
