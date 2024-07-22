@@ -17,10 +17,10 @@ def test_read_outcar(
 
 
 @pytest.mark.parametrize(
-    "potcar_line, expected",
+    'potcar_line, expected',
     [
-        (" POTCAR:    PAW_PBE Ti_pv 07Sep2000\n", "Ti"),
-        (" POTCAR:    PAW_PBE O 08Apr2002  \n", "O"),
+        (' POTCAR:    PAW_PBE Ti_pv 07Sep2000\n', 'Ti'),
+        (' POTCAR:    PAW_PBE O 08Apr2002  \n', 'O'),
     ],
 )
 def test_get_atom_symbol_from_potcar_line(potcar_line: str, expected: str) -> None:
@@ -40,4 +40,4 @@ def test_read_atom_symbols_from_outcar(
             outcar_file_fixture
         )
     )
-    assert atom_symbols == ["Ti"] * 36 + ["O"] * 72
+    assert atom_symbols == ['Ti'] * 36 + ['O'] * 72
