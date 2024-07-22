@@ -1,7 +1,7 @@
 ramannoodle
 =======================================
 
-Calculates Raman spectra from molecular dynamics simulations. Interfaces with VASP.
+Calculates Raman spectra from VASP calculations.
 
 Instructions and documentation can be found here:
 https://ramannoodle.readthedocs.io

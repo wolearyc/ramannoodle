@@ -1,4 +1,4 @@
-"""Parent class for jiggling atoms."""
+"""Handles the motion of atoms. """
 
 from abc import ABC, abstractmethod
 
@@ -10,7 +10,7 @@ from ..polarizability import PolarizabilityModel
 
 
 class Dynamics(ABC):
-    """Represents jiggling atoms"""
+    """A set of moving atoms."""
 
     @abstractmethod
     def calculate_raman_spectrum(
@@ -20,15 +20,17 @@ class Dynamics(ABC):
 
     @abstractmethod
     def calculate_density_of_states(self) -> DensityOfStates:
-        """Returns a vibrational spectrum."""
+        """Returns a vibrational density of states."""
 
 
 class Phonons(Dynamics):
-    """A set of phonons, which are represented simply as
-    a list of wavenumbers (eigenvectors) and a list of displacements (eigenvalues)"""
+    """Phonons, which can be thought of as a list of wavenumbers (eigenvalues)
+    and corresponding atomic displacements (eigenvectors)."""
 
     def __init__(
-        self, wavenumbers: NDArray[np.float64], displacements: NDArray[np.float64]
+        self,
+        wavenumbers: NDArray[np.float64],
+        displacements: NDArray[np.float64],
     ) -> None:
         self._wavenumbers: NDArray[np.float64] = wavenumbers
         self._displacements: NDArray[np.float64] = displacements
@@ -39,8 +41,16 @@ class Phonons(Dynamics):
         return RamanSpectrum(np.array([]), np.array([]))
 
     def calculate_density_of_states(self) -> DensityOfStates:
-        """Returns a vibrational spectrum."""
+        """Returns a vibrational density of states."""
         return DensityOfStates(np.array([]), np.array([]))
+
+    def get_wavenumbers(self) -> NDArray[np.float64]:
+        """Returns wavenumbers in cm-1"""
+        return self._wavenumbers
+
+    def get_displacements(self) -> NDArray[np.float64]:
+        """Returns displacements"""
+        return self._displacements
 
 
 class MDTrajectory(Dynamics):
@@ -55,5 +65,5 @@ class MDTrajectory(Dynamics):
         return RamanSpectrum(np.array([]), np.array([]))
 
     def calculate_density_of_states(self) -> DensityOfStates:
-        """Returns a vibrational spectrum."""
+        """Returns a vibrational density of states."""
         return DensityOfStates(np.array([]), np.array([]))

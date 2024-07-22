@@ -14,3 +14,11 @@ force-exclude = '''
   | setup.py
 )
 '''
+
+[tool.mypy]
+warn_return_any = "True"
+warn_unused_configs = "True"
+ignore_missing_imports = "True"
+follow_imports = "silent"
+disable_error_code = ["method-assign"]
+strict = "True"
