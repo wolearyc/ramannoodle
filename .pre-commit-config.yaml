@@ -11,7 +11,6 @@ repos:
     -   id: check-executables-have-shebangs
     -   id: check-toml
     -   id: debug-statements
-    -   id: double-quote-string-fixer
     -   id: requirements-txt-fixer
 -   repo: https://github.com/psf/black
     rev: 24.4.2
