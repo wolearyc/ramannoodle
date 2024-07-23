@@ -1,0 +1,24 @@
+[tool.pylint.MASTER]
+ignore-paths = [ "^docs/.*$",
+                 "setup.py" ]
+
+[tool.black]
+line-length = 88
+force-exclude = '''
+
+(
+  /(
+      \.git          # root of the project
+    | docs
+  )/
+  | setup.py
+)
+'''
+
+[tool.mypy]
+warn_return_any = "True"
+warn_unused_configs = "True"
+ignore_missing_imports = "True"
+follow_imports = "silent"
+disable_error_code = ["method-assign"]
+strict = "True"

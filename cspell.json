@@ -1,0 +1,36 @@
+{
+    "version": "0.2",
+    "ignorePaths": [
+        ".pre-commit-config.yaml"
+    ],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [
+        "AVOGADROS",
+        "fft",
+        "fftfreq",
+        "fftpack",
+        "fftshift",
+        "freq",
+        "Grumet",
+        "ifft",
+        "ndarray",
+        "newaxis",
+        "NIONS",
+        "outcar",
+        "phonopy",
+        "POSCAR",
+        "POTCAR",
+        "Raman",
+        "ramannoodle",
+        "spglib",
+        "timestep",
+        "timesteps",
+        "VASP",
+        "VRHFIN",
+        "wavenumber",
+        "wavenumbers"
+    ],
+    "ignoreWords": [],
+    "import": []
+}

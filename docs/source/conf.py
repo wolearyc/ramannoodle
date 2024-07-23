@@ -19,14 +19,15 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
 ]
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('http://docs.scipy.org/doc/numpy', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
-    'matplotlib': ('http://matplotlib.org/stable', None)}
+    'matplotlib': ('http://matplotlib.org/stable', None),
+}
 
 intersphinx_disabled_domains = ['std']
 
@@ -34,7 +35,7 @@ templates_path = ['_templates']
 
 # -- Options for HTML output
 
-#html_theme = 'sphinx_rtd_theme'
+# html_theme = 'sphinx_rtd_theme'
 
 # -- Options for EPUB output
 epub_show_urls = 'footnote'
@@ -43,4 +44,3 @@ epub_show_urls = 'footnote'
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../../'))
-
