@@ -3,8 +3,6 @@ ramannoodle
 
 Calculates Raman spectra from VASP calculations.
 
-Instructions and documentation can be found here:
-https://ramannoodle.readthedocs.io
+This tool is currently being completely overhauled.
 
-The dielectric tensor model approach used in `ramannoodle` is based on work by Grumet and coworkers:
-https://arxiv.org/abs/2307.10578
+Check out the `legacy`` branch for the old version.
