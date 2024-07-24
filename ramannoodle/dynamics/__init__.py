@@ -25,7 +25,7 @@ class Dynamics(ABC):
 
 class Phonons(Dynamics):
     """Phonons, which can be thought of as a list of wavenumbers (eigenvalues)
-    and corresponding atomic displacements (eigenvectors)."""
+    and corresponding atomic displacements (eigenvectors divided by sqrt(mass))."""
 
     def __init__(
         self,

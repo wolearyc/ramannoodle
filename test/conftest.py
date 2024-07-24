@@ -8,7 +8,7 @@ import pytest
 
 
 @pytest.fixture
-def phonon_outcar_path_fixture() -> Path:
+def phonons_outcar_path_fixture() -> Path:
     """Returns an outcar path"""
     return Path("test/data/TiO2_OUTCAR")
 
@@ -20,12 +20,12 @@ def eps_outcar_path_fixture() -> Path:
 
 
 @pytest.fixture(scope="function")
-def phonon_outcar_file_fixture(
-    phonon_outcar_path_fixture: Path,  # pylint: disable = redefined-outer-name
+def phonons_outcar_file_fixture(
+    phonons_outcar_path_fixture: Path,  # pylint: disable = redefined-outer-name
 ) -> Generator[TextIO, None, None]:
     """Returns an outcar file"""
     file = open(  # pylint: disable=consider-using-with
-        phonon_outcar_path_fixture, "r", encoding="utf-8"
+        phonons_outcar_path_fixture, "r", encoding="utf-8"
     )
     yield file
     file.close()

@@ -26,7 +26,7 @@ def load_phonons_from_outcar(path: Path) -> Phonons:
         atom_symbols = _read_atom_symbols_from_outcar(outcar_file)
         atom_masses = np.array([ATOMIC_MASSES[symbol] for symbol in atom_symbols])
         num_atoms = len(atom_symbols)
-        degrees_of_freedom = num_atoms * 3 - 3
+        degrees_of_freedom = num_atoms * 3
 
         # read in eigenvectors/eigenvalues
         _ = _skip_file_until_line_contains(
@@ -34,7 +34,10 @@ def load_phonons_from_outcar(path: Path) -> Phonons:
         )
         for _ in range(degrees_of_freedom):
             line = _skip_file_until_line_contains(outcar_file, "cm-1")
-            wavenumbers.append(float(line.split()[7]))
+            if "f/i" in line:  # if complex
+                wavenumbers.append(-float(line.split()[6]))  # set negative wavenumber
+            else:
+                wavenumbers.append(float(line.split()[7]))
             eigenvectors.append(_read_eigenvector_from_outcar(outcar_file, num_atoms))
 
         # Divide eigenvectors by sqrt(mass) to get displacements
@@ -45,4 +48,4 @@ def load_phonons_from_outcar(path: Path) -> Phonons:
         assert len(wavenumbers) == len(displacements)
         assert len(wavenumbers) == degrees_of_freedom
 
-    return Phonons(wavenumbers, eigenvectors)
+    return Phonons(wavenumbers, displacements)
