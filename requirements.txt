@@ -2,5 +2,6 @@ numpy
 pre-commit
 pylint
 pytest
+scipy
 setuptools
 spglib
