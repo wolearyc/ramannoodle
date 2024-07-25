@@ -43,8 +43,9 @@ class RamanSpectrum:  # pylint: disable=too-few-public-methods
 
 
 class RamanSettings:  # pylint: disable=too-few-public-methods
-    """Settings for a Raman calculation"""
+    """Settings for a Raman calculation. Currently, only
+    polycrystalline spectra are calculated."""
 
-    def __init__(self, polycrystalline: bool = True, angle: None = None) -> None:
-        self._polycrystalline = polycrystalline
-        self._angle = angle
+    def __init__(self) -> None:
+        self._polycrystalline = True
+        # self._angle = angle

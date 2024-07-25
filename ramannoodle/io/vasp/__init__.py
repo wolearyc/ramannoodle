@@ -6,11 +6,15 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ...dynamics import Phonons
-from ...globals import ATOMIC_MASSES
+from ...globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from .vasp_utils import (
-    _get_atom_symbol_from_potcar_line,
-    _read_atom_symbols_from_outcar,
+    _get_atomic_symbol_from_potcar_line,
+    _read_atomic_symbols_from_outcar,
     _read_eigenvector_from_outcar,
+    _read_cartesian_positions_from_outcar,
+    _read_polarizability_from_outcar,
+    _read_fractional_positions_from_outcar,
+    _read_lattice_from_outcar,
 )
 from ..io_utils import _skip_file_until_line_contains
 
@@ -23,9 +27,9 @@ def load_phonons_from_outcar(path: Path) -> Phonons:
     with open(path, "r", encoding="utf-8") as outcar_file:
 
         # get atom information
-        atom_symbols = _read_atom_symbols_from_outcar(outcar_file)
-        atom_masses = np.array([ATOMIC_MASSES[symbol] for symbol in atom_symbols])
-        num_atoms = len(atom_symbols)
+        atomic_symbols = _read_atomic_symbols_from_outcar(outcar_file)
+        atomic_weights = np.array([ATOMIC_WEIGHTS[symbol] for symbol in atomic_symbols])
+        num_atoms = len(atomic_symbols)
         degrees_of_freedom = num_atoms * 3
 
         # read in eigenvectors/eigenvalues
@@ -43,9 +47,41 @@ def load_phonons_from_outcar(path: Path) -> Phonons:
         # Divide eigenvectors by sqrt(mass) to get displacements
         wavenumbers = np.array(wavenumbers)
         eigenvectors = np.array(eigenvectors)
-        displacements = eigenvectors / np.sqrt(atom_masses)[:, np.newaxis]
+        displacements = eigenvectors / np.sqrt(atomic_weights)[:, np.newaxis]
 
         assert len(wavenumbers) == len(displacements)
         assert len(wavenumbers) == degrees_of_freedom
 
-    return Phonons(wavenumbers, displacements)
+        return Phonons(wavenumbers, displacements)
+
+
+def load_positions_and_polarizability_from_outcar(
+    path: Path,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Extracts the atom positions and polarizability tensor from an OUTCAR"""
+
+    with open(path, "r", encoding="utf-8") as outcar_file:
+        num_atoms = len(_read_atomic_symbols_from_outcar(outcar_file))
+        positions = _read_cartesian_positions_from_outcar(outcar_file, num_atoms)
+        polarizability = _read_polarizability_from_outcar(outcar_file)
+        return positions, polarizability
+
+
+def load_symmetry_cell_from_outcar(
+    path: Path,
+) -> tuple[NDArray[np.int32], NDArray[np.float64], NDArray[np.float64]]:
+    """Extracts a symmetry information (as tuple) from an OUTCAR."""
+
+    lattice = np.array([])
+    fractional_positions = np.array([])
+    atomic_numbers = np.array([], dtype=np.int32)
+
+    with open(path, "r", encoding="utf-8") as outcar_file:
+        atomic_symbols = _read_atomic_symbols_from_outcar(outcar_file)
+        atomic_numbers = np.array([ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols])
+        lattice = _read_lattice_from_outcar(outcar_file)
+        fractional_positions = _read_fractional_positions_from_outcar(
+            outcar_file, len(atomic_symbols)
+        )
+
+    return (atomic_numbers, lattice, fractional_positions)

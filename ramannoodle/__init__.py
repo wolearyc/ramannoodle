@@ -20,12 +20,21 @@ from polarizability.taylor import LinearPolarizabilityModel
 
 Workflow:
 
-From your simulations:
-- Create a Dynamics object.
-- Create a PolarizabilityModel object.
+1. Create a Dynamics object from your simulations.
+
+2. Create an InterpolationPolarizabilityModel from your simulations.
+- Set up a model with known symmetries
+- Insert DOF, a set of displacements and polarizabilities (e.g. +,-,
+polarizability_plus,polarizability_minus)
+    - Check that displacements given are colinear.
+    - That that the new displacements are orthogonal to all existing displacements
+    - If checks are successful:
+        - Generate all symmetry equivalent displacements.
+        - Do sanity check to ensure we're still totally orthogonal
+        - add interpolation and normalized dof displacements
 
 Run a virtual experiment
-- Specify SpectrometerSettings (angle, polycrystalline)
+- Specify RamanSettings (angle, polycrystalline)
 - dynamics.get_spectrum(PolarizabilityModel, SpectrometerSettings) -> RamanSpectrum
 
 Extract Relevant information from RamanSpectrum
