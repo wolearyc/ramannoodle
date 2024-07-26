@@ -6,6 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ...dynamics import Phonons
+from ...polarizability import StructuralSymmetry
 from ...globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from .vasp_utils import (
     _get_atomic_symbol_from_potcar_line,
@@ -67,9 +68,9 @@ def load_positions_and_polarizability_from_outcar(
         return positions, polarizability
 
 
-def load_symmetry_cell_from_outcar(
+def load_structural_symmetry_from_outcar(
     path: Path,
-) -> tuple[NDArray[np.int32], NDArray[np.float64], NDArray[np.float64]]:
+) -> StructuralSymmetry:
     """Extracts a symmetry information (as tuple) from an OUTCAR."""
 
     lattice = np.array([])
@@ -84,4 +85,4 @@ def load_symmetry_cell_from_outcar(
             outcar_file, len(atomic_symbols)
         )
 
-    return (atomic_numbers, lattice, fractional_positions)
+    return StructuralSymmetry(atomic_numbers, lattice, fractional_positions)

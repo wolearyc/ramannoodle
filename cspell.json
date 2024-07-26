@@ -7,6 +7,7 @@
     "dictionaries": [],
     "words": [
         "AVOGADROS",
+        "dtype",
         "fft",
         "fftfreq",
         "fftpack",
@@ -16,6 +17,7 @@
         "ifft",
         "interp",
         "linalg",
+        "LLZO",
         "ndarray",
         "newaxis",
         "NIONS",
@@ -29,6 +31,7 @@
         "Raman",
         "ramannoodle",
         "spglib",
+        "symprec",
         "timestep",
         "timesteps",
         "VASP",

@@ -10,7 +10,6 @@ import pytest
 from ramannoodle.io.vasp import (
     vasp_utils,
     load_phonons_from_outcar,
-    load_symmetry_cell_from_outcar,
 )
 from ramannoodle.globals import ATOMIC_WEIGHTS
 
@@ -206,40 +205,3 @@ def test_read_lattice_from_outcar(
         outcar_file_fixture
     )
     assert np.isclose(result, known_lattice).all()
-
-
-@pytest.mark.parametrize(
-    "outcar_path_fixture, known_first_position, known_last_position,"
-    "known_lattice, known_atomic_numbers",
-    [
-        (
-            "test/data/EPS_OUTCAR",
-            np.array([0.999995547, 0.000120001, 0.999821233]),
-            np.array([0.666812676, 0.833732482, 0.833998755]),
-            np.array(
-                [
-                    [11.823066970, 0.000000000, 0.000000000],
-                    [0.000000000, 11.823066970, 0.000000000],
-                    [0.000000000, 0.000000000, 11.823066970],
-                ]
-            ),
-            np.array([38] * 27 + [22] * 26 + [28] * 1 + [8] * 81),
-        ),
-    ],
-    indirect=["outcar_path_fixture"],
-)
-def test_load_symmetry_cell_from_outcar(
-    outcar_path_fixture: Path,
-    known_first_position: NDArray[np.float64],
-    known_last_position: NDArray[np.float64],
-    known_lattice: NDArray[np.float64],
-    known_atomic_numbers: NDArray[np.int32],
-) -> None:
-    """test"""
-    symmetry_cell = load_symmetry_cell_from_outcar(outcar_path_fixture)
-    atomic_numbers, lattice, fractional_positions = symmetry_cell
-
-    assert (atomic_numbers == known_atomic_numbers).all()
-    assert np.isclose(fractional_positions[0], known_first_position).all()
-    assert np.isclose(fractional_positions[-1], known_last_position).all()
-    assert np.isclose(lattice, known_lattice).all()

@@ -23,7 +23,8 @@ Workflow:
 1. Create a Dynamics object from your simulations.
 
 2. Create an InterpolationPolarizabilityModel from your simulations.
-- Set up a model with known symmetries
+- Set up a Symmetry object from an OUTCAR
+- Set up a model for that symmetry
 - Insert DOF, a set of displacements and polarizabilities (e.g. +,-,
 polarizability_plus,polarizability_minus)
     - Check that displacements given are colinear.
