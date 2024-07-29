@@ -6,7 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ...dynamics import Phonons
-from ...polarizability import StructuralSymmetry
+from ...symmetry import StructuralSymmetry
 from ...globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from .vasp_utils import (
     _get_atomic_symbol_from_potcar_line,

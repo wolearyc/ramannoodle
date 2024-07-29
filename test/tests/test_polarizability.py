@@ -7,11 +7,13 @@ from numpy.typing import NDArray
 
 import pytest
 
-from ramannoodle.polarizability.polarizability_utils import (
+from ramannoodle.polarizability.polarizability_utils import find_duplicates
+from ramannoodle.symmetry.symmetry_utils import (
     are_collinear,
     is_orthogonal_to_all,
     get_fractional_positions_permutation_matrix,
 )
+from ramannoodle.polarizability import InterpolationPolarizabilityModel
 from ramannoodle.io.vasp import load_structural_symmetry_from_outcar
 
 
@@ -75,7 +77,7 @@ def test_structural_symmetry(
     displacement = (
         symmetry._fractional_positions * 0  # pylint: disable=protected-access
     )
-    displacement[0, 2] += 0.05
+    displacement[0, 2] += 0.1
     print(displacement.shape)
     displacements = symmetry.get_equivalent_displacements(displacement)
     assert len(displacements) == known_orthogonal_displacements
@@ -105,3 +107,43 @@ def test_get_fractional_positions_permutation_matrix(
     assert np.isclose(
         get_fractional_positions_permutation_matrix(reference, permuted), known
     ).all()
+
+
+@pytest.mark.parametrize(
+    "vectors, known",
+    [
+        (np.array([-0.05, 0.05, 0.01, -0.01]), None),
+        (np.array([-0.05, 0.05, -0.05, -0.01]), -0.05),
+    ],
+)
+def test_find_duplicates(vectors: list[NDArray[np.float64]], known: bool) -> None:
+    """test"""
+    assert find_duplicates(vectors) == known
+
+
+@pytest.mark.parametrize(
+    "outcar_path_fixture,displaced_atom_index, magnitudes,known_dof_added",
+    [
+        ("test/data/STO_RATTLED_OUTCAR", 0, np.array([-0.05, 0.05, 0.01, -0.01]), 1),
+        ("test/data/TiO2_OUTCAR", 0, np.array([0.01]), 72),
+    ],
+    indirect=["outcar_path_fixture"],
+)
+def test_add_dof(
+    outcar_path_fixture: Path,
+    displaced_atom_index: int,
+    magnitudes: NDArray[np.float64],
+    known_dof_added: int,
+) -> None:
+    """test"""
+    symmetry = load_structural_symmetry_from_outcar(outcar_path_fixture)
+    model = InterpolationPolarizabilityModel(symmetry)
+    displacement = (
+        symmetry._fractional_positions * 0  # pylint: disable=protected-access
+    )
+    displacement[displaced_atom_index][0] = 1.0
+    polarizabilities = np.zeros((len(magnitudes), 3, 3))
+    model.add_dof(displacement, magnitudes, polarizabilities, 1)
+    assert (
+        len(model._basis_vectors) == known_dof_added  # pylint: disable=protected-access
+    )
