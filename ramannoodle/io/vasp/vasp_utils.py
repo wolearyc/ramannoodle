@@ -1,6 +1,9 @@
-"""Utilities for VASP. One should be careful about
+"""Utilities for VASP.
+
+One should be careful about
 running these functions, as they will often only partially read a file.
-Pay attention to order!"""
+Pay attention to order!
+"""
 
 from typing import TextIO
 import numpy as np

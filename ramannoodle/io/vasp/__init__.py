@@ -1,4 +1,4 @@
-"""Utilities for VASP."""
+"""Functions for interacting with VASP input and output files."""
 
 from pathlib import Path
 import numpy as np
@@ -19,7 +19,7 @@ from ..io_utils import _skip_file_until_line_contains
 
 
 def load_phonons_from_outcar(path: Path) -> Phonons:
-    """Extracts phonons from a VASP OUTCAR file.
+    """Extract phonons from a VASP OUTCAR file.
 
     Parameters
     ----------
@@ -65,11 +65,27 @@ def load_phonons_from_outcar(path: Path) -> Phonons:
 
 
 def load_positions_and_polarizability_from_outcar(
-    path: Path,
+    filepath: Path,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Extracts the atom positions and polarizability tensor from an OUTCAR"""
+    """Extract atom position and polarizability from a VASP OUTCAR file.
 
-    with open(path, "r", encoding="utf-8") as outcar_file:
+    Technically, the extracted polarizability is, in fact, a dielectric tensor. However,
+    this is inconsequential to the calculation of Raman spectra.
+
+    Parameters
+    ----------
+    path : Path
+        filepath
+
+    Returns
+    -------
+    tuple[numpy.ndarray, numpy.ndarray]
+        The first element is atomic positions (Nx3) and the second element is the
+        polarizability tensor (3x3).
+
+    """
+
+    with open(filepath, "r", encoding="utf-8") as outcar_file:
         num_atoms = len(_read_atomic_symbols_from_outcar(outcar_file))
         positions = _read_cartesian_positions_from_outcar(outcar_file, num_atoms)
         polarizability = _read_polarizability_from_outcar(outcar_file)
@@ -77,15 +93,26 @@ def load_positions_and_polarizability_from_outcar(
 
 
 def load_structural_symmetry_from_outcar(
-    path: Path,
+    filepath: Path,
 ) -> StructuralSymmetry:
-    """Extracts a symmetry information (as tuple) from an OUTCAR."""
+    """Extract structural symmetry from a VASP OUTCAR file.
+
+    Parameters
+    ----------
+    path : Path
+        filepath
+
+    Returns
+    -------
+    StructuralSymmetry
+
+    """
 
     lattice = np.array([])
     fractional_positions = np.array([])
     atomic_numbers = np.array([], dtype=np.int32)
 
-    with open(path, "r", encoding="utf-8") as outcar_file:
+    with open(filepath, "r", encoding="utf-8") as outcar_file:
         atomic_symbols = _read_atomic_symbols_from_outcar(outcar_file)
         atomic_numbers = np.array([ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols])
         lattice = _read_lattice_from_outcar(outcar_file)

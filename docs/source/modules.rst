@@ -4,4 +4,4 @@ ramannoodle
 .. toctree::
    :maxdepth: 4
 
-   ramannoodle
+   ramannoodle.io.vasp

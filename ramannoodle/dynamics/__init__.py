@@ -16,16 +16,18 @@ class Dynamics(ABC):
     def calculate_raman_spectrum(
         self, polarizability_model: PolarizabilityModel, raman_settings: RamanSettings
     ) -> RamanSpectrum:
-        """Returns a Raman spectrum."""
+        """Calculate a Raman spectrum."""
 
     @abstractmethod
     def calculate_density_of_states(self) -> DensityOfStates:
-        """Returns a vibrational density of states."""
+        """Calculate a vibrational density of states."""
 
 
 class Phonons(Dynamics):
-    """Phonons, which can be thought of as a list of wavenumbers (eigenvalues)
-    and corresponding atomic displacements (eigenvectors divided by sqrt(mass))."""
+    """Harmonic lattice vibrations.
+
+    A phonon can be represented by a wavenumber and corresponding atomic displacement.
+    """
 
     def __init__(
         self,
