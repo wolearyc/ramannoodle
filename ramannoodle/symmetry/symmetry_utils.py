@@ -89,7 +89,7 @@ def get_fractional_positions_permutation_matrix(
 def transform_fractional_positions(
     positions: NDArray[np.float64],
     rotation: NDArray[np.float64],
-    translation: NDArray[np.float64] = np.array([0.0, 0.0, 0.0]),
+    translation: NDArray[np.float64],
 ) -> NDArray[np.float64]:
     """Transforms fractional coordinates and applies periodic boundary
     conditions."""

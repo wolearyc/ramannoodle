@@ -104,7 +104,7 @@ def _read_polarizability_from_outcar(outcar_file: TextIO) -> NDArray[np.float64]
 
 
 def _get_lattice_vector_from_outcar_line(line: str) -> NDArray[np.float64]:
-    """e.g.  "11.823066970  0.000000000  0.000000000     0.084580423  0.000000000  0.000000000" """
+    """Extracts lattice vector from an appropriate line from an outcar"""
     return np.array([float(item) for item in line.split()[0:3]])
 
 

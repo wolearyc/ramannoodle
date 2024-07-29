@@ -5,12 +5,10 @@ from abc import ABC, abstractmethod
 import numpy as np
 from numpy.typing import NDArray
 from scipy.interpolate import make_interp_spline, BSpline
-import spglib
 
 from . import polarizability_utils
 from ..symmetry.symmetry_utils import is_orthogonal_to_all
 from ..symmetry import StructuralSymmetry
-from ..exceptions import InvalidDOFException, SymmetryException
 
 
 class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods

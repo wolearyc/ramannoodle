@@ -2,11 +2,10 @@
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.interpolate import make_interp_spline, BSpline
 import spglib
 
 from . import symmetry_utils
-from ..exceptions import InvalidDOFException, SymmetryException
+from ..exceptions import SymmetryException
 
 
 class StructuralSymmetry:
