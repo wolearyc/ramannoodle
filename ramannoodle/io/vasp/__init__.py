@@ -84,7 +84,6 @@ def load_positions_and_polarizability_from_outcar(
         polarizability tensor (3x3).
 
     """
-
     with open(filepath, "r", encoding="utf-8") as outcar_file:
         num_atoms = len(_read_atomic_symbols_from_outcar(outcar_file))
         positions = _read_cartesian_positions_from_outcar(outcar_file, num_atoms)
@@ -107,7 +106,6 @@ def load_structural_symmetry_from_outcar(
     StructuralSymmetry
 
     """
-
     lattice = np.array([])
     fractional_positions = np.array([])
     atomic_numbers = np.array([], dtype=np.int32)

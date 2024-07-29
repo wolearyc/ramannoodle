@@ -10,7 +10,7 @@ from pytest import FixtureRequest
 
 @pytest.fixture
 def outcar_path_fixture(request: FixtureRequest) -> Path:
-    """Returns an outcar path"""
+    """Return an outcar path."""
     return Path(request.param)
 
 
@@ -18,7 +18,7 @@ def outcar_path_fixture(request: FixtureRequest) -> Path:
 def outcar_file_fixture(
     request: FixtureRequest,  # pylint: disable = redefined-outer-name
 ) -> Generator[TextIO, None, None]:
-    """Returns an outcar file"""
+    """Return an outcar file."""
     file = open(  # pylint: disable=consider-using-with
         Path(request.param), "r", encoding="utf-8"
     )

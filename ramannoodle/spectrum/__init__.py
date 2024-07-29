@@ -1,11 +1,11 @@
-"""Spectra."""
+"""Classes for storing and manipulating spectra."""
 
 import numpy as np
 from numpy.typing import NDArray
 
 
 class DensityOfStates:  # pylint: disable=too-few-public-methods
-    """Vibrational spectrum, with useful post-processing methods"""
+    """Vibrational spectrum."""
 
     def __init__(
         self, raw_wavenumbers: NDArray[np.float64], raw_intensities: NDArray[np.float64]
@@ -14,16 +14,16 @@ class DensityOfStates:  # pylint: disable=too-few-public-methods
         self._raw_intensities = raw_intensities
 
     def get_wavenumbers(self) -> NDArray[np.float64]:
-        """Returns wavenumbers"""
+        """Return wavenumbers."""
         return self._raw_wavenumbers
 
     def get_intensities(self) -> NDArray[np.float64]:
-        """Returns intensities"""
+        """Return intensities."""
         return self._raw_intensities
 
 
 class RamanSpectrum:
-    """Raman spectrum, with useful post-processing methods"""
+    """Raman spectrum."""
 
     def __init__(
         self, raw_wavenumbers: NDArray[np.float64], raw_intensities: NDArray[np.float64]
@@ -32,17 +32,22 @@ class RamanSpectrum:
         self._raw_intensities = raw_intensities
 
     def get_wavenumbers(self) -> NDArray[np.float64]:
-        """Returns wavenumbers"""
+        """Return wavenumbers."""
         return self._raw_wavenumbers
 
     def get_intensities(self) -> NDArray[np.float64]:
-        """Returns intensities"""
+        """Return intensities."""
         return self._raw_intensities
 
 
 class RamanSettings:  # pylint: disable=too-few-public-methods
-    """Settings for a Raman calculation. Currently, only
-    polycrystalline spectra are calculated."""
+    """Settings for a Raman calculation.
+
+    This class currently has no function. In the future, it will specify the parameters
+    of a virtual Raman experiment, such as laser wavelength, measurement angle, and
+    sample orientation.
+
+    """
 
     def __init__(self) -> None:
         self._polycrystalline = True

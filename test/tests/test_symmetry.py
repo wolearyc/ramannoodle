@@ -27,7 +27,7 @@ from ramannoodle.io.vasp import load_structural_symmetry_from_outcar
 def test_are_collinear(
     vector_1: NDArray[np.float64], vector_2: NDArray[np.float64], known: bool
 ) -> None:
-    """Test"""
+    """Test."""
     assert are_collinear(vector_1, vector_2) == known
 
 
@@ -45,7 +45,7 @@ def test_are_collinear(
 def test_check_orthogonal(
     vector_1: NDArray[np.float64], vectors: list[NDArray[np.float64]], known: int
 ) -> None:
-    """Test"""
+    """Test."""
     assert is_orthogonal_to_all(vector_1, vectors) == known
 
 
@@ -65,8 +65,7 @@ def test_structural_symmetry(
     known_orthogonal_displacements: int,
     known_displacements_shape: list[int],
 ) -> None:
-    """Test"""
-
+    """Test."""
     # Equivalent atoms test
     symmetry = load_structural_symmetry_from_outcar(outcar_path_fixture)
     assert symmetry.get_num_nonequivalent_atoms() == known_nonequivalent_atoms
@@ -101,7 +100,7 @@ def test_get_fractional_positions_permutation_matrix(
     permuted: NDArray[np.float64],
     known: NDArray[np.float64],
 ) -> None:
-    """test"""
+    """Test."""
     assert np.isclose(
         get_fractional_positions_permutation_matrix(reference, permuted), known
     ).all()

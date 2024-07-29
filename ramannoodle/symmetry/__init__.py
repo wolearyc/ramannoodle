@@ -1,4 +1,4 @@
-"""Symmetry for structures, Raman peaks, etc."""
+"""Classes for symmetries of crystal structures, vibrations, etc."""
 
 import numpy as np
 from numpy.typing import NDArray
@@ -9,7 +9,7 @@ from ..exceptions import SymmetryException
 
 
 class StructuralSymmetry:
-    """Symmetries of a crystal structure."""
+    """Crystal structure symmetries."""
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -37,21 +37,30 @@ class StructuralSymmetry:
         )
 
     def get_num_nonequivalent_atoms(self) -> int:
-        """Returns the number of nonequivalent atoms."""
+        """Return number of nonequivalent atoms."""
         assert self._symmetry_dict is not None
         return len(set(self._symmetry_dict["equivalent_atoms"]))
 
     def get_equivalent_displacements(
         self, displacement: NDArray[np.float64]
     ) -> list[dict[str, list[NDArray[np.float64]]]]:
-        """Calculates and returns all symmetrically equivalent displacements.
-        The return is a little complicated.
-        [('displacements' : [...], {'transformations' : [...]}]
-        We want to guarantee that all displacements are orthogonal between
-        the dictionaries and are all collinear and unique within the
-        dictionaries.
-        """
+        """Calculate symmetrically equivalent displacements.
 
+        Parameters
+        ----------
+        displacement : numpy.ndarray
+            Atomic displacement (Nx3)
+
+        Returns
+        -------
+        list[dict[str,list[numpy.ndarray]]]
+            List of dictionaries with 'displacement' and 'transformation' keys.
+
+            Displacements within each dictionary will be collinear, corresponding to
+            the same degree of freedom. The provided transformations are those that
+            transform the parameter displacements into that degree of freedom.
+
+        """
         assert (displacement >= -0.5).all() and (displacement <= 0.5).all()
 
         ref_positions = symmetry_utils.add_fractional_positions(

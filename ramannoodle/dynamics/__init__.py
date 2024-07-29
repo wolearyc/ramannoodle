@@ -1,4 +1,4 @@
-"""Handles the motion of atoms. """
+"""Classes representing atomic dynamics, including phonons and trajectories."""
 
 from abc import ABC, abstractmethod
 
@@ -10,7 +10,7 @@ from ..polarizability import PolarizabilityModel
 
 
 class Dynamics(ABC):
-    """A set of moving atoms."""
+    """Abstract class for atomic dynamics."""
 
     @abstractmethod
     def calculate_raman_spectrum(
@@ -40,18 +40,19 @@ class Phonons(Dynamics):
     def calculate_raman_spectrum(
         self, polarizability_model: PolarizabilityModel, raman_settings: RamanSettings
     ) -> RamanSpectrum:
+        """Calculate a Raman spectrum."""
         return RamanSpectrum(np.array([]), np.array([]))
 
     def calculate_density_of_states(self) -> DensityOfStates:
-        """Returns a vibrational density of states."""
+        """Calculate a vibrational density of states."""
         return DensityOfStates(np.array([]), np.array([]))
 
     def get_wavenumbers(self) -> NDArray[np.float64]:
-        """Returns wavenumbers in cm-1"""
+        """Return wavenumbers in cm-1."""
         return self._wavenumbers
 
     def get_displacements(self) -> NDArray[np.float64]:
-        """Returns displacements"""
+        """Return atomic displacements."""
         return self._displacements
 
 
@@ -64,8 +65,9 @@ class MDTrajectory(Dynamics):
     def calculate_raman_spectrum(
         self, polarizability_model: PolarizabilityModel, raman_settings: RamanSettings
     ) -> RamanSpectrum:
+        """Calculate a Raman spectrum."""
         return RamanSpectrum(np.array([]), np.array([]))
 
     def calculate_density_of_states(self) -> DensityOfStates:
-        """Returns a vibrational density of states."""
+        """Calculate a vibrational density of states."""
         return DensityOfStates(np.array([]), np.array([]))

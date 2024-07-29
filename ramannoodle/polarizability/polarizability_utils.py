@@ -1,4 +1,4 @@
-"""Useful utilities (largely linalg for calculating polarizability model)"""
+"""Useful utilities (largely linalg for calculating polarizability model)."""
 
 import itertools
 
@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 
 
 def find_duplicates(vectors: list[NDArray[np.float64]]) -> NDArray[np.float64] | None:
-    """Returns duplicate vector in a list or None if not found"""
+    """Return duplicate vector in a list or None if no duplicates found."""
     for vector_1, vector_2 in itertools.combinations(vectors, 2):
         if np.isclose(vector_1, vector_2):
             return vector_1

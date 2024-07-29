@@ -1,8 +1,8 @@
 """Utilities for VASP.
 
-One should be careful about
-running these functions, as they will often only partially read a file.
-Pay attention to order!
+One should be careful about running these functions, as they will often only partially
+read through a given file. Each function must be run in a specific order.
+
 """
 
 from typing import TextIO
@@ -13,12 +13,12 @@ from ..io_utils import _skip_file_until_line_contains
 
 
 def _get_atomic_symbol_from_potcar_line(line: str) -> str:
-    """e.g. "POTCAR:    PAW_PBE Ti_pv 07Sep2000" -> "Ti" """
+    """Extract atomic symbol from a POTCAR line in a VASP OUTCAR file."""
     return line.split()[-2].split("_")[0]
 
 
 def _read_atomic_symbols_from_outcar(outcar_file: TextIO) -> list[str]:
-    """Reads through outcar and returns the atom symbol list."""
+    """Read atomic symbols from a VASP OUTCAR file."""
     potcar_symbols: list[str] = []
     line = _skip_file_until_line_contains(outcar_file, "POTCAR:    ")
     potcar_symbols.append(_get_atomic_symbol_from_potcar_line(line))
@@ -46,7 +46,7 @@ def _read_atomic_symbols_from_outcar(outcar_file: TextIO) -> list[str]:
 def _read_eigenvector_from_outcar(
     outcar_file: TextIO, num_atoms: int
 ) -> NDArray[np.float64]:
-    """Reads a single eigenvector from an OUTCAR."""
+    """Read the next available phonon eigenvector from a VASP OUTCAR file."""
     eigenvector: list[list[float]] = []
     for line in outcar_file:
         if len(eigenvector) == num_atoms:
@@ -60,7 +60,7 @@ def _read_eigenvector_from_outcar(
 def _read_cartesian_positions_from_outcar(
     outcar_file: TextIO, num_atoms: int
 ) -> NDArray[np.float64]:
-    """Returns cartesian coordinates found in an outcar."""
+    """Read atomic cartesian positions from a VASP OUTCAR file."""
     _ = _skip_file_until_line_contains(
         outcar_file, "position of ions in cartesian coordinates  (Angst):"
     )
@@ -76,7 +76,7 @@ def _read_cartesian_positions_from_outcar(
 def _read_fractional_positions_from_outcar(
     outcar_file: TextIO, num_atoms: int
 ) -> NDArray[np.float64]:
-    """Returns fractional coordinates found in an outcar."""
+    """Read atomic fractional positions from a VASP OUTCAR file."""
     _ = _skip_file_until_line_contains(
         outcar_file, "position of ions in fractional coordinates (direct lattice)"
     )
@@ -90,9 +90,12 @@ def _read_fractional_positions_from_outcar(
 
 
 def _read_polarizability_from_outcar(outcar_file: TextIO) -> NDArray[np.float64]:
-    """Returns macroscopic dielectric tensor (equivalently, polarizability)
-    including local field effects from OUTCAR"""
+    """Read polarizability from a VASP OUTCAR file.
 
+    In actuality, we read the macroscopic dielectric tensor including local field
+    effects.
+
+    """
     _ = _skip_file_until_line_contains(
         outcar_file,
         "MACROSCOPIC STATIC DIELECTRIC TENSOR (including local field effects in DFT",
@@ -107,13 +110,12 @@ def _read_polarizability_from_outcar(outcar_file: TextIO) -> NDArray[np.float64]
 
 
 def _get_lattice_vector_from_outcar_line(line: str) -> NDArray[np.float64]:
-    """Extracts lattice vector from an appropriate line from an outcar"""
+    """Extract lattice vector from an appropriate line in a VASP OUTCAR file."""
     return np.array([float(item) for item in line.split()[0:3]])
 
 
 def _read_lattice_from_outcar(outcar_file: TextIO) -> NDArray[np.float64]:
-    """Returns lattice vectors in angstroms."""
-
+    """Read all three lattice vectors (in angstroms) from a VASP OUTCAR file."""
     # HACK: if symmetry is turned on, outcar will write additional
     # lattice vectors. We must skip ahead.
     _ = _skip_file_until_line_contains(

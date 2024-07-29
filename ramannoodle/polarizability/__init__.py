@@ -13,24 +13,23 @@ from ..exceptions import InvalidDOFException
 
 
 class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
-    """Represents a polarizability model"""
+    """Abstract polarizability model."""
 
     @abstractmethod
     def get_polarizability(
         self, displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Returns a polarizability for a set of atomic displacements."""
+        """Return an estimated polarizability for a given displacement."""
 
 
 class InterpolationPolarizabilityModel(PolarizabilityModel):
-    """This model uses interpolation around independent degrees of
-    freedom to estimate polarizabilities.
-    With linear interpolation + phonon displacements, we get a standard
-    raman-tensor-based spectrum.
-    With linear interpolation + site displacements, we get an atomic raman
-    tensor-based spectrum. This class also needs to take careful care
-    to obey symmetry operations.
+    """Polarizability model based on interpolation around degrees of freedom.
 
+    One is free to specify the interpolation order as well as the precise
+    form of the degrees of freedom, so long as they are orthogonal. For example, one can
+    employ first-order (linear) interpolation around phonon displacements to calculate
+    a conventional Raman spectrum. One can achieve similar results with fewer
+    calculations by using first-order interpolations around atomic displacements.
     """
 
     def __init__(self, structural_symmetry: StructuralSymmetry) -> None:
@@ -41,8 +40,7 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
     def get_polarizability(
         self, displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Returns a polarizability for a given displacement."""
-
+        """Return an estimated polarizability for a given displacement."""
         # Project displacement onto each dof_displacement, use the coordinate to
         # define the interpolation.
 
@@ -55,8 +53,7 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         polarizabilities: NDArray[np.float64],
         interpolation_dim: int,
     ) -> None:
-        """Adds a degree of freedom"""
-
+        """Add a degree of freedom."""
         parent_displacement = displacement / (np.linalg.norm(displacement) * 10)
 
         # Check that the parent displacement is orthogonal to existing basis vectors

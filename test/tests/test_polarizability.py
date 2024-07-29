@@ -23,7 +23,7 @@ from ramannoodle.exceptions import InvalidDOFException
     ],
 )
 def test_find_duplicates(vectors: list[NDArray[np.float64]], known: bool) -> None:
-    """test"""
+    """Test."""
     assert find_duplicates(vectors) == known
 
 
@@ -41,7 +41,7 @@ def test_add_dof(
     magnitudes: NDArray[np.float64],
     known_dof_added: int,
 ) -> None:
-    """test"""
+    """Test."""
     symmetry = load_structural_symmetry_from_outcar(outcar_path_fixture)
     model = InterpolationPolarizabilityModel(symmetry)
     displacement = symmetry._fractional_positions * 0
@@ -65,7 +65,7 @@ def test_overspecified_dof(
     displaced_atom_index: int,
     magnitudes: NDArray[np.float64],
 ) -> None:
-    """test"""
+    """Test."""
     symmetry = load_structural_symmetry_from_outcar(outcar_path_fixture)
     model = InterpolationPolarizabilityModel(symmetry)
     displacement = symmetry._fractional_positions * 0

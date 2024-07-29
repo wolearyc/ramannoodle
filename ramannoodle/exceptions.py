@@ -1,4 +1,4 @@
-"""Exceptions and warnings for ramannoodle"""
+"""Exceptions and warnings for ramannoodle."""
 
 
 class NoMatchingLineFoundException(Exception):

@@ -1,4 +1,4 @@
-"""Tests for VASP-related routines"""
+"""Tests for VASP-related routines."""
 
 from pathlib import Path
 from typing import TextIO
@@ -39,7 +39,7 @@ def test_load_phonons_from_outcar(
     known_first_displacement: NDArray[np.float64],
     known_last_displacement: NDArray[np.float64],
 ) -> None:
-    """Tests outcar reading"""
+    """Test."""
     phonons = load_phonons_from_outcar(outcar_path_fixture)
 
     known_degrees_of_freedom = known_num_atoms * 3
@@ -65,7 +65,7 @@ def test_load_phonons_from_outcar(
     ],
 )
 def test_get_atomic_symbol_from_potcar_line(potcar_line: str, known: str) -> None:
-    """test"""
+    """Test."""
     result = vasp_utils._get_atomic_symbol_from_potcar_line(potcar_line)
     assert result == known
 
@@ -79,7 +79,7 @@ def test_read_atomic_symbols_from_outcar(
     outcar_file_fixture: TextIO,  # pylint: disable=redefined-outer-name
     known: list[str],
 ) -> None:
-    """test"""
+    """Test."""
     atomic_symbols = vasp_utils._read_atomic_symbols_from_outcar(outcar_file_fixture)
     assert atomic_symbols == known
 
@@ -100,7 +100,7 @@ def test_read_cartesian_positions_from_outcar(
     known_first_position: NDArray[np.float64],
     known_last_position: NDArray[np.float64],
 ) -> None:
-    """test"""
+    """Test."""
     cartesian_positions = vasp_utils._read_cartesian_positions_from_outcar(
         outcar_file_fixture, EPS_OUTCAR_NUM_ATOMS
     )
@@ -126,7 +126,7 @@ def test_read_fractional_positions_from_outcar(
     known_first_position: NDArray[np.float64],
     known_last_position: NDArray[np.float64],
 ) -> None:
-    """test"""
+    """Test."""
     fractional_positions = vasp_utils._read_fractional_positions_from_outcar(
         outcar_file_fixture, EPS_OUTCAR_NUM_ATOMS
     )
@@ -156,8 +156,7 @@ def test_read_polarizability_from_outcar(
     outcar_file_fixture: TextIO,  # pylint: disable=redefined-outer-name
     known_polarizability: NDArray[np.float64],
 ) -> None:
-    """test"""
-
+    """Test."""
     polarizability = vasp_utils._read_polarizability_from_outcar(outcar_file_fixture)
 
     assert np.isclose(polarizability, known_polarizability).all()
@@ -192,6 +191,6 @@ def test_read_polarizability_from_outcar(
 def test_read_lattice_from_outcar(
     outcar_file_fixture: TextIO, known_lattice: NDArray[np.float64]
 ) -> None:
-    """test"""
+    """Test."""
     result = vasp_utils._read_lattice_from_outcar(outcar_file_fixture)
     assert np.isclose(result, known_lattice).all()
