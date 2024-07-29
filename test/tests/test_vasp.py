@@ -1,4 +1,4 @@
-"""Testing for the VASP utilities"""
+"""Tests for VASP-related routines"""
 
 from pathlib import Path
 from typing import TextIO

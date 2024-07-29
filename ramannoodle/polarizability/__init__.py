@@ -9,6 +9,7 @@ from scipy.interpolate import make_interp_spline, BSpline
 from . import polarizability_utils
 from ..symmetry.symmetry_utils import is_orthogonal_to_all
 from ..symmetry import StructuralSymmetry
+from ..exceptions import InvalidDOFException
 
 
 class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
@@ -61,7 +62,7 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         # Check that the parent displacement is orthogonal to existing basis vectors
         result = is_orthogonal_to_all(parent_displacement, self._basis_vectors)
         if result != -1:
-            raise ValueError(
+            raise InvalidDOFException(
                 f"new dof is not orthogonal with existing dof (index={result})"
             )
         if len(magnitudes) == 0:
@@ -99,13 +100,13 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
             # been provided
             duplicate = polarizability_utils.find_duplicates(interpolation_x)
             if duplicate is not None:
-                raise ValueError(
+                raise InvalidDOFException(
                     f"due to symmetry, magnitude {duplicate} should not be specified"
                 )
 
             if len(interpolation_x) <= interpolation_dim:
-                raise ValueError(
-                    f"insufficient data ({len(interpolation_x)}) available for"
+                raise InvalidDOFException(
+                    f"insufficient magnitudes ({len(interpolation_x)}) available for"
                     f"{interpolation_dim}-dimensional interpolation"
                 )
             assert len(interpolation_x) > 1

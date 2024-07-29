@@ -22,7 +22,7 @@ class DensityOfStates:  # pylint: disable=too-few-public-methods
         return self._raw_intensities
 
 
-class RamanSpectrum:  # pylint: disable=too-few-public-methods
+class RamanSpectrum:
     """Raman spectrum, with useful post-processing methods"""
 
     def __init__(

@@ -5,11 +5,11 @@ import os
 # -- Project information
 
 project = 'ramannoodle'
-copyright = "2023, Willis O'Leary"
+copyright = "2023-present Willis O'Leary"
 author = "Willis O'Leary"
 
-release = '1.0'
-version = '1.0'
+release = 'alpha_0.1'
+version = 'alpha_0.1'
 
 # -- General configuration
 
@@ -20,13 +20,13 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
+    'sphinx_rtd_theme',
 ]
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('http://docs.scipy.org/doc/numpy', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
-    'matplotlib': ('http://matplotlib.org/stable', None),
 }
 
 intersphinx_disabled_domains = ['std']
@@ -35,7 +35,7 @@ templates_path = ['_templates']
 
 # -- Options for HTML output
 
-# html_theme = 'sphinx_rtd_theme'
+html_theme = 'sphinx_rtd_theme'
 
 # -- Options for EPUB output
 epub_show_urls = 'footnote'

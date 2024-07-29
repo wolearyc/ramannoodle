@@ -4,7 +4,7 @@ ramannoodle
 
 ![Tests](reports/tests-badge.svg)
 ![Coverage](reports/coverage-badge.svg)
-
+[![Documentation Status](https://readthedocs.org/projects/ramannoodle/badge/?version=latest)](https://ramannoodle.readthedocs.io/en/latest/?badge=latest)
 
 
 `ramannoodle` helps you calculate Raman spectra quickly and efficiency based on VASP calculations. **This software is currently being completely overhauled.** Check out the `legacy` branch for the old (and functional!) version.

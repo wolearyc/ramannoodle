@@ -9,7 +9,7 @@ from ..exceptions import SymmetryException
 
 
 class StructuralSymmetry:
-    """Represents symmetries of a crystal structure."""
+    """Symmetries of a crystal structure."""
 
     def __init__(  # pylint: disable=too-many-arguments
         self,

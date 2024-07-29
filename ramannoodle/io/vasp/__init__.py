@@ -19,7 +19,17 @@ from ..io_utils import _skip_file_until_line_contains
 
 
 def load_phonons_from_outcar(path: Path) -> Phonons:
-    """Extracts phonons from an OUTCAR"""
+    """Extracts phonons from a VASP OUTCAR file.
+
+    Parameters
+    ----------
+    path : Path
+        filepath
+
+    Returns
+    -------
+    Phonons
+    """
     wavenumbers = []
     eigenvectors = []
 
