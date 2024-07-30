@@ -32,8 +32,25 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
     calculations by using first-order interpolations around atomic displacements.
     """
 
-    def __init__(self, structural_symmetry: StructuralSymmetry) -> None:
+    def __init__(
+        self,
+        structural_symmetry: StructuralSymmetry,
+        equilibrium_polarizability: NDArray[np.float64],
+    ) -> None:
+        """Construct model.
+
+        Parameters
+        ----------
+        structural_symmetry: StructuralSymmetry
+        equilibrium_polarizability: NDArray[np.float64]
+            Polarizability (3x3) of system at "equilibrium", i.e., minimized structure.
+
+            Raman spectra calculated using this model do not explicitly depend on this
+            value. However, specifying the actual value is recommended in order to
+            compute the correct polarizability magnitude.
+        """
         self._structural_symmetry = structural_symmetry
+        self._equilibrium_polarizability = equilibrium_polarizability
         self._basis_vectors: list[NDArray[np.float64]] = []
         self._interpolations: list[BSpline] = []
 
@@ -41,15 +58,25 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         self, displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
         """Return an estimated polarizability for a given displacement."""
-        # Project displacement onto each dof_displacement, use the coordinate to
-        # define the interpolation.
+        polarizability: NDArray[np.float64] = np.zeros((3, 3))
+        for basis_vector, interpolation in zip(
+            self._basis_vectors, self._interpolations
+        ):
+            projected_displacement = (
+                self._structural_symmetry.get_cartesian_displacement(
+                    np.dot(basis_vector.flatten(), displacement.flatten())
+                    * basis_vector
+                )
+            )
+            amplitude = np.linalg.norm(projected_displacement)
+            polarizability += interpolation(amplitude)
 
-        return np.array([])
+        return polarizability + self._equilibrium_polarizability
 
     def add_dof(  # pylint: disable=too-many-locals
         self,
         displacement: NDArray[np.float64],
-        magnitudes: NDArray[np.float64],
+        amplitudes: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
         interpolation_dim: int,
     ) -> None:
@@ -62,11 +89,11 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
             raise InvalidDOFException(
                 f"new dof is not orthogonal with existing dof (index={result})"
             )
-        if len(magnitudes) == 0:
-            raise ValueError("no magnitudes provided")
-        if len(magnitudes) != len(polarizabilities):
+        if len(amplitudes) == 0:
+            raise ValueError("no amplitudes provided")
+        if len(amplitudes) != len(polarizabilities):
             raise ValueError(
-                f"unequal numbers of magnitudes ({len(magnitudes)})) and "
+                f"unequal numbers of amplitudes ({len(amplitudes)})) and "
                 f"polarizabilities ({len(polarizabilities)})"
             )
 
@@ -89,21 +116,25 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
                 )
                 multiplier = child_displacement[_index] / collinear_displacement[_index]
 
-                for magnitude, polarizability in zip(magnitudes, polarizabilities):
-                    interpolation_x.append(multiplier * magnitude)
-                    interpolation_y.append(polarizability @ transformation[0])
+                for amplitude, polarizability in zip(amplitudes, polarizabilities):
+                    interpolation_x.append(multiplier * amplitude)
+                    rotation = transformation[0]
+                    interpolation_y.append(
+                        (rotation @ polarizability @ np.linalg.inv(rotation))
+                        - self._equilibrium_polarizability
+                    )
 
-            # If duplicate magnitudes are generated, too much data has
+            # If duplicate amplitudes are generated, too much data has
             # been provided
             duplicate = polarizability_utils.find_duplicates(interpolation_x)
             if duplicate is not None:
                 raise InvalidDOFException(
-                    f"due to symmetry, magnitude {duplicate} should not be specified"
+                    f"due to symmetry, amplitude {duplicate} should not be specified"
                 )
 
             if len(interpolation_x) <= interpolation_dim:
                 raise InvalidDOFException(
-                    f"insufficient magnitudes ({len(interpolation_x)}) available for"
+                    f"insufficient amplitudes ({len(interpolation_x)}) available for"
                     f"{interpolation_dim}-dimensional interpolation"
                 )
             assert len(interpolation_x) > 1

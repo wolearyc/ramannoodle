@@ -35,7 +35,7 @@ jobs:
       uses: py-actions/flake8@v2
       with:
         max-line-length: "88"
-        docstring-convention: "numpy"
+        args: "--docstring-convention=numpy"
         plugins: "flake8-bugbear==24.4.26 flake8-docstrings"
     - name: Test with pytest
       run: |

@@ -123,3 +123,13 @@ class StructuralSymmetry:
                         )
 
         return result
+
+    def get_cartesian_displacement(
+        self, fractional_displacement: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
+        """Convert a fractional displacement into cartesian coordinates."""
+        assert (fractional_displacement >= -0.5).all() and (
+            fractional_displacement <= 0.5
+        ).all()
+
+        return fractional_displacement @ self._lattice
