@@ -7,5 +7,5 @@ mv htmlcov/* reports/coverage
 rm -r htmlcov
 
 echo "Generating badges"
-genbadge tests  -o reports/tests-badge.svg
-genbadge coverage  -o reports/coverage-badge.svg
+genbadge tests  -o docs/tests-badge.svg
+genbadge coverage  -o docs/coverage-badge.svg

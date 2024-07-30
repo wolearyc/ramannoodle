@@ -28,8 +28,12 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
     One is free to specify the interpolation order as well as the precise
     form of the degrees of freedom, so long as they are orthogonal. For example, one can
     employ first-order (linear) interpolation around phonon displacements to calculate
-    a conventional Raman spectrum. One can achieve similar results with fewer
+    a conventional Raman spectrum. One can achieve identical results with fewer
     calculations by using first-order interpolations around atomic displacements.
+
+    This model's key assumption is that each degree of freedom in a system modulates
+    the polarizability **independently**.
+
     """
 
     def __init__(
@@ -78,9 +82,29 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         displacement: NDArray[np.float64],
         amplitudes: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
-        interpolation_dim: int,
+        interpolation_order: int,
     ) -> None:
-        """Add a degree of freedom."""
+        """Add a degree of freedom (DOF).
+
+        Specification of a DOF requires a displacement (how the atoms move) alongside
+        displacement amplitudes and corresponding known polarizabilities for each
+        amplitude. Alongside the DOF specified, all DOFs related by the system's
+        symmetry will be added as well. The interpolation order can be specified,
+        though one must ensure that sufficient data available.
+
+        Parameters
+        ----------
+        displacement: np.ndarray
+            Atomic displacement. Must be orthogonal to preexisting DOFs.
+        amplitudes: np.ndarray
+            Amplitudes in angstroms.
+        polarizabilities: NDArray[np.float64]
+            List of known polarizabilities corresponding to each amplitude.
+        interpolation_order: int
+            Interpolation order. Must be less than the number of symmetrically-
+            equivalent amplitudes.
+
+        """
         parent_displacement = displacement / (np.linalg.norm(displacement) * 10)
 
         # Check that the parent displacement is orthogonal to existing basis vectors
@@ -132,10 +156,10 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
                     f"due to symmetry, amplitude {duplicate} should not be specified"
                 )
 
-            if len(interpolation_x) <= interpolation_dim:
+            if len(interpolation_x) <= interpolation_order:
                 raise InvalidDOFException(
                     f"insufficient amplitudes ({len(interpolation_x)}) available for"
-                    f"{interpolation_dim}-dimensional interpolation"
+                    f"{interpolation_order}-order interpolation"
                 )
             assert len(interpolation_x) > 1
             basis_vectors_to_add.append(
@@ -146,7 +170,7 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
                 make_interp_spline(
                     x=np.array(interpolation_x)[sort_indices],
                     y=np.array(interpolation_y)[sort_indices],
-                    k=interpolation_dim,
+                    k=interpolation_order,
                     bc_type=None,
                 )
             )
