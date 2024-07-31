@@ -8,6 +8,4 @@
 
    .. autosummary::
 
-      DensityOfStates
-      RamanSettings
-      RamanSpectrum
+      PhononRamanSpectrum

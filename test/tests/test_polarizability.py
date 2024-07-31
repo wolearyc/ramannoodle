@@ -87,8 +87,8 @@ def test_get_polarizability() -> None:
     polarizabilities = np.array([[[2.0, 1.0, 0.0], [1.0, 2.0, 0.0], [0.0, 0.0, 2.0]]])
     model.add_dof(displacement, amplitudes, polarizabilities, 1)
 
-    test_displacement = displacement * amplitudes[0] / symmetry._lattice[0][0]
+    test_cartesian_displacement = displacement * amplitudes[0]
     assert np.isclose(
         polarizabilities[0],
-        model.get_polarizability(test_displacement),
+        model.get_polarizability(test_cartesian_displacement),
     ).all()

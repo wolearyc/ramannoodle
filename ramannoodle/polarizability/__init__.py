@@ -17,9 +17,9 @@ class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
 
     @abstractmethod
     def get_polarizability(
-        self, displacement: NDArray[np.float64]
+        self, cartesian_displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Return an estimated polarizability for a given displacement."""
+        """Return an estimated polarizability for a given cartesian displacement."""
 
 
 class InterpolationPolarizabilityModel(PolarizabilityModel):
@@ -46,7 +46,7 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         Parameters
         ----------
         structural_symmetry: StructuralSymmetry
-        equilibrium_polarizability: NDArray[np.float64]
+        equilibrium_polarizability: numpy.ndarray[(3,3),dtype=numpy.float64]
             Polarizability (3x3) of system at "equilibrium", i.e., minimized structure.
 
             Raman spectra calculated using this model do not explicitly depend on this
@@ -59,20 +59,18 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         self._interpolations: list[BSpline] = []
 
     def get_polarizability(
-        self, displacement: NDArray[np.float64]
+        self, cartesian_displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Return an estimated polarizability for a given displacement."""
+        """Return an estimated polarizability for a given cartesian displacement."""
         polarizability: NDArray[np.float64] = np.zeros((3, 3))
         for basis_vector, interpolation in zip(
             self._basis_vectors, self._interpolations
         ):
-            projected_displacement = (
-                self._structural_symmetry.get_cartesian_displacement(
-                    np.dot(basis_vector.flatten(), displacement.flatten())
-                    * basis_vector
-                )
+            projected_cartesian_displacement = (
+                np.dot(basis_vector.flatten(), cartesian_displacement.flatten())
+                * basis_vector
             )
-            amplitude = np.linalg.norm(projected_displacement)
+            amplitude = np.linalg.norm(projected_cartesian_displacement)
             polarizability += interpolation(amplitude)
 
         return polarizability + self._equilibrium_polarizability

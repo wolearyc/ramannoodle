@@ -9,5 +9,4 @@
    .. autosummary::
 
       Dynamics
-      MDTrajectory
       Phonons

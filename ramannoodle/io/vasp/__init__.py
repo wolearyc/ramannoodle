@@ -39,13 +39,13 @@ def load_phonons_from_outcar(path: Path) -> Phonons:
         atomic_symbols = _read_atomic_symbols_from_outcar(outcar_file)
         atomic_weights = np.array([ATOMIC_WEIGHTS[symbol] for symbol in atomic_symbols])
         num_atoms = len(atomic_symbols)
-        degrees_of_freedom = num_atoms * 3
+        num_degrees_of_freedom = num_atoms * 3
 
         # read in eigenvectors/eigenvalues
         _ = _skip_file_until_line_contains(
             outcar_file, "Eigenvectors and eigenvalues of the dynamical matrix"
         )
-        for _ in range(degrees_of_freedom):
+        for _ in range(num_degrees_of_freedom):
             line = _skip_file_until_line_contains(outcar_file, "cm-1")
             if "f/i" in line:  # if complex
                 wavenumbers.append(-float(line.split()[6]))  # set negative wavenumber
@@ -53,15 +53,15 @@ def load_phonons_from_outcar(path: Path) -> Phonons:
                 wavenumbers.append(float(line.split()[7]))
             eigenvectors.append(_read_eigenvector_from_outcar(outcar_file, num_atoms))
 
-        # Divide eigenvectors by sqrt(mass) to get displacements
+        # Divide eigenvectors by sqrt(mass) to get cartesian displacements
         wavenumbers = np.array(wavenumbers)
         eigenvectors = np.array(eigenvectors)
-        displacements = eigenvectors / np.sqrt(atomic_weights)[:, np.newaxis]
+        cartesian_displacements = eigenvectors / np.sqrt(atomic_weights)[:, np.newaxis]
 
-        assert len(wavenumbers) == len(displacements)
-        assert len(wavenumbers) == degrees_of_freedom
+        assert len(wavenumbers) == len(cartesian_displacements)
+        assert len(wavenumbers) == num_degrees_of_freedom
 
-        return Phonons(wavenumbers, displacements)
+        return Phonons(wavenumbers, cartesian_displacements)
 
 
 def load_positions_and_polarizability_from_outcar(
