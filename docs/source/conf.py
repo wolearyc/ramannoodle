@@ -8,8 +8,8 @@ project = 'ramannoodle'
 copyright = "2023-present Willis O'Leary"
 author = "Willis O'Leary"
 
-release = 'alpha_0.1'
-version = 'alpha_0.1'
+release = 'dev'
+version = 'dev'
 
 # -- General configuration
 
@@ -22,6 +22,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx_rtd_theme',
 ]
+autodoc_typehints = 'description'
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),

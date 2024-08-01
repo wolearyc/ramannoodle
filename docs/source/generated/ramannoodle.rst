@@ -1,4 +1,0 @@
-﻿ramannoodle
-===========
-
-.. automodule:: ramannoodle
