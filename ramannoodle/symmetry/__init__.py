@@ -9,7 +9,21 @@ from ..exceptions import SymmetryException
 
 
 class StructuralSymmetry:
-    """Crystal structure symmetries."""
+    """Crystal structure symmetries.
+
+    Parameters
+    ----------
+    atomic_numbers
+        1D array of length N where N is the number of atoms.
+    lattice
+        Lattice vectors expressed as a 2D array with shape (3,3).
+    fractional_positions
+        2D array with shape (N,3) where N is the number of atoms
+    symprec
+        Symmetry precision parameter for spglib.
+    angle_tolerance
+        Symmetry precision parameter for spglib.
+    """
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -48,17 +62,17 @@ class StructuralSymmetry:
 
         Parameters
         ----------
-        displacement : numpy.ndarray
-            Atomic displacement (Nx3)
+        displacement
+            2D array with shape (N,3) where N is the number of atoms.
 
         Returns
         -------
-        list[dict[str,list[numpy.ndarray]]]
-            List of dictionaries with 'displacement' and 'transformation' keys.
-
-            Displacements within each dictionary will be collinear, corresponding to
+        :
+            List of dictionaries containing displacements and transformations,
+            accessed using the 'displacements' and 'transformations' keys. Displacements
+            within each dictionary will be collinear, corresponding to
             the same degree of freedom. The provided transformations are those that
-            transform the parameter displacements into that degree of freedom.
+            transform the parameter `displacements` into that degree of freedom.
 
         """
         assert (displacement >= -0.5).all() and (displacement <= 0.5).all()
@@ -127,7 +141,13 @@ class StructuralSymmetry:
     def get_cartesian_displacement(
         self, fractional_displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Convert a fractional displacement into cartesian coordinates."""
+        """Convert a fractional displacement into cartesian coordinates.
+
+        Parameters
+        ----------
+        fractional_displacement
+            2D array with shape (N,3) where N is the number of atoms
+        """
         assert (fractional_displacement >= -0.5).all() and (
             fractional_displacement <= 0.5
         ).all()

@@ -18,22 +18,21 @@ from .vasp_utils import (
 from ..io_utils import _skip_file_until_line_contains
 
 
-def load_phonons_from_outcar(path: Path) -> Phonons:
+def load_phonons_from_outcar(filepath: Path) -> Phonons:
     """Extract phonons from a VASP OUTCAR file.
 
     Parameters
     ----------
-    path : Path
-        filepath
+    filepath
 
     Returns
     -------
-    Phonons
+    :
     """
     wavenumbers = []
     eigenvectors = []
 
-    with open(path, "r", encoding="utf-8") as outcar_file:
+    with open(filepath, "r", encoding="utf-8") as outcar_file:
 
         # get atom information
         atomic_symbols = _read_atomic_symbols_from_outcar(outcar_file)
@@ -67,21 +66,20 @@ def load_phonons_from_outcar(path: Path) -> Phonons:
 def load_positions_and_polarizability_from_outcar(
     filepath: Path,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Extract atom position and polarizability from a VASP OUTCAR file.
+    """Extract fractional positions and polarizability from a VASP OUTCAR file.
 
-    Technically, the extracted polarizability is, in fact, a dielectric tensor. However,
+    The polarizability returned by VASP is, in fact, a dielectric tensor. However,
     this is inconsequential to the calculation of Raman spectra.
 
     Parameters
     ----------
-    path : Path
-        filepath
+    filepath
 
     Returns
     -------
-    tuple[numpy.ndarray, numpy.ndarray]
-        The first element is atomic positions (Nx3) and the second element is the
-        polarizability tensor (3x3).
+    :
+        2-tuple, whose first element is the fractional positions, a 2D array with shape
+        (N,3). The second element is the polarizability, a 2D array with shape (3,3).
 
     """
     with open(filepath, "r", encoding="utf-8") as outcar_file:
@@ -94,18 +92,7 @@ def load_positions_and_polarizability_from_outcar(
 def load_structural_symmetry_from_outcar(
     filepath: Path,
 ) -> StructuralSymmetry:
-    """Extract structural symmetry from a VASP OUTCAR file.
-
-    Parameters
-    ----------
-    path : Path
-        filepath
-
-    Returns
-    -------
-    StructuralSymmetry
-
-    """
+    """Extract structural symmetry from a VASP OUTCAR file."""
     lattice = np.array([])
     fractional_positions = np.array([])
     atomic_numbers = np.array([], dtype=np.int32)

@@ -24,9 +24,17 @@ class Phonons(Dynamics):
     """Harmonic lattice vibrations.
 
     A phonon can be represented by a wavenumber and corresponding atomic displacement.
-    The wavenumbers of the eigenvalues of the system's dynamical matrix, while the
+    The wavenumbers are the eigenvalues of the system's dynamical matrix, while the
     atomic displacements are the eigenvectors of the dynamical matrix divided by the
     square root of the atomic masses.
+
+    Parameters
+    ----------
+    wavenumbers
+        1D array with length M
+    cartesian_displacements
+        3D array with shape (M,N,3) where N is the number of atoms
+
     """
 
     def __init__(
@@ -34,13 +42,6 @@ class Phonons(Dynamics):
         wavenumbers: NDArray[np.float64],
         cartesian_displacements: NDArray[np.float64],
     ) -> None:
-        """Construct.
-
-        Parameters
-        ----------
-        wavenumber: numpy.ndarray
-
-        """
         self._wavenumbers: NDArray[np.float64] = wavenumbers
         self._cartesian_displacements: NDArray[np.float64] = cartesian_displacements
 
@@ -61,9 +62,22 @@ class Phonons(Dynamics):
         return PhononRamanSpectrum(self._wavenumbers, np.array(raman_tensors))
 
     def get_wavenumbers(self) -> NDArray[np.float64]:
-        """Return wavenumbers in cm-1."""
+        """Return wavenumbers.
+
+        Returns
+        -------
+        :
+            1D array with length M
+        """
         return self._wavenumbers
 
-    def get_displacements(self) -> NDArray[np.float64]:
-        """Return atomic displacements."""
+    def get_cartesian_displacements(self) -> NDArray[np.float64]:
+        """Return cartesian displacements.
+
+        Returns
+        -------
+        :
+            3D array with shape (M,N,3) where M is the number of displacements
+            and N is the number of atoms
+        """
         return self._cartesian_displacements

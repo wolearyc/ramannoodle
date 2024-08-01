@@ -26,13 +26,27 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
         bose_einstein_correction: bool = False,
         temperature: float | None = None,
     ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-        """Calculate and return a largely unprocessed Raman spectrum.
+        """Calculate and return a raw Raman spectrum.
 
         Parameters
         ----------
-        orientation: str | NDArray[np.float64]
+        orientation
+            Currently only "polycrystalline" is supported.
+        laser_correction
+            Applies laser-wavelength-dependent intensity correction. If True,
+            `laser_wavelength` must be specified.
+        laser_wavelength
+        bose_einstein_correction
+            Applies temperature-dependent Bose Einstein correction. If True,
+            `temperature` must be specified.
 
-        laser_correction:
+        Returns
+        -------
+        :
+            2-tuple, whose first element is wavenumbers, a 1D array with length M
+            where M is the number of normal modes. The second element is intensities,
+            a 1D array with length M.
+
         """
         if orientation != "polycrystalline":
             raise NotImplementedError(

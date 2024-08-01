@@ -19,7 +19,18 @@ class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
     def get_polarizability(
         self, cartesian_displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Return an estimated polarizability for a given cartesian displacement."""
+        """Return an estimated polarizability for a given cartesian displacement.
+
+        Parameters
+        ----------
+        cartesian_displacement
+            2D array with shape (N,3) where N is the number of atoms
+
+        Returns
+        -------
+        :
+            2D array with shape (3,3)
+        """
 
 
 class InterpolationPolarizabilityModel(PolarizabilityModel):
@@ -28,11 +39,22 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
     One is free to specify the interpolation order as well as the precise
     form of the degrees of freedom, so long as they are orthogonal. For example, one can
     employ first-order (linear) interpolation around phonon displacements to calculate
-    a conventional Raman spectrum. One can achieve identical results with fewer
-    calculations by using first-order interpolations around atomic displacements.
+    a conventional Raman spectrum. One can achieve identical results -- often with fewer
+    calculations -- by using first-order interpolations around atomic displacements.
 
     This model's key assumption is that each degree of freedom in a system modulates
     the polarizability **independently**.
+
+    Parameters
+    ----------
+    structural_symmetry
+    equilibrium_polarizability
+        2D array with shape (3,3) giving polarizability of system at equilibrium. This
+        would usually correspond to the minimum energy structure.
+
+        Raman spectra calculated using this model do not explicitly depend on this
+        value. However, specifying the actual value is recommended in order to
+        compute the correct polarizability magnitudes.
 
     """
 
@@ -41,18 +63,6 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         structural_symmetry: StructuralSymmetry,
         equilibrium_polarizability: NDArray[np.float64],
     ) -> None:
-        """Construct model.
-
-        Parameters
-        ----------
-        structural_symmetry: StructuralSymmetry
-        equilibrium_polarizability: numpy.ndarray[(3,3),dtype=numpy.float64]
-            Polarizability (3x3) of system at "equilibrium", i.e., minimized structure.
-
-            Raman spectra calculated using this model do not explicitly depend on this
-            value. However, specifying the actual value is recommended in order to
-            compute the correct polarizability magnitude.
-        """
         self._structural_symmetry = structural_symmetry
         self._equilibrium_polarizability = equilibrium_polarizability
         self._basis_vectors: list[NDArray[np.float64]] = []
@@ -61,7 +71,18 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
     def get_polarizability(
         self, cartesian_displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Return an estimated polarizability for a given cartesian displacement."""
+        """Return an estimated polarizability for a given cartesian displacement.
+
+        Parameters
+        ----------
+        cartesian_displacement
+            2D array with shape (N,3) where N is the number of atoms
+
+        Returns
+        -------
+        :
+            2D array with shape (3,3)
+        """
         polarizability: NDArray[np.float64] = np.zeros((3, 3))
         for basis_vector, interpolation in zip(
             self._basis_vectors, self._interpolations
@@ -88,19 +109,21 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         displacement amplitudes and corresponding known polarizabilities for each
         amplitude. Alongside the DOF specified, all DOFs related by the system's
         symmetry will be added as well. The interpolation order can be specified,
-        though one must ensure that sufficient data available.
+        though one must ensure that sufficient data is available.
 
         Parameters
         ----------
-        displacement: np.ndarray
-            Atomic displacement. Must be orthogonal to preexisting DOFs.
-        amplitudes: np.ndarray
-            Amplitudes in angstroms.
-        polarizabilities: NDArray[np.float64]
-            List of known polarizabilities corresponding to each amplitude.
-        interpolation_order: int
-            Interpolation order. Must be less than the number of symmetrically-
-            equivalent amplitudes.
+        displacement
+            2D array with shape (N,3) where N is the number of atoms. Units
+            are arbitrary.
+        amplitudes
+            1D array of length L containing amplitudes in angstroms.
+        polarizabilities
+            3D array with shape (L,3,3) containing known polarizabilities for
+            each amplitude.
+        interpolation_order
+            must be less than the number of total number of amplitudes after
+            symmetry considerations.
 
         """
         parent_displacement = displacement / (np.linalg.norm(displacement) * 10)

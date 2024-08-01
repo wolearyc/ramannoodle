@@ -45,15 +45,17 @@ def test_load_phonons_from_outcar(
     known_degrees_of_freedom = known_num_atoms * 3
     assert phonons.get_wavenumbers().shape == (known_degrees_of_freedom,)
     assert np.isclose(phonons.get_wavenumbers()[0:4], known_wavenumbers).all()
-    assert phonons.get_displacements().shape == (
+    assert phonons.get_cartesian_displacements().shape == (
         known_degrees_of_freedom,
         known_num_atoms,
         3,
     )
-    assert np.isclose(phonons.get_displacements()[0, 0], known_first_displacement).all()
-    print(phonons.get_displacements()[-1, -1])
     assert np.isclose(
-        phonons.get_displacements()[-1, -1], known_last_displacement
+        phonons.get_cartesian_displacements()[0, 0], known_first_displacement
+    ).all()
+    print(phonons.get_cartesian_displacements()[-1, -1])
+    assert np.isclose(
+        phonons.get_cartesian_displacements()[-1, -1], known_last_displacement
     ).all()
 
 
