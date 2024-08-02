@@ -16,6 +16,7 @@ from .vasp_utils import (
     _read_lattice_from_outcar,
 )
 from ..io_utils import _skip_file_until_line_contains
+from ...exceptions import NoMatchingLineFoundException, InvalidFileException
 
 
 def load_phonons_from_outcar(filepath: Path) -> Phonons:
@@ -28,6 +29,11 @@ def load_phonons_from_outcar(filepath: Path) -> Phonons:
     Returns
     -------
     :
+
+    Raises
+    ------
+    InvalidFileException
+        If the OUTCAR has an unexpected format.
     """
     wavenumbers = []
     eigenvectors = []
@@ -41,24 +47,31 @@ def load_phonons_from_outcar(filepath: Path) -> Phonons:
         num_degrees_of_freedom = num_atoms * 3
 
         # read in eigenvectors/eigenvalues
-        _ = _skip_file_until_line_contains(
-            outcar_file, "Eigenvectors and eigenvalues of the dynamical matrix"
-        )
+        try:
+            _ = _skip_file_until_line_contains(
+                outcar_file, "Eigenvectors and eigenvalues of the dynamical matrix"
+            )
+        except NoMatchingLineFoundException as exc:
+            raise InvalidFileException(
+                "eigenvector/eigenvalues block not found"
+            ) from exc
         for _ in range(num_degrees_of_freedom):
-            line = _skip_file_until_line_contains(outcar_file, "cm-1")
-            if "f/i" in line:  # if complex
-                wavenumbers.append(-float(line.split()[6]))  # set negative wavenumber
-            else:
-                wavenumbers.append(float(line.split()[7]))
+            try:
+                line = _skip_file_until_line_contains(outcar_file, "cm-1")
+                if "f/i" in line:  # if complex
+                    wavenumbers.append(
+                        -float(line.split()[6])  # set negative wavenumber
+                    )
+                else:
+                    wavenumbers.append(float(line.split()[7]))
+            except (NoMatchingLineFoundException, TypeError, IndexError) as exc:
+                raise InvalidFileException("eigenvalue could not be parsed") from exc
             eigenvectors.append(_read_eigenvector_from_outcar(outcar_file, num_atoms))
 
         # Divide eigenvectors by sqrt(mass) to get cartesian displacements
         wavenumbers = np.array(wavenumbers)
         eigenvectors = np.array(eigenvectors)
         cartesian_displacements = eigenvectors / np.sqrt(atomic_weights)[:, np.newaxis]
-
-        assert len(wavenumbers) == len(cartesian_displacements)
-        assert len(wavenumbers) == num_degrees_of_freedom
 
         return Phonons(wavenumbers, cartesian_displacements)
 
@@ -81,6 +94,10 @@ def load_positions_and_polarizability_from_outcar(
         2-tuple, whose first element is the fractional positions, a 2D array with shape
         (N,3). The second element is the polarizability, a 2D array with shape (3,3).
 
+    Raises
+    ------
+    InvalidFileException
+        If the OUTCAR has an unexpected format.
     """
     with open(filepath, "r", encoding="utf-8") as outcar_file:
         num_atoms = len(_read_atomic_symbols_from_outcar(outcar_file))
@@ -92,7 +109,23 @@ def load_positions_and_polarizability_from_outcar(
 def load_structural_symmetry_from_outcar(
     filepath: Path,
 ) -> StructuralSymmetry:
-    """Extract structural symmetry from a VASP OUTCAR file."""
+    """Extract structural symmetry from a VASP OUTCAR file.
+
+    Parameters
+    ----------
+    filepath
+
+    Returns
+    -------
+    StructuralSymmetry
+
+    Raises
+    ------
+    InvalidFileException
+        If the OUTCAR has an unexpected format.
+    SymmetryException
+        If OUTCAR was read but the symmetry search failed
+    """
     lattice = np.array([])
     fractional_positions = np.array([])
     atomic_numbers = np.array([], dtype=np.int32)

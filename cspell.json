@@ -20,6 +20,7 @@
         "linalg",
         "LLZO",
         "ndarray",
+        "ndim",
         "newaxis",
         "NIONS",
         "outcar",

@@ -8,6 +8,13 @@ class NoMatchingLineFoundException(Exception):
         pass
 
 
+class InvalidFileException(Exception):
+    """Raised when a file cannot be read due to formatting issues."""
+
+    def __init__(self, reason: str):
+        pass
+
+
 class InvalidDOFException(Exception):
     """Raised when things a degree of freedom is invalid in some way."""
 
