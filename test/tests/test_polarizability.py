@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 import pytest
 
 from ramannoodle.polarizability.polarizability_utils import find_duplicates
-from ramannoodle.polarizability import InterpolationPolarizabilityModel
+from ramannoodle.polarizability.interpolation import InterpolationPolarizabilityModel
 from ramannoodle.io.vasp import load_structural_symmetry_from_outcar
 from ramannoodle.exceptions import InvalidDOFException
 
@@ -48,8 +48,8 @@ def test_add_dof(
     displacement[displaced_atom_index][0] = 1.0
     polarizabilities = np.zeros((len(amplitudes), 3, 3))
     model.add_dof(displacement, amplitudes, polarizabilities, 1)
-    assert len(model._basis_vectors) == known_dof_added
-    assert np.isclose(np.linalg.norm(model._basis_vectors[0]), 1)
+    assert len(model._cartesian_basis_vectors) == known_dof_added
+    assert np.isclose(np.linalg.norm(model._cartesian_basis_vectors[0]), 1)
 
 
 @pytest.mark.parametrize(

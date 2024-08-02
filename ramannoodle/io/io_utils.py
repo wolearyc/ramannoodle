@@ -1,6 +1,7 @@
 """Universal IO utility functions."""
 
 from typing import TextIO
+from pathlib import Path
 from ..exceptions import NoMatchingLineFoundException
 
 
@@ -10,3 +11,15 @@ def _skip_file_until_line_contains(file: TextIO, content: str) -> str:
         if content in line:
             return line
     raise NoMatchingLineFoundException(content)
+
+
+def pathify(filepath: str | Path) -> Path:
+    """Convert filepath to Path."""
+    return Path(filepath)
+
+
+def pathify_as_list(filepaths: str | Path | list[str] | list[Path]) -> list[Path]:
+    """Convert filepaths to list of Paths."""
+    if isinstance(filepaths, list):
+        return [Path(item) for item in filepaths]
+    return [Path(filepaths)]

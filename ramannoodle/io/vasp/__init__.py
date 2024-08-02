@@ -10,16 +10,15 @@ from ...globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from .vasp_utils import (
     _read_atomic_symbols_from_outcar,
     _read_eigenvector_from_outcar,
-    _read_cartesian_positions_from_outcar,
     _read_polarizability_from_outcar,
     _read_fractional_positions_from_outcar,
     _read_lattice_from_outcar,
 )
-from ..io_utils import _skip_file_until_line_contains
+from ..io_utils import _skip_file_until_line_contains, pathify
 from ...exceptions import NoMatchingLineFoundException, InvalidFileException
 
 
-def load_phonons_from_outcar(filepath: Path) -> Phonons:
+def load_phonons_from_outcar(filepath: str | Path) -> Phonons:
     """Extract phonons from a VASP OUTCAR file.
 
     Parameters
@@ -38,6 +37,7 @@ def load_phonons_from_outcar(filepath: Path) -> Phonons:
     wavenumbers = []
     eigenvectors = []
 
+    filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as outcar_file:
 
         # get atom information
@@ -77,7 +77,7 @@ def load_phonons_from_outcar(filepath: Path) -> Phonons:
 
 
 def load_positions_and_polarizability_from_outcar(
-    filepath: Path,
+    filepath: str | Path,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Extract fractional positions and polarizability from a VASP OUTCAR file.
 
@@ -99,15 +99,16 @@ def load_positions_and_polarizability_from_outcar(
     InvalidFileException
         If the OUTCAR has an unexpected format.
     """
+    filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as outcar_file:
         num_atoms = len(_read_atomic_symbols_from_outcar(outcar_file))
-        positions = _read_cartesian_positions_from_outcar(outcar_file, num_atoms)
+        positions = _read_fractional_positions_from_outcar(outcar_file, num_atoms)
         polarizability = _read_polarizability_from_outcar(outcar_file)
         return positions, polarizability
 
 
 def load_structural_symmetry_from_outcar(
-    filepath: Path,
+    filepath: str | Path,
 ) -> StructuralSymmetry:
     """Extract structural symmetry from a VASP OUTCAR file.
 
@@ -130,6 +131,7 @@ def load_structural_symmetry_from_outcar(
     fractional_positions = np.array([])
     atomic_numbers = np.array([], dtype=np.int32)
 
+    filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as outcar_file:
         atomic_symbols = _read_atomic_symbols_from_outcar(outcar_file)
         atomic_numbers = np.array([ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols])

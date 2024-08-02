@@ -24,6 +24,7 @@
         "newaxis",
         "NIONS",
         "outcar",
+        "pathify",
         "phonopy",
         "polarizabilities",
         "POSCAR",

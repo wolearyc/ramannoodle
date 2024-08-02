@@ -38,6 +38,26 @@ def is_orthogonal_to_all(
     return -1
 
 
+def is_collinear_with_all(
+    vector_1: NDArray[np.float64], vectors: list[NDArray[np.float64]]
+) -> int:
+    """Check if a given vector is collinear to a list of others.
+
+    Returns
+    -------
+    int
+        first index of non-collinear vector, otherwise -1
+
+    """
+    # This implementation could be made more efficient but readability would
+    # be sacrificed.
+    for index, vector_2 in enumerate(vectors):
+        if not are_collinear(vector_1.flatten(), vector_2.flatten()):
+            return index
+
+    return -1
+
+
 def is_non_collinear_with_all(
     vector_1: NDArray[np.float64], vectors: list[NDArray[np.float64]]
 ) -> int:

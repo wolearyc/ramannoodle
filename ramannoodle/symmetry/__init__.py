@@ -153,3 +153,7 @@ class StructuralSymmetry:
         ).all()
 
         return fractional_displacement @ self._lattice
+
+    def get_fractional_positions(self) -> NDArray[np.float64]:
+        """Return fractional positions."""
+        return self._fractional_positions

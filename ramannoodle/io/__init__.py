@@ -16,7 +16,7 @@ _POSITION_AND_POLARIZABILITY_LOADERS = {
 _STRUCTURAL_SYMMETRY_LOADERS = {"outcar": vasp.load_structural_symmetry_from_outcar}
 
 
-def load_phonons(filepath: Path, file_format: str) -> Phonons:
+def load_phonons(filepath: str | Path, file_format: str) -> Phonons:
     """Extract phonons from a file.
 
     Parameters
@@ -40,13 +40,10 @@ def load_phonons(filepath: Path, file_format: str) -> Phonons:
 
 
 def load_positions_and_polarizability(
-    filepath: Path,
+    filepath: str | Path,
     file_format: str,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Extract fractional positions and polarizability from a VASP OUTCAR file.
-
-    The polarizability returned by VASP is, in fact, a dielectric tensor. However,
-    this is inconsequential to the calculation of Raman spectra.
+    """Extract fractional positions and polarizability from a file.
 
     Parameters
     ----------
@@ -70,8 +67,10 @@ def load_positions_and_polarizability(
         raise ValueError(f"unsupported format: {file_format}") from exc
 
 
-def load_structural_symmetry(filepath: Path, file_format: str) -> StructuralSymmetry:
-    """Extract structural symmetry from a VASP OUTCAR file.
+def load_structural_symmetry(
+    filepath: str | Path, file_format: str
+) -> StructuralSymmetry:
+    """Extract structural symmetry from a file.
 
     Parameters
     ----------
@@ -88,6 +87,7 @@ def load_structural_symmetry(filepath: Path, file_format: str) -> StructuralSymm
         If the OUTCAR has an unexpected format.
     SymmetryException
         If OUTCAR was read but the symmetry search failed
+    ValueError
     """
     try:
         return _STRUCTURAL_SYMMETRY_LOADERS[file_format](filepath)
