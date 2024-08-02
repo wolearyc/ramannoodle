@@ -77,7 +77,7 @@ class StructuralSymmetry:
         """
         assert (displacement >= -0.5).all() and (displacement <= 0.5).all()
 
-        ref_positions = symmetry_utils.add_fractional_positions(
+        ref_positions = symmetry_utils.displace_fractional_positions(
             self._fractional_positions, displacement
         )
 

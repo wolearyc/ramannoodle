@@ -87,11 +87,7 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         for basis_vector, interpolation in zip(
             self._basis_vectors, self._interpolations
         ):
-            projected_cartesian_displacement = (
-                np.dot(basis_vector.flatten(), cartesian_displacement.flatten())
-                * basis_vector
-            )
-            amplitude = np.linalg.norm(projected_cartesian_displacement)
+            amplitude = np.dot(basis_vector.flatten(), cartesian_displacement.flatten())
             polarizability += interpolation(amplitude)
 
         return polarizability + self._equilibrium_polarizability

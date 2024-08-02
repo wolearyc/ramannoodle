@@ -30,7 +30,9 @@ def is_orthogonal_to_all(
 
     for index, vector_2 in enumerate(vectors):
         vector_2_copy = vector_2 / np.linalg.norm(vector_2)
-        if not np.isclose(np.dot(vector_1_copy, vector_2_copy) + 1, 1).all():
+        if not np.isclose(
+            np.dot(vector_1_copy.flatten(), vector_2_copy.flatten()) + 1, 1
+        ).all():
             return index
 
     return -1
@@ -106,18 +108,17 @@ def transform_fractional_positions(
     rotated = positions @ rotation
     rotated[rotated < 0.0] += 1
     rotated[rotated > 1.0] -= 1
-    return add_fractional_positions(rotated, translation)
+    return displace_fractional_positions(rotated, translation)
 
 
-def add_fractional_positions(
-    positions_1: NDArray[np.float64],
-    positions_2: NDArray[np.float64],
+def displace_fractional_positions(
+    positions: NDArray[np.float64],
+    displacement: NDArray[np.float64],
 ) -> NDArray[np.float64]:
     """Add fractional positions together under periodic boundary conditions."""
-    assert (0 <= positions_1).all() and (positions_1 <= 1.0).all()
-    assert (0 <= positions_2).all() and (positions_2 <= 1.0).all()
+    assert (0 <= positions).all() and (positions <= 1.0).all()
 
-    result = positions_1 + positions_2
+    result = positions + displacement
     result[result < 0.0] += 1
     result[result > 1.0] -= 1
     return result
