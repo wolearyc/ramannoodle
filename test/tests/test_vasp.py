@@ -6,8 +6,8 @@ from numpy.typing import NDArray
 
 import pytest
 
-from ramannoodle.io.vasp import (
-    load_phonons_from_outcar,
+from ramannoodle.io import (
+    load_phonons,
 )
 from ramannoodle.globals import ATOMIC_WEIGHTS
 
@@ -19,7 +19,7 @@ from .. import PHONONS_OUTCAR_NUM_ATOMS
     "known_first_displacement, known_last_displacement",
     [
         (
-            "test/data/TiO2_OUTCAR",
+            "test/data/TiO2/PHONON_OUTCAR",
             PHONONS_OUTCAR_NUM_ATOMS,
             np.array([811.691808, 811.691808, 811.691808, 811.691808]),
             np.array([-0.068172, 0.046409, 0.000000]) / np.sqrt(ATOMIC_WEIGHTS["Ti"]),
@@ -36,7 +36,7 @@ def test_load_phonons_from_outcar(
     known_last_displacement: NDArray[np.float64],
 ) -> None:
     """Test."""
-    phonons = load_phonons_from_outcar(outcar_path_fixture)
+    phonons = load_phonons(outcar_path_fixture, file_format="outcar")
 
     known_degrees_of_freedom = known_num_atoms * 3
     assert phonons.get_wavenumbers().shape == (known_degrees_of_freedom,)

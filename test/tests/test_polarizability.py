@@ -31,7 +31,7 @@ def test_find_duplicates(vectors: list[NDArray[np.float64]], known: bool) -> Non
     "outcar_path_fixture,displaced_atom_index, amplitudes, known_dof_added",
     [
         ("test/data/STO_RATTLED_OUTCAR", 0, np.array([-0.05, 0.05, 0.01, -0.01]), 1),
-        ("test/data/TiO2_OUTCAR", 0, np.array([0.01]), 72),
+        ("test/data/TiO2/PHONON_OUTCAR", 0, np.array([0.01]), 72),
     ],
     indirect=["outcar_path_fixture"],
 )
@@ -56,7 +56,7 @@ def test_add_dof(
     "outcar_path_fixture,displaced_atom_index, amplitudes",
     [
         ("test/data/STO_RATTLED_OUTCAR", 0, np.array([0.01, 0.01])),
-        ("test/data/TiO2_OUTCAR", 0, np.array([-0.01, 0.01])),
+        ("test/data/TiO2/PHONON_OUTCAR", 0, np.array([-0.01, 0.01])),
     ],
     indirect=["outcar_path_fixture"],
 )
@@ -79,7 +79,9 @@ def test_overspecified_dof(
 
 def test_get_polarizability() -> None:
     """Test."""
-    symmetry = load_structural_symmetry_from_outcar(Path("test/data/TiO2_OUTCAR"))
+    symmetry = load_structural_symmetry_from_outcar(
+        Path("test/data/TiO2/PHONON_OUTCAR")
+    )
     model = InterpolationPolarizabilityModel(symmetry, np.diag([2, 2, 2]))
     displacement = symmetry._fractional_positions * 0
     displacement[0][0] = 1
