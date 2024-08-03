@@ -4,21 +4,17 @@ from setuptools import setup
 
 setup(
     name='ramannoodle',
-    version='1.0',
-    description='Calculated Raman spectra from MD',
-    long_description='',
+    version='1.0.0-alpha',
+    description='Raman spectra from first principles calculations.',
+    long_description='Raman spectra from first principles calculations. Supports VASP.',
     author="Willis O'Leary",
-    author_email='wolearyc@mit.edu',
-    license='TODO',
+    author_email='wolearyc@gmail.com',
+    license='MIT',
     packages=['ramannoodle'],
     zip_safe=False,
     install_requires=[
         'numpy',
         'scipy',
-        'matplotlib',
-        'ase',
-        'phonopy',
         'spglib',
-        'tabulate',
     ],
 )

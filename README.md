@@ -10,7 +10,7 @@
 **ramannoodle** helps you calculate Raman spectra from first-principles calculations.
 
 > [!NOTE]
->  **This software is currently being completely overhauled.** Check out the `legacy` branch for the old (and functional!) version.
+>  **This API is currently in alpha.**
 
 ramannoodle is built from the ground up with the goals of being:
 
