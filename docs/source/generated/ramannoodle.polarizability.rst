@@ -8,5 +8,4 @@
 
    .. autosummary::
 
-      InterpolationPolarizabilityModel
       PolarizabilityModel

@@ -9,15 +9,15 @@ from ..symmetry import StructuralSymmetry
 from . import vasp
 
 # These dictionaries map between file_format's and appropriate loading functions.
-_PHONON_LOADERS = {"outcar": vasp.load_phonons_from_outcar}
+_PHONON_LOADERS = {"outcar": vasp.read_phonons_from_outcar}
 _POSITION_AND_POLARIZABILITY_LOADERS = {
-    "outcar": vasp.load_positions_and_polarizability_from_outcar
+    "outcar": vasp.read_positions_and_polarizability_from_outcar
 }
-_STRUCTURAL_SYMMETRY_LOADERS = {"outcar": vasp.load_structural_symmetry_from_outcar}
+_STRUCTURAL_SYMMETRY_LOADERS = {"outcar": vasp.read_structural_symmetry_from_outcar}
 
 
-def load_phonons(filepath: str | Path, file_format: str) -> Phonons:
-    """Extract phonons from a file.
+def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
+    """Read phonons from a file.
 
     Parameters
     ----------
@@ -39,11 +39,11 @@ def load_phonons(filepath: str | Path, file_format: str) -> Phonons:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
 
-def load_positions_and_polarizability(
+def read_positions_and_polarizability(
     filepath: str | Path,
     file_format: str,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Extract fractional positions and polarizability from a file.
+    """Read fractional positions and polarizability from a file.
 
     Parameters
     ----------
@@ -67,10 +67,10 @@ def load_positions_and_polarizability(
         raise ValueError(f"unsupported format: {file_format}") from exc
 
 
-def load_structural_symmetry(
+def read_structural_symmetry(
     filepath: str | Path, file_format: str
 ) -> StructuralSymmetry:
-    """Extract structural symmetry from a file.
+    """Read structural symmetry from a file.
 
     Parameters
     ----------

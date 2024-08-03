@@ -222,7 +222,7 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         polarizabilities = []
         filepaths = pathify_as_list(filepaths)
         for filepath in filepaths:
-            fractional_positions, polarizability = io.load_positions_and_polarizability(
+            fractional_positions, polarizability = io.read_positions_and_polarizability(
                 filepath, file_format
             )
             displacement = calculate_displacement(

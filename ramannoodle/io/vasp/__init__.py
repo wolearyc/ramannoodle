@@ -18,7 +18,7 @@ from ..io_utils import _skip_file_until_line_contains, pathify
 from ...exceptions import NoMatchingLineFoundException, InvalidFileException
 
 
-def load_phonons_from_outcar(filepath: str | Path) -> Phonons:
+def read_phonons_from_outcar(filepath: str | Path) -> Phonons:
     """Extract phonons from a VASP OUTCAR file.
 
     Parameters
@@ -76,7 +76,7 @@ def load_phonons_from_outcar(filepath: str | Path) -> Phonons:
         return Phonons(wavenumbers, cartesian_displacements)
 
 
-def load_positions_and_polarizability_from_outcar(
+def read_positions_and_polarizability_from_outcar(
     filepath: str | Path,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Extract fractional positions and polarizability from a VASP OUTCAR file.
@@ -107,7 +107,7 @@ def load_positions_and_polarizability_from_outcar(
         return positions, polarizability
 
 
-def load_structural_symmetry_from_outcar(
+def read_structural_symmetry_from_outcar(
     filepath: str | Path,
 ) -> StructuralSymmetry:
     """Extract structural symmetry from a VASP OUTCAR file.

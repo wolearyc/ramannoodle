@@ -9,7 +9,7 @@ import pytest
 
 from ramannoodle.polarizability.polarizability_utils import find_duplicates
 from ramannoodle.polarizability.interpolation import InterpolationPolarizabilityModel
-from ramannoodle.io.vasp import load_structural_symmetry_from_outcar
+from ramannoodle.io.vasp import read_structural_symmetry_from_outcar
 from ramannoodle.exceptions import InvalidDOFException
 
 # pylint: disable=protected-access
@@ -42,7 +42,7 @@ def test_add_dof(
     known_dof_added: int,
 ) -> None:
     """Test."""
-    symmetry = load_structural_symmetry_from_outcar(outcar_path_fixture)
+    symmetry = read_structural_symmetry_from_outcar(outcar_path_fixture)
     model = InterpolationPolarizabilityModel(symmetry, np.zeros((3, 3)))
     displacement = symmetry._fractional_positions * 0
     displacement[displaced_atom_index][0] = 1.0
@@ -66,7 +66,7 @@ def test_overspecified_dof(
     amplitudes: NDArray[np.float64],
 ) -> None:
     """Test."""
-    symmetry = load_structural_symmetry_from_outcar(outcar_path_fixture)
+    symmetry = read_structural_symmetry_from_outcar(outcar_path_fixture)
     model = InterpolationPolarizabilityModel(symmetry, np.zeros((3, 3)))
     displacement = symmetry._fractional_positions * 0
     displacement[displaced_atom_index][0] = 1.0
@@ -79,7 +79,7 @@ def test_overspecified_dof(
 
 def test_get_polarizability() -> None:
     """Test."""
-    symmetry = load_structural_symmetry_from_outcar(
+    symmetry = read_structural_symmetry_from_outcar(
         Path("test/data/TiO2/PHONON_OUTCAR")
     )
     model = InterpolationPolarizabilityModel(symmetry, np.diag([2, 2, 2]))

@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 import pytest
 
 from ramannoodle.io import (
-    load_phonons,
+    read_phonons,
 )
 from ramannoodle.globals import ATOMIC_WEIGHTS
 
@@ -28,7 +28,7 @@ from .. import PHONONS_OUTCAR_NUM_ATOMS
     ],
     indirect=["outcar_path_fixture"],
 )
-def test_load_phonons_from_outcar(
+def test_read_phonons_from_outcar(
     outcar_path_fixture: Path,
     known_num_atoms: int,
     known_wavenumbers: NDArray[np.float64],
@@ -36,7 +36,7 @@ def test_load_phonons_from_outcar(
     known_last_displacement: NDArray[np.float64],
 ) -> None:
     """Test."""
-    phonons = load_phonons(outcar_path_fixture, file_format="outcar")
+    phonons = read_phonons(outcar_path_fixture, file_format="outcar")
 
     known_degrees_of_freedom = known_num_atoms * 3
     assert phonons.get_wavenumbers().shape == (known_degrees_of_freedom,)

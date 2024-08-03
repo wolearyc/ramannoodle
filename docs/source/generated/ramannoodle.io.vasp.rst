@@ -8,6 +8,6 @@
 
    .. autosummary::
 
-      load_phonons_from_outcar
-      load_positions_and_polarizability_from_outcar
-      load_structural_symmetry_from_outcar
+      read_phonons_from_outcar
+      read_positions_and_polarizability_from_outcar
+      read_structural_symmetry_from_outcar

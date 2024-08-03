@@ -4,7 +4,7 @@ API
 .. autosummary::
    :toctree: generated
 
-   ramannoodle.io.vasp
+   ramannoodle.io
    ramannoodle.dynamics
    ramannoodle.polarizability
    ramannoodle.spectrum

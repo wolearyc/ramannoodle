@@ -12,7 +12,7 @@ from ramannoodle.symmetry.symmetry_utils import (
     is_orthogonal_to_all,
     get_fractional_positions_permutation_matrix,
 )
-from ramannoodle.io.vasp import load_structural_symmetry_from_outcar
+from ramannoodle.io.vasp import read_structural_symmetry_from_outcar
 
 
 @pytest.mark.parametrize(
@@ -67,7 +67,7 @@ def test_structural_symmetry(
 ) -> None:
     """Test."""
     # Equivalent atoms test
-    symmetry = load_structural_symmetry_from_outcar(outcar_path_fixture)
+    symmetry = read_structural_symmetry_from_outcar(outcar_path_fixture)
     assert symmetry.get_num_nonequivalent_atoms() == known_nonequivalent_atoms
 
     # Equivalent displacement test
