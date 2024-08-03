@@ -7,6 +7,9 @@ from collections.abc import Generator
 import pytest
 from pytest import FixtureRequest
 
+from ramannoodle.symmetry import StructuralSymmetry
+from ramannoodle import io
+
 
 @pytest.fixture
 def outcar_path_fixture(request: FixtureRequest) -> Path:
@@ -16,7 +19,7 @@ def outcar_path_fixture(request: FixtureRequest) -> Path:
 
 @pytest.fixture
 def outcar_file_fixture(
-    request: FixtureRequest,  # pylint: disable = redefined-outer-name
+    request: FixtureRequest,
 ) -> Generator[TextIO, None, None]:
     """Return an outcar file."""
     file = open(  # pylint: disable=consider-using-with
@@ -24,3 +27,9 @@ def outcar_file_fixture(
     )
     yield file
     file.close()
+
+
+@pytest.fixture
+def outcar_symmetry_fixture(request: FixtureRequest) -> StructuralSymmetry:
+    """Return a structural symmetry."""
+    return io.read_structural_symmetry(request.param, file_format="outcar")

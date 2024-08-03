@@ -87,7 +87,7 @@ class StructuralSymmetry:
             self._rotations, self._translations, self._permutation_matrices
         ):
 
-            # Transform, permute, then get displacements
+            # Transform, permute, then get candidate displacement
             candidate_positions = symmetry_utils.transform_fractional_positions(
                 ref_positions, rotation, translation
             )

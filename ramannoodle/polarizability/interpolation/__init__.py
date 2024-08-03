@@ -49,10 +49,6 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         2D array with shape (3,3) giving polarizability of system at equilibrium. This
         would usually correspond to the minimum energy structure.
 
-        Raman spectra calculated using this model do not explicitly depend on this
-        value. However, specifying the actual value is recommended in order to
-        compute the correct polarizability magnitudes.
-
     """
 
     def __init__(
@@ -80,14 +76,14 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         :
             2D array with shape (3,3)
         """
-        polarizability: NDArray[np.float64] = np.zeros((3, 3))
+        delta_polarizability: NDArray[np.float64] = np.zeros((3, 3))
         for basis_vector, interpolation in zip(
             self._cartesian_basis_vectors, self._interpolations
         ):
             amplitude = np.dot(basis_vector.flatten(), cartesian_displacement.flatten())
-            polarizability += interpolation(amplitude)
+            delta_polarizability += interpolation(amplitude)
 
-        return polarizability + self._equilibrium_polarizability
+        return delta_polarizability + self._equilibrium_polarizability
 
     def add_dof(  # pylint: disable=too-many-locals
         self,
@@ -149,8 +145,8 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         for dof_dictionary in displacements_and_transformations:
             child_displacement = dof_dictionary["displacements"][0]
 
-            interpolation_x = []
-            interpolation_y = []
+            interpolation_x = [0.0]
+            interpolation_y = [np.zeros((3, 3))]
             for collinear_displacement, transformation in zip(
                 dof_dictionary["displacements"], dof_dictionary["transformations"]
             ):
@@ -162,9 +158,12 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
                 for amplitude, polarizability in zip(amplitudes, polarizabilities):
                     interpolation_x.append(multiplier * amplitude)
                     rotation = transformation[0]
+                    delta_polarizability = (
+                        polarizability - self._equilibrium_polarizability
+                    )
+
                     interpolation_y.append(
-                        (rotation @ polarizability @ np.linalg.inv(rotation))
-                        - self._equilibrium_polarizability
+                        (np.linalg.inv(rotation) @ delta_polarizability @ rotation)
                     )
 
             # If duplicate amplitudes are generated, too much data has

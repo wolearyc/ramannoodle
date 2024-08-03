@@ -1,7 +1,5 @@
 """Testing for symmetry-related routines."""
 
-from pathlib import Path
-
 import numpy as np
 from numpy.typing import NDArray
 
@@ -12,7 +10,7 @@ from ramannoodle.symmetry.symmetry_utils import (
     is_orthogonal_to_all,
     get_fractional_positions_permutation_matrix,
 )
-from ramannoodle.io.vasp import read_structural_symmetry_from_outcar
+from ramannoodle.symmetry import StructuralSymmetry
 
 
 @pytest.mark.parametrize(
@@ -50,24 +48,24 @@ def test_check_orthogonal(
 
 
 @pytest.mark.parametrize(
-    "outcar_path_fixture, known_nonequivalent_atoms,"
+    "outcar_symmetry_fixture, known_nonequivalent_atoms,"
     "known_orthogonal_displacements, known_displacements_shape",
     [
         ("test/data/TiO2/PHONON_OUTCAR", 2, 36, [2] * 36),
         ("test/data/STO_RATTLED_OUTCAR", 135, 1, [1]),
         ("test/data/LLZO_OUTCAR", 9, 32, [1] * 32),
     ],
-    indirect=["outcar_path_fixture"],
+    indirect=["outcar_symmetry_fixture"],
 )
 def test_structural_symmetry(
-    outcar_path_fixture: Path,
+    outcar_symmetry_fixture: StructuralSymmetry,
     known_nonequivalent_atoms: int,
     known_orthogonal_displacements: int,
     known_displacements_shape: list[int],
 ) -> None:
     """Test."""
     # Equivalent atoms test
-    symmetry = read_structural_symmetry_from_outcar(outcar_path_fixture)
+    symmetry = outcar_symmetry_fixture
     assert symmetry.get_num_nonequivalent_atoms() == known_nonequivalent_atoms
 
     # Equivalent displacement test

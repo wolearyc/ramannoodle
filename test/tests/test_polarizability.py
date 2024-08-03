@@ -11,6 +11,8 @@ from ramannoodle.polarizability.polarizability_utils import find_duplicates
 from ramannoodle.polarizability.interpolation import InterpolationPolarizabilityModel
 from ramannoodle.io.vasp import read_structural_symmetry_from_outcar
 from ramannoodle.exceptions import InvalidDOFException
+from ramannoodle.symmetry import StructuralSymmetry
+from ramannoodle import io
 
 # pylint: disable=protected-access
 
@@ -77,20 +79,69 @@ def test_overspecified_dof(
     assert "should not be specified" in str(error.value)
 
 
-def test_get_polarizability() -> None:
+@pytest.mark.parametrize(
+    "outcar_symmetry_fixture,ref_eps,to_add,additional_references",
+    [
+        (
+            "test/data/TiO2/PHONON_OUTCAR",
+            "test/data/TiO2/ref_OUTCAR",
+            [
+                ["test/data/TiO2/Ti5_0.1z_OUTCAR", "test/data/TiO2/Ti5_0.2z_OUTCAR"],
+                ["test/data/TiO2/Ti5_0.1x_OUTCAR", "test/data/TiO2/Ti5_0.2x_OUTCAR"],
+                [
+                    "test/data/TiO2/O43_0.1z_OUTCAR",
+                    "test/data/TiO2/O43_0.2z_OUTCAR",
+                    "test/data/TiO2/O43_m0.1z_OUTCAR",
+                    "test/data/TiO2/O43_m0.2z_OUTCAR",
+                ],
+                [
+                    "test/data/TiO2/O43_0.1x_OUTCAR",
+                    "test/data/TiO2/O43_0.2x_OUTCAR",
+                ],
+                [
+                    "test/data/TiO2/O43_0.1y_OUTCAR",
+                    "test/data/TiO2/O43_0.2y_OUTCAR",
+                ],
+            ],
+            [
+                "test/data/TiO2/Ti5_m0.2z_OUTCAR",
+                "test/data/TiO2/Ti5_m0.1z_OUTCAR",
+                "test/data/TiO2/O43_m0.1x_OUTCAR",
+                "test/data/TiO2/O43_m0.2x_OUTCAR",
+                "test/data/TiO2/O43_m0.1y_OUTCAR",
+                "test/data/TiO2/O43_m0.2y_OUTCAR",
+            ],
+        ),
+    ],
+    indirect=["outcar_symmetry_fixture"],
+)
+def test_get_polarizability(
+    outcar_symmetry_fixture: StructuralSymmetry,
+    ref_eps: str,
+    to_add: list[str],
+    additional_references: list[str],
+) -> None:
     """Test."""
-    symmetry = read_structural_symmetry_from_outcar(
-        Path("test/data/TiO2/PHONON_OUTCAR")
+    symmetry = outcar_symmetry_fixture
+    _, polarizability = io.read_positions_and_polarizability(
+        ref_eps, file_format="outcar"
     )
-    model = InterpolationPolarizabilityModel(symmetry, np.diag([2, 2, 2]))
-    displacement = symmetry._fractional_positions * 0
-    displacement[0][0] = 1
-    amplitudes = np.array([0.01])
-    polarizabilities = np.array([[[2.0, 1.0, 0.0], [1.0, 2.0, 0.0], [0.0, 0.0, 2.0]]])
-    model.add_dof(displacement, amplitudes, polarizabilities, 1)
+    model = InterpolationPolarizabilityModel(symmetry, polarizability)
+    for outcar_path_list in to_add:
+        model.add_dof_from_files(
+            outcar_path_list, file_format="outcar", interpolation_order=2
+        )
 
-    test_cartesian_displacement = displacement * amplitudes[0]
-    assert np.isclose(
-        polarizabilities[0],
-        model.get_polarizability(test_cartesian_displacement),
-    ).all()
+    # Tests
+    total_outcar_paths = additional_references
+    for outcar_path in to_add:
+        total_outcar_paths += outcar_path
+    for outcar_path in total_outcar_paths:
+        positions, known_polarizability = io.read_positions_and_polarizability(
+            outcar_path, file_format="outcar"
+        )
+        cartesian_displacement = symmetry.get_cartesian_displacement(
+            positions - symmetry.get_fractional_positions()
+        )
+        model_polarizability = model.get_polarizability(cartesian_displacement)
+        assert np.isclose(model_polarizability, known_polarizability, atol=1e-4).all()
