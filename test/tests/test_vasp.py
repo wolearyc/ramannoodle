@@ -19,7 +19,7 @@ from .. import PHONONS_OUTCAR_NUM_ATOMS
     "known_first_displacement, known_last_displacement",
     [
         (
-            "test/data/TiO2/PHONON_OUTCAR",
+            "test/data/TiO2/phonons_OUTCAR",
             PHONONS_OUTCAR_NUM_ATOMS,
             np.array([811.691808, 811.691808, 811.691808, 811.691808]),
             np.array([-0.068172, 0.046409, 0.000000]) / np.sqrt(ATOMIC_WEIGHTS["Ti"]),

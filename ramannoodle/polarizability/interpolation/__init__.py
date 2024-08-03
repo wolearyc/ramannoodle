@@ -174,7 +174,7 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
                     f"due to symmetry, amplitude {duplicate} should not be specified"
                 )
 
-            if len(interpolation_x) <= interpolation_order:
+            if len(interpolation_x) - 1 <= interpolation_order:
                 raise InvalidDOFException(
                     f"insufficient amplitudes ({len(interpolation_x)}) available for"
                     f"{interpolation_order}-order interpolation"

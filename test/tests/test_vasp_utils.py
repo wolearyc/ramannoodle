@@ -43,7 +43,7 @@ def test_fail_get_atomic_symbol_from_potcar_line(potcar_line: str) -> None:
 
 @pytest.mark.parametrize(
     "outcar_file_fixture, known",
-    [("test/data/TiO2/PHONON_OUTCAR", ["Ti"] * 36 + ["O"] * 72)],
+    [("test/data/TiO2/phonons_OUTCAR", ["Ti"] * 36 + ["O"] * 72)],
     indirect=["outcar_file_fixture"],
 )
 def test_read_atomic_symbols_from_outcar(
@@ -137,7 +137,7 @@ def test_read_polarizability_from_outcar(
     "outcar_file_fixture, known_lattice",
     [
         (
-            "test/data/TiO2/PHONON_OUTCAR",
+            "test/data/TiO2/phonons_OUTCAR",
             np.array(
                 [
                     [11.3768434223, 0.0000000000, 0.0000000000],

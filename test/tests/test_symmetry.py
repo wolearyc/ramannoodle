@@ -51,7 +51,7 @@ def test_check_orthogonal(
     "outcar_symmetry_fixture, known_nonequivalent_atoms,"
     "known_orthogonal_displacements, known_displacements_shape",
     [
-        ("test/data/TiO2/PHONON_OUTCAR", 2, 36, [2] * 36),
+        ("test/data/TiO2/phonons_OUTCAR", 2, 36, [2] * 36),
         ("test/data/STO_RATTLED_OUTCAR", 135, 1, [1]),
         ("test/data/LLZO_OUTCAR", 9, 32, [1] * 32),
     ],
