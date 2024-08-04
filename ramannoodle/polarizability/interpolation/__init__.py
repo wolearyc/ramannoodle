@@ -18,7 +18,7 @@ from ...exceptions import InvalidDOFException
 
 from ... import io
 from ...io.io_utils import pathify_as_list
-from ...globals import verify_ndarray_shape
+from ...exceptions import verify_ndarray_shape
 
 
 def get_amplitude(

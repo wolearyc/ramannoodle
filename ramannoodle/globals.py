@@ -1,9 +1,5 @@
 """Defines some useful globals."""
 
-from typing import Sequence
-
-from numpy.typing import NDArray
-
 ATOMIC_WEIGHTS = {
     "H": 1.008,
     "He": 4.002602,
@@ -248,55 +244,3 @@ ATOMIC_NUMBERS = {
 
 RAMAN_TENSOR_CENTRAL_DIFFERENCE = 0.001
 BOLTZMANN_CONSTANT = 8.617333262e-5  # Units: eV/K
-
-
-def _shape_string(shape: Sequence[int | None]) -> str:
-    """Get a string representing a shape.
-
-    Maps None --> "_", indicating that this element can
-    be anything.
-    """
-    result = "("
-    for i in shape:
-        if i is None:
-            result += "_,"
-        else:
-            result += f"{i},"
-    return result[:-1] + ")"
-
-
-def verify_ndarray(name: str, array: NDArray) -> None:
-    """Verify type of NDArray .
-
-    We should avoid calling this function wherever possible (EATF)
-    """
-    try:
-        _ = array.shape
-    except AttributeError as exc:
-        wrong_type = type(array).__name__
-        raise TypeError(f"{name} should be an ndarray, not a {wrong_type}") from exc
-
-
-def verify_ndarray_shape(
-    name: str, array: NDArray, shape: Sequence[int | None]
-) -> None:
-    """Verify an NDArray's shape.
-
-    We should avoid calling this function whenever possible (EATF).
-
-    Parameters
-    ----------
-    shape
-        int elements will be checked, None elements will not be.
-    """
-    try:
-        if len(shape) != array.ndim:
-            shape_spec = f"{_shape_string(array.shape)} != {_shape_string(shape)}"
-            raise ValueError(f"{name} has wrong shape: {shape_spec}")
-        for d1, d2 in zip(array.shape, shape, strict=True):
-            if d2 is not None and d1 != d2:
-                shape_spec = f"{_shape_string(array.shape)} != {_shape_string(shape)}"
-                raise ValueError(f"{name} has wrong shape: {shape_spec}")
-    except AttributeError as exc:
-        wrong_type = type(array).__name__
-        raise TypeError(f"{name} should be an ndarray, not a {wrong_type}") from exc

@@ -5,8 +5,7 @@ from numpy.typing import NDArray
 import spglib
 
 from . import symmetry_utils
-from ..exceptions import SymmetryException
-from ..globals import verify_ndarray_shape
+from ..exceptions import SymmetryException, verify_ndarray_shape
 
 
 class StructuralSymmetry:

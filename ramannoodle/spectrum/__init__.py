@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from . import spectrum_utils
-from ..globals import verify_ndarray_shape
+from ..exceptions import verify_ndarray_shape
 
 
 class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods

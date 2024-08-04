@@ -3,7 +3,8 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from ..globals import BOLTZMANN_CONSTANT, verify_ndarray_shape, verify_ndarray
+from ..globals import BOLTZMANN_CONSTANT
+from ..exceptions import verify_ndarray_shape, verify_ndarray, get_type_error
 
 
 def get_bose_einstein_correction(
@@ -27,16 +28,16 @@ def get_bose_einstein_correction(
     ValueError
 
     """
-    if temperature <= 0:
-        raise ValueError(f"invalid temperature: {temperature}<=0")
     try:
-        energy = wavenumbers * 29979245800 * 4.1357e-15  # in eV
+        if temperature <= 0:
+            raise ValueError(f"invalid temperature: {temperature} <= 0")
+    except TypeError as exc:
+        raise get_type_error("temperature", temperature, "float") from exc
+    try:
+        energy = wavenumbers * 29979245800.0 * 4.1357e-15  # in eV
         return 1 / (1 - np.exp(-energy / (BOLTZMANN_CONSTANT * temperature)))
     except TypeError as exc:
-        wrong_type = type(wavenumbers).__name__
-        raise TypeError(
-            f"wavenumbers should be an ndarray, not a {wrong_type}"
-        ) from exc
+        raise get_type_error("wavenumbers", wavenumbers, "ndarray") from exc
 
 
 def get_laser_correction(
@@ -59,15 +60,15 @@ def get_laser_correction(
     ValueError
 
     """
-    if laser_wavenumber <= 0:
-        raise ValueError(f"invalid laser wavenumber: {laser_wavenumber}<=0")
+    try:
+        if laser_wavenumber <= 0:
+            raise ValueError(f"invalid laser_wavenumber: {laser_wavenumber} <= 0")
+    except TypeError as exc:
+        raise get_type_error("laser_wavenumber", laser_wavenumber, "float") from exc
     try:
         return ((wavenumbers - laser_wavenumber) / 10000) ** 4 / wavenumbers
     except TypeError as exc:
-        wrong_type = type(wavenumbers).__name__
-        raise TypeError(
-            f"wavenumbers should be an ndarray, not a {wrong_type}"
-        ) from exc
+        raise get_type_error("wavenumbers", wavenumbers, "ndarray") from exc
 
 
 def convolve_intensities(
@@ -106,11 +107,14 @@ def convolve_intensities(
         out_wavenumbers = np.linspace(
             np.min(wavenumbers) - 100, np.max(wavenumbers) + 100, 1000
         )
-    out_wavenumbers = np.array(out_wavenumbers)  # to shut the type checker up
+    verify_ndarray_shape("out_wavenumbers", out_wavenumbers, (None,))
     verify_ndarray_shape("wavenumbers", wavenumbers, (None,))
     verify_ndarray_shape("intensities", intensities, (len(wavenumbers),))
-    if width <= 0:
-        raise ValueError(f"invalid width: {width} <= 0")
+    try:
+        if width <= 0:
+            raise ValueError(f"invalid width: {width} <= 0")
+    except TypeError as exc:
+        raise get_type_error("width", width, "float") from exc
     verify_ndarray("out_wavenumbers", out_wavenumbers)
 
     convolved_intensities = out_wavenumbers * 0
@@ -133,6 +137,6 @@ def convolve_intensities(
                 / ((wavenumber - out_wavenumbers) ** 2 + (0.5 * width) ** 2)
             )
         else:
-            raise ValueError(f"unsupported convolution type: {type}")
+            raise ValueError(f"unsupported convolution type: {function}")
         convolved_intensities += factor * intensity
     return (out_wavenumbers, convolved_intensities)
