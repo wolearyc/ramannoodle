@@ -11,13 +11,13 @@ from ramannoodle.symmetry import StructuralSymmetry
 from ramannoodle import io
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def outcar_path_fixture(request: FixtureRequest) -> Path:
     """Return an outcar path."""
     return Path(request.param)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def outcar_file_fixture(
     request: FixtureRequest,
 ) -> Generator[TextIO, None, None]:
@@ -29,7 +29,15 @@ def outcar_file_fixture(
     file.close()
 
 
-@pytest.fixture
+# HACK: indirect fixtures are unable to be scoped, so manually cache.
+symmetry_cache = {}
+
+
+@pytest.fixture(scope="session")
 def outcar_symmetry_fixture(request: FixtureRequest) -> StructuralSymmetry:
     """Return a structural symmetry."""
-    return io.read_structural_symmetry(request.param, file_format="outcar")
+    if request.param not in symmetry_cache:
+        symmetry_cache[request.param] = io.read_structural_symmetry(
+            request.param, file_format="outcar"
+        )
+    return symmetry_cache[request.param]

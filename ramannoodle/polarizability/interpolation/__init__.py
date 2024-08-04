@@ -14,7 +14,7 @@ from ...symmetry.symmetry_utils import (
     is_collinear_with_all,
 )
 from ...symmetry import StructuralSymmetry
-from ...exceptions import InvalidDOFException
+from ...exceptions import InvalidDOFException, get_type_error
 
 from ... import io
 from ...io.io_utils import pathify_as_list
@@ -233,9 +233,8 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
                     ) from exc
                 raise exc
             except TypeError as exc:
-                raise TypeError(
-                    "interpolation_order should be int, not "
-                    f"{type(interpolation_order).__name__}"
+                raise get_type_error(
+                    "interpolation_order", interpolation_order, "int"
                 ) from exc
 
         self._cartesian_basis_vectors += basis_vectors_to_add
