@@ -21,5 +21,14 @@ def pathify(filepath: str | Path) -> Path:
 def pathify_as_list(filepaths: str | Path | list[str] | list[Path]) -> list[Path]:
     """Convert filepaths to list of Paths."""
     if isinstance(filepaths, list):
-        return [Path(item) for item in filepaths]
-    return [Path(filepaths)]
+        paths = []
+        for item in filepaths:
+            try:
+                paths.append(Path(item))
+            except TypeError as exc:
+                raise TypeError(f"{item} cannot be resolved as a filepath") from exc
+        return paths
+    try:
+        return [Path(filepaths)]
+    except TypeError as exc:
+        raise TypeError(f"{filepaths} cannot be resolved as a filepath") from exc

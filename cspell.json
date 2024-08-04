@@ -9,6 +9,7 @@
         "argmax",
         "AVOGADROS",
         "dtype",
+        "EATF",
         "fft",
         "fftfreq",
         "fftpack",

@@ -6,6 +6,7 @@ import spglib
 
 from . import symmetry_utils
 from ..exceptions import SymmetryException
+from ..globals import verify_ndarray_shape
 
 
 class StructuralSymmetry:
@@ -33,6 +34,10 @@ class StructuralSymmetry:
         symprec: float = 1e-5,
         angle_tolerance: float = -1.0,
     ) -> None:
+        verify_ndarray_shape("atomic_numbers", atomic_numbers, (None,))
+        verify_ndarray_shape("lattice", lattice, (3, 3))
+        verify_ndarray_shape("fractional_positions", fractional_positions, (None, 3))
+
         self._atomic_numbers = atomic_numbers
         self._lattice = lattice
         self._fractional_positions = fractional_positions

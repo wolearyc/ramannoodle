@@ -31,6 +31,7 @@ def read_phonons_from_outcar(filepath: str | Path) -> Phonons:
 
     Raises
     ------
+    FileNotFoundError
     InvalidFileException
         If the OUTCAR has an unexpected format.
     """
@@ -96,6 +97,7 @@ def read_positions_and_polarizability_from_outcar(
 
     Raises
     ------
+    FileNotFoundError
     InvalidFileException
         If the OUTCAR has an unexpected format.
     """
@@ -126,6 +128,7 @@ def read_structural_symmetry_from_outcar(
         If the OUTCAR has an unexpected format.
     SymmetryException
         If OUTCAR was read but the symmetry search failed
+    FileNotFoundError
     """
     lattice = np.array([])
     fractional_positions = np.array([])
