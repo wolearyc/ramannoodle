@@ -71,7 +71,7 @@ def test_spectrum(
     data_directory: str,
     dof_eps_outcars: list[str],
 ) -> None:
-    """Test a spectrum calculation."""
+    """Test a full spectrum calculation."""
     # Setup model
     symmetry = outcar_symmetry_fixture
     _, polarizability = io.read_positions_and_polarizability(
@@ -122,7 +122,7 @@ def test_convolve_intensities(
     known_gaussian_spectrum_path: str,
     known_lorentzian_spectrum_path: str,
 ) -> None:
-    """Test convolutions."""
+    """Test convolve_intensities (normal)."""
     with np.load(spectrum_path) as spectrum:
         wavenumbers = spectrum["wavenumbers"]
         intensities = spectrum["intensities"]
@@ -232,7 +232,7 @@ def test_convolve_intensities_exception(  # pylint: disable=too-many-arguments
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
-    """Test exceptions raised by convolve_intensities."""
+    """Test convolve_intensities (exception)."""
     with pytest.raises(exception_type) as error:
         convolve_intensities(wavenumbers, intensities, function, width, out_wavenumbers)
     assert in_reason in str(error.value)
@@ -261,13 +261,13 @@ def test_convolve_intensities_exception(  # pylint: disable=too-many-arguments
         ),
     ],
 )
-def test_get_bose_einstein_correction_exceptions(
+def test_get_bose_einstein_correction_exception(
     wavenumbers: NDArray[np.float64],
     temperature: float,
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
-    """Test exceptions raised by get_bose_einstein_correction."""
+    """Test get_bose_einstein_correction (exception)."""
     with pytest.raises(exception_type) as error:
         get_bose_einstein_correction(wavenumbers, temperature)
     assert in_reason in str(error.value)
@@ -302,7 +302,7 @@ def test_get_laser_correction(
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
-    """Test exceptions raised by get_laser_correction."""
+    """Test get_laser_correction (exception)."""
     with pytest.raises(exception_type) as error:
         get_laser_correction(wavenumbers, laser_wavenumber)
     assert in_reason in str(error.value)

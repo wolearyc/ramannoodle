@@ -35,7 +35,9 @@ class StructuralSymmetry:
     ) -> None:
         verify_ndarray_shape("atomic_numbers", atomic_numbers, (None,))
         verify_ndarray_shape("lattice", lattice, (3, 3))
-        verify_ndarray_shape("fractional_positions", fractional_positions, (None, 3))
+        verify_ndarray_shape(
+            "fractional_positions", fractional_positions, (len(atomic_numbers), 3)
+        )
 
         self._atomic_numbers = atomic_numbers
         self._lattice = lattice
@@ -79,7 +81,7 @@ class StructuralSymmetry:
             transform the parameter `displacements` into that degree of freedom.
 
         """
-        assert (displacement >= -0.5).all() and (displacement <= 0.5).all()
+        displacement = symmetry_utils.apply_pbc_displacement(displacement)
 
         ref_positions = symmetry_utils.displace_fractional_positions(
             self._fractional_positions, displacement
@@ -152,9 +154,9 @@ class StructuralSymmetry:
         fractional_displacement
             2D array with shape (N,3) where N is the number of atoms
         """
-        assert (fractional_displacement >= -0.5).all() and (
-            fractional_displacement <= 0.5
-        ).all()
+        fractional_displacement = symmetry_utils.apply_pbc_displacement(
+            fractional_displacement
+        )
 
         return fractional_displacement @ self._lattice
 

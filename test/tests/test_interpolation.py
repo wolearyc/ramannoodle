@@ -24,7 +24,7 @@ from ramannoodle.symmetry import StructuralSymmetry
     ],
 )
 def test_find_duplicates(vectors: NDArray[np.float64], known: bool) -> None:
-    """Test for find_duplicates (success)."""
+    """Test find_duplicates (normal)."""
     assert find_duplicates(vectors) == known
 
 
@@ -38,7 +38,7 @@ def test_find_duplicates(vectors: NDArray[np.float64], known: bool) -> None:
 def test_find_duplicates_exception(
     vectors: NDArray[np.float64], exception_type: Type[Exception], in_reason: str
 ) -> None:
-    """Test for find_duplicates (exception)."""
+    """Test find_duplicates (exception)."""
     with pytest.raises(exception_type) as error:
         find_duplicates(vectors)
     assert in_reason in str(error.value)
@@ -246,7 +246,7 @@ def test_add_dof_from_files_exception(
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
-    """Test exceptions in add_dof_from_files."""
+    """Test add_dof_from_files (exception)."""
     symmetry = outcar_symmetry_fixture
     model = InterpolationPolarizabilityModel(symmetry, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:

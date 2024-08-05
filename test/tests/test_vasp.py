@@ -35,7 +35,7 @@ def test_read_phonons_from_outcar(
     known_first_displacement: NDArray[np.float64],
     known_last_displacement: NDArray[np.float64],
 ) -> None:
-    """Test."""
+    """Test read_phonons for outcar (normal)."""
     phonons = read_phonons(outcar_path_fixture, file_format="outcar")
 
     known_degrees_of_freedom = known_num_atoms * 3
