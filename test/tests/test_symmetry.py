@@ -134,7 +134,7 @@ def test_is_non_collinear_with_all(
     [
         ("test/data/TiO2/phonons_OUTCAR", 2, 36, [2] * 36),
         ("test/data/STO_RATTLED_OUTCAR", 135, 1, [1]),
-        ("test/data/LLZO_OUTCAR", 9, 32, [1] * 32),
+        ("test/data/LLZO/LLZO_OUTCAR", 9, 32, [1] * 32),
     ],
     indirect=["outcar_symmetry_fixture"],
 )
