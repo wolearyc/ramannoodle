@@ -62,7 +62,7 @@ Future releases:
 * Minor bugfixes and documentation updates
 
 
-**v.0.1.1-alpha**
+**v.0.1.2-alpha**
 * Utilities to help set up calculations for `InterpolationPolarizabilityModel`, including displaced structure writing functionality.
 * Additional tests, ideally achieving >95 % coverage
 * Add read/write support for other VASP files, namely POSCAR and vasprun.xml
