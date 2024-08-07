@@ -47,3 +47,27 @@ Contributions in the form of bug reports, feature suggestions, and pull requests
 ## Citing
 
 coming soon...
+
+## Roadmap
+
+Current release: v.0.1.0-alpha
+
+Future releases:
+
+**v.0.1.1-alpha**
+
+* Major improvements to exception and error handling.
+* Draft documentation, including a basic tutorial
+* Symmetry generation is now much faster
+* Minor bugfixes and documentation updates
+
+
+**v.0.1.1-alpha**
+* Utilities to help set up calculations for `InterpolationPolarizabilityModel`, including displaced structure writing functionality.
+* Additional tests, ideally achieving >95 % coverage
+* Add read/write support for other VASP files, namely POSCAR and vasprun.xml
+* Minor bugfixes and documentation updates
+
+**v.0.2.0-alpha**
+* Add support for molecular dynamics
+* Add IO support for Phonopy
