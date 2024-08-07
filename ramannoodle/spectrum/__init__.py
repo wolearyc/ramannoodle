@@ -4,17 +4,34 @@ import numpy as np
 from numpy.typing import NDArray
 
 from . import spectrum_utils
+from ..exceptions import verify_ndarray_shape
 
 
 class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
-    """Phonon-based first-order Raman spectrum."""
+    """Phonon-based first-order Raman spectrum.
+
+    Parameters
+    ----------
+    phonon_wavenumbers
+        an ndarray with shape (M,N,3)
+    raman_tensors
+        an ndarray with shape (M,3,3)
+
+    Raises
+    ------
+    ValueError
+    TypeError
+    """
 
     def __init__(
         self,
         phonon_wavenumbers: NDArray[np.float64],
         raman_tensors: NDArray[np.float64],
     ) -> None:
-        """Construct."""
+        verify_ndarray_shape("phonon_wavenumbers", phonon_wavenumbers, (None,))
+        verify_ndarray_shape(
+            "raman_tensors", raman_tensors, (len(phonon_wavenumbers), 3, 3)
+        )
         self._phonon_wavenumbers = phonon_wavenumbers
         self._raman_tensors = raman_tensors
 
@@ -22,9 +39,9 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
         self,
         orientation: str | NDArray[np.float64] = "polycrystalline",
         laser_correction: bool = False,
-        laser_wavelength: float | None = None,
+        laser_wavelength: float = 522,
         bose_einstein_correction: bool = False,
-        temperature: float | None = None,
+        temperature: float = 300,
     ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
         """Calculate and return a raw Raman spectrum.
 
@@ -47,20 +64,15 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
             where M is the number of normal modes. The second element is intensities,
             a 1D array with length M.
 
+        Raises
+        ------
+        ValueError
+        NotImplementedError
+
         """
         if orientation != "polycrystalline":
             raise NotImplementedError(
                 "only polycrystalline spectra are supported for now"
-            )
-        if laser_correction and laser_wavelength is None:
-            raise ValueError(
-                "laser wavenumber correction requires argument 'laser_wavelength' "
-                "to be specified"
-            )
-        if bose_einstein_correction and temperature is None:
-            raise ValueError(
-                "bose-einstein correction requires argument 'temperature' "
-                "to be specified"
             )
 
         alpha_squared = (
@@ -85,13 +97,13 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
         intensities = 45.0 * alpha_squared + 7.0 * gamma_squared
 
         if laser_correction:
-            laser_wavenumber = 10000000 / laser_wavelength  # type: ignore
+            laser_wavenumber = 10000000 / laser_wavelength
             intensities *= spectrum_utils.get_laser_correction(
                 self._phonon_wavenumbers, laser_wavenumber
             )
         if bose_einstein_correction:
             intensities *= spectrum_utils.get_bose_einstein_correction(
-                self._phonon_wavenumbers, temperature  # type: ignore
+                self._phonon_wavenumbers, temperature
             )
 
         return self._phonon_wavenumbers, intensities

@@ -6,9 +6,13 @@
     "dictionaryDefinitions": [],
     "dictionaries": [],
     "words": [
+        "anharmonic",
         "argmax",
+        "automodule",
         "AVOGADROS",
         "dtype",
+        "EATF",
+        "equil",
         "fft",
         "fftfreq",
         "fftpack",
@@ -18,7 +22,10 @@
         "ifft",
         "interp",
         "linalg",
+        "linewidth",
         "LLZO",
+        "mathtext",
+        "matplotlib",
         "ndarray",
         "ndim",
         "newaxis",
@@ -41,7 +48,8 @@
         "VASP",
         "VRHFIN",
         "wavenumber",
-        "wavenumbers"
+        "wavenumbers",
+        "wspace"
     ],
     "ignoreWords": [],
     "import": []

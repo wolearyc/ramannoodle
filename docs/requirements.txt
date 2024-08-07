@@ -1,2 +1,5 @@
+furo
+ipython
+nbsphinx==0.9.4
 sphinx==7.4.7
 sphinx-rtd-theme==2.0.0

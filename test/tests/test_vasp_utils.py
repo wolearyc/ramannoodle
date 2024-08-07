@@ -1,6 +1,6 @@
 """Tests for VASP-related routines."""
 
-from typing import TextIO
+from typing import TextIO, Type
 import numpy as np
 from numpy.typing import NDArray
 
@@ -9,6 +9,7 @@ import pytest
 from ramannoodle.io.vasp import (
     vasp_utils,
 )
+from ramannoodle.exceptions import InvalidFileException
 
 from .. import EPS_OUTCAR_NUM_ATOMS
 
@@ -23,36 +24,87 @@ from .. import EPS_OUTCAR_NUM_ATOMS
     ],
 )
 def test_get_atomic_symbol_from_potcar_line(potcar_line: str, known: str) -> None:
-    """Test."""
+    """Test get_atomic_symbol_from_potcar_line (normal)."""
     result = vasp_utils._get_atomic_symbol_from_potcar_line(potcar_line)
     assert result == known
 
 
 @pytest.mark.parametrize(
-    "potcar_line",
+    "potcar_line,exception_type,in_reason",
     [
-        ("blah blah blah"),
-        ("blah"),
+        (
+            "bogus_line",
+            ValueError,
+            "could not parse atomic symbol: bogus_line",
+        ),
+        (
+            "PAW_PBE ZZ_sv 10Sep2004",
+            ValueError,
+            "unrecognized atomic symbol 'ZZ': PAW_PBE ZZ_sv 10Sep2004",
+        ),
+        (
+            [],
+            TypeError,
+            "line should have type str, not list",
+        ),
     ],
 )
-def test_fail_get_atomic_symbol_from_potcar_line(potcar_line: str) -> None:
-    """Test."""
-    with pytest.raises(ValueError):
+def test_get_atomic_symbol_from_potcar_line_exception(
+    potcar_line: str,
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test get_atomic_symbol_from_potcar_line (exception)."""
+    with pytest.raises(exception_type) as error:
         vasp_utils._get_atomic_symbol_from_potcar_line(potcar_line)
+    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
     "outcar_file_fixture, known",
-    [("test/data/TiO2/phonons_OUTCAR", ["Ti"] * 36 + ["O"] * 72)],
+    [
+        ("test/data/TiO2/phonons_OUTCAR", ["Ti"] * 36 + ["O"] * 72),
+        (
+            "test/data/LLZO/LLZO_OUTCAR",
+            ["Li"] * 56 + ["La"] * 24 + ["Zr"] * 16 + ["O"] * 96,
+        ),
+    ],
     indirect=["outcar_file_fixture"],
 )
 def test_read_atomic_symbols_from_outcar(
     outcar_file_fixture: TextIO,  # pylint: disable=redefined-outer-name
     known: list[str],
 ) -> None:
-    """Test."""
+    """Test _read_atomic_symbols_from_outcar (normal)."""
     atomic_symbols = vasp_utils._read_atomic_symbols_from_outcar(outcar_file_fixture)
     assert atomic_symbols == known
+
+
+@pytest.mark.parametrize(
+    "outcar_file_fixture, exception_type, in_reason",
+    [
+        (
+            "test/data/invalid_vasp/no_elements_OUTCAR",
+            InvalidFileException,
+            "POTCAR block not found",
+        ),
+        (
+            "test/data/invalid_vasp/no_ion_count_OUTCAR",
+            InvalidFileException,
+            "ion number block could not be parsed",
+        ),
+    ],
+    indirect=["outcar_file_fixture"],
+)
+def test_read_atomic_symbols_from_outcar_exception(
+    outcar_file_fixture: TextIO,  # pylint: disable=redefined-outer-name
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test _read_atomic_symbols_from_outcar (exception)."""
+    with pytest.raises(exception_type) as error:
+        vasp_utils._read_atomic_symbols_from_outcar(outcar_file_fixture)
+    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -71,7 +123,7 @@ def test_read_cartesian_positions_from_outcar(
     known_first_position: NDArray[np.float64],
     known_last_position: NDArray[np.float64],
 ) -> None:
-    """Test."""
+    """Test _read_cartesian_positions_from_outcar (normal)."""
     cartesian_positions = vasp_utils._read_cartesian_positions_from_outcar(
         outcar_file_fixture, EPS_OUTCAR_NUM_ATOMS
     )
@@ -79,6 +131,33 @@ def test_read_cartesian_positions_from_outcar(
     assert len(cartesian_positions) == EPS_OUTCAR_NUM_ATOMS
     assert np.isclose(cartesian_positions[0], known_first_position).all()
     assert np.isclose(cartesian_positions[-1], known_last_position).all()
+
+
+@pytest.mark.parametrize(
+    "outcar_file_fixture, exception_type, in_reason",
+    [
+        (
+            "test/data/invalid_vasp/empty_file",
+            InvalidFileException,
+            "cartesian positions not found",
+        ),
+        (
+            "test/data/invalid_vasp/invalid_positions_OUTCAR",
+            InvalidFileException,
+            "cartesian positions could not be parsed",
+        ),
+    ],
+    indirect=["outcar_file_fixture"],
+)
+def test_read_cartesian_positions_from_outcar_exception(
+    outcar_file_fixture: TextIO,  # pylint: disable=redefined-outer-name
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test _read_cartesian_positions_from_outcar (exception)."""
+    with pytest.raises(exception_type) as error:
+        vasp_utils._read_cartesian_positions_from_outcar(outcar_file_fixture, 20)
+    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -97,7 +176,7 @@ def test_read_fractional_positions_from_outcar(
     known_first_position: NDArray[np.float64],
     known_last_position: NDArray[np.float64],
 ) -> None:
-    """Test."""
+    """Test _read_fractional_positions_from_outcar (normal)."""
     fractional_positions = vasp_utils._read_fractional_positions_from_outcar(
         outcar_file_fixture, EPS_OUTCAR_NUM_ATOMS
     )
@@ -105,6 +184,33 @@ def test_read_fractional_positions_from_outcar(
     assert len(fractional_positions) == EPS_OUTCAR_NUM_ATOMS
     assert np.isclose(fractional_positions[0], known_first_position).all()
     assert np.isclose(fractional_positions[-1], known_last_position).all()
+
+
+@pytest.mark.parametrize(
+    "outcar_file_fixture, exception_type, in_reason",
+    [
+        (
+            "test/data/invalid_vasp/empty_file",
+            InvalidFileException,
+            "fractional positions not found",
+        ),
+        (
+            "test/data/invalid_vasp/invalid_positions_OUTCAR",
+            InvalidFileException,
+            "fractional positions could not be parsed",
+        ),
+    ],
+    indirect=["outcar_file_fixture"],
+)
+def test_read_fractional_positions_from_outcar_exception(
+    outcar_file_fixture: TextIO,  # pylint: disable=redefined-outer-name
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test _read_fractional_positions_from_outcar (exception)."""
+    with pytest.raises(exception_type) as error:
+        vasp_utils._read_fractional_positions_from_outcar(outcar_file_fixture, 20)
+    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -127,10 +233,37 @@ def test_read_polarizability_from_outcar(
     outcar_file_fixture: TextIO,  # pylint: disable=redefined-outer-name
     known_polarizability: NDArray[np.float64],
 ) -> None:
-    """Test."""
+    """Test _read_polarizability_from_outcar (normal)."""
     polarizability = vasp_utils._read_polarizability_from_outcar(outcar_file_fixture)
 
     assert np.isclose(polarizability, known_polarizability).all()
+
+
+@pytest.mark.parametrize(
+    "outcar_file_fixture, exception_type, in_reason",
+    [
+        (
+            "test/data/invalid_vasp/invalid_positions_OUTCAR",
+            InvalidFileException,
+            "polarizability not found",
+        ),
+        (
+            "test/data/invalid_vasp/invalid_eps_OUTCAR",
+            InvalidFileException,
+            "polarizability could not be parsed",
+        ),
+    ],
+    indirect=["outcar_file_fixture"],
+)
+def test_read_polarizability_from_outcar_exception(
+    outcar_file_fixture: TextIO,  # pylint: disable=redefined-outer-name
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test _read_polarizability_from_outcar (normal)."""
+    with pytest.raises(exception_type) as error:
+        vasp_utils._read_polarizability_from_outcar(outcar_file_fixture)
+    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -162,6 +295,33 @@ def test_read_polarizability_from_outcar(
 def test_read_lattice_from_outcar(
     outcar_file_fixture: TextIO, known_lattice: NDArray[np.float64]
 ) -> None:
-    """Test."""
+    """Test _read_lattice_from_outcar (normal)."""
     result = vasp_utils._read_lattice_from_outcar(outcar_file_fixture)
     assert np.isclose(result, known_lattice).all()
+
+
+@pytest.mark.parametrize(
+    "outcar_file_fixture, exception_type, in_reason",
+    [
+        (
+            "test/data/invalid_vasp/empty_file",
+            InvalidFileException,
+            "outcar does not have expected format",
+        ),
+        (
+            "test/data/invalid_vasp/invalid_positions_lattice_OUTCAR",
+            InvalidFileException,
+            "lattice could not be parsed:  ",
+        ),
+    ],
+    indirect=["outcar_file_fixture"],
+)
+def test_read_lattice_from_outcar_exception(
+    outcar_file_fixture: TextIO,
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test _read_lattice_from_outcar (exception)."""
+    with pytest.raises(exception_type) as error:
+        vasp_utils._read_lattice_from_outcar(outcar_file_fixture)
+    assert in_reason in str(error.value)

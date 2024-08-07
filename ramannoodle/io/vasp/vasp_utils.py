@@ -12,6 +12,7 @@ from numpy.typing import NDArray
 from ..io_utils import _skip_file_until_line_contains
 from ...exceptions import InvalidFileException, NoMatchingLineFoundException
 from ...globals import ATOMIC_NUMBERS
+from ...exceptions import get_type_error
 
 
 def _get_atomic_symbol_from_potcar_line(line: str) -> str:
@@ -24,12 +25,12 @@ def _get_atomic_symbol_from_potcar_line(line: str) -> str:
     """
     try:
         symbol = line.split()[-2].split("_")[0]
-    except TypeError as exc:
-        raise TypeError("line is not a str") from exc
+    except AttributeError as exc:
+        raise get_type_error("line", line, "str") from exc
     except IndexError as exc:
-        raise ValueError("line does not have the expected format") from exc
+        raise ValueError(f"could not parse atomic symbol: {line}") from exc
     if symbol not in ATOMIC_NUMBERS:
-        raise ValueError("line does not have the expected format")
+        raise ValueError(f"unrecognized atomic symbol '{symbol}': {line}")
     return symbol
 
 
@@ -56,8 +57,10 @@ def _read_atomic_symbols_from_outcar(outcar_file: TextIO) -> list[str]:
         line = outcar_file.readline()
         if "VRHFIN" in line:
             potcar_symbols.pop()  # We read one too many!
-    except (ValueError, NoMatchingLineFoundException) as exc:
-        raise InvalidFileException("POTCAR block could not be parsed") from exc
+    except NoMatchingLineFoundException as exc:
+        raise InvalidFileException("POTCAR block not found") from exc
+    except ValueError as exc:
+        raise InvalidFileException(f"POTCAR block could not be parsed: {line}") from exc
 
     # Then get atom numbers
     try:
@@ -69,7 +72,9 @@ def _read_atomic_symbols_from_outcar(outcar_file: TextIO) -> list[str]:
             atomic_symbols += [symbol] * number
         return atomic_symbols
     except (NoMatchingLineFoundException, IndexError) as exc:
-        raise InvalidFileException("ion number block could not be parsed") from exc
+        raise InvalidFileException(
+            f"ion number block could not be parsed: {line}"
+        ) from exc
 
 
 def _read_eigenvector_from_outcar(
@@ -91,7 +96,7 @@ def _read_eigenvector_from_outcar(
             eigenvector.append([float(item) for item in line.split()[3:]])
         return np.array(eigenvector)
     except (ValueError, IndexError) as exc:
-        raise InvalidFileException("eigenvector could not be parsed") from exc
+        raise InvalidFileException(f"eigenvector could not be parsed: {line}") from exc
 
 
 def _read_cartesian_positions_from_outcar(
@@ -116,7 +121,7 @@ def _read_cartesian_positions_from_outcar(
             cartesian_coordinates.append([float(item) for item in line.split()[0:3]])
         except (EOFError, ValueError, IndexError) as exc:
             raise InvalidFileException(
-                "cartesian coordinates could not be parsed"
+                f"cartesian positions could not be parsed: {line}"
             ) from exc
 
     return np.array(cartesian_coordinates)
@@ -145,7 +150,7 @@ def _read_fractional_positions_from_outcar(
             fractional_coordinates.append([float(item) for item in line.split()[0:3]])
         except (EOFError, ValueError, IndexError) as exc:
             raise InvalidFileException(
-                "fractional coordinates could not be parsed"
+                f"fractional positions could not be parsed: {line}"
             ) from exc
     return np.array(fractional_coordinates)
 
@@ -175,7 +180,9 @@ def _read_polarizability_from_outcar(outcar_file: TextIO) -> NDArray[np.float64]
             line = outcar_file.readline()
             polarizability.append([float(item) for item in line.split()[0:3]])
         except (EOFError, ValueError, IndexError) as exc:
-            raise InvalidFileException("polarizability could not be parsed") from exc
+            raise InvalidFileException(
+                f"polarizability could not be parsed: {line}"
+            ) from exc
     return np.array(polarizability)
 
 
@@ -222,6 +229,6 @@ def _read_lattice_from_outcar(outcar_file: TextIO) -> NDArray[np.float64]:
             line = outcar_file.readline()
             lattice.append(_get_lattice_vector_from_outcar_line(line))
         except (EOFError, ValueError) as exc:
-            raise InvalidFileException("lattice could not be parsed") from exc
+            raise InvalidFileException(f"lattice could not be parsed: {line}") from exc
 
     return np.array(lattice)

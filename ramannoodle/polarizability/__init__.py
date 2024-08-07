@@ -1,4 +1,4 @@
-"""Polarizability models."""
+"""Classes for various polarizability models."""
 
 from abc import ABC, abstractmethod
 

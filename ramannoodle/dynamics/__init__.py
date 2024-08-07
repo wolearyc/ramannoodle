@@ -35,6 +35,11 @@ class Phonons(Dynamics):
     cartesian_displacements
         3D array with shape (M,N,3) where N is the number of atoms
 
+    Raises
+    ------
+    ValueError
+    TypeError
+
     """
 
     def __init__(
@@ -67,7 +72,12 @@ class Phonons(Dynamics):
     def get_raman_spectrum(
         self, polarizability_model: PolarizabilityModel
     ) -> PhononRamanSpectrum:
-        """Calculate a Raman spectrum."""
+        """Calculate a raman spectrum using a polarizability model.
+
+        Raises
+        ------
+        ValueError
+        """
         raman_tensors = []
         for cartesian_displacement in self._cartesian_displacements:
             try:

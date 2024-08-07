@@ -1,12 +1,10 @@
-﻿ramannoodle.dynamics
-====================
+ramannoodle.dynamics package
+============================
+
+Module contents
+---------------
 
 .. automodule:: ramannoodle.dynamics
-
-
-   .. rubric:: Classes
-
-   .. autosummary::
-
-      Dynamics
-      Phonons
+   :members:
+   :undoc-members:
+   :show-inheritance:
