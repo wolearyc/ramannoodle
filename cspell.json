@@ -21,6 +21,7 @@
         "Grumet",
         "ifft",
         "interp",
+        "lexsort",
         "linalg",
         "linewidth",
         "LLZO",

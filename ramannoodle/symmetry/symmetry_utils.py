@@ -7,7 +7,6 @@ from numpy.typing import NDArray
 
 from ..exceptions import (
     get_type_error,
-    SymmetryException,
     verify_positions,
     get_shape_error,
 )
@@ -130,13 +129,21 @@ def compute_permutation_matrices(
     SymmetryException
 
     """
+    # Ensure no atom is at unit cell boundary by shifting
+    # center of mass
+    center_of_mass_shift = np.array([0.5, 0.5, 0.5]) - np.mean(
+        fractional_positions, axis=0
+    )
+
     permutation_matrices = []
     for rotation, translation in zip(rotations, translations):
         permutation_matrices.append(
             _get_fractional_positions_permutation_matrix(
-                fractional_positions,
+                displace_fractional_positions(
+                    fractional_positions, center_of_mass_shift
+                ),
                 transform_fractional_positions(
-                    fractional_positions, rotation, translation
+                    fractional_positions, rotation, translation + center_of_mass_shift
                 ),
             )
         )
@@ -144,30 +151,42 @@ def compute_permutation_matrices(
 
 
 def _get_fractional_positions_permutation_matrix(
-    reference: NDArray[np.float64], permuted: NDArray[np.float64]
+    reference_positions: NDArray[np.float64], permuted_positions: NDArray[np.float64]
 ) -> NDArray[np.float64]:
-    """Calculate a permutation matrix given permuted fractional positions.
+    """Calculate a permutation matrix between reference and permuted positions.
+
+    Parameters
+    ----------
+    reference_positions
+        A 2D array with shape (N,3)
+    permuted_positions
+        A 2D array with shape (N,3).
 
     Raises
     ------
     SymmetryException
     """
-    reference = apply_pbc(reference)
-    permuted = apply_pbc(permuted)
+    reference_positions = apply_pbc(reference_positions)
+    permuted_positions = apply_pbc(permuted_positions)
 
-    # This implementation is VERY slow.
-    permutation_matrix = np.zeros((len(reference), len(reference)))
+    argsort_reference = np.lexsort(
+        (
+            reference_positions[:, 2],
+            reference_positions[:, 1],
+            reference_positions[:, 0],
+        )
+    )
+    argsort_permuted = np.lexsort(
+        (permuted_positions[:, 2], permuted_positions[:, 1], permuted_positions[:, 0])
+    )
+    sorted_reference = reference_positions[argsort_reference]
+    sorted_permuted = permuted_positions[argsort_permuted]
+    if not np.isclose(sorted_reference, sorted_permuted).all():
+        raise ValueError("permuted is not a permutation of reference")
 
-    for ref_index, ref_position in enumerate(reference):
-        for permuted_index, permuted_position in enumerate(permuted):
-            difference = calculate_displacement(permuted_position, ref_position)
-            distance = np.sum(difference**2)
-            if distance < 0.001:
-                permutation_matrix[ref_index][permuted_index] = 1
-                break
+    permutation_matrix = np.zeros((len(reference_positions), len(reference_positions)))
+    permutation_matrix[tuple(argsort_reference), tuple(argsort_permuted)] = 1
 
-    if not np.isclose(np.sum(permutation_matrix, axis=1), 1).all():
-        raise SymmetryException("permutation matrix could not be found")
     return permutation_matrix
 
 
