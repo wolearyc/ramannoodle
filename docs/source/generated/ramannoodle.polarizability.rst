@@ -1,11 +1,29 @@
-﻿ramannoodle.polarizability
-==========================
+ramannoodle.polarizability package
+==================================
+
+Submodules
+----------
+
+ramannoodle.polarizability.interpolation module
+-----------------------------------------------
+
+.. automodule:: ramannoodle.polarizability.interpolation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ramannoodle.polarizability.polarizability\_utils module
+-------------------------------------------------------
+
+.. automodule:: ramannoodle.polarizability.polarizability_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: ramannoodle.polarizability
-
-
-   .. rubric:: Classes
-
-   .. autosummary::
-
-      PolarizabilityModel
+   :members:
+   :undoc-members:
+   :show-inheritance:

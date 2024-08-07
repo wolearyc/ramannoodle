@@ -23,6 +23,7 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
     ----------
     filepath
     file_format
+        supports: "outcar"
 
     Returns
     -------
@@ -49,6 +50,7 @@ def read_positions_and_polarizability(
     ----------
     filepath
     file_format
+        supports: "outcar"
 
     Returns
     -------
@@ -76,6 +78,7 @@ def read_structural_symmetry(
     ----------
     filepath
     file_format
+        supports: "outcar"
 
     Returns
     -------

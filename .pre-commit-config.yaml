@@ -40,6 +40,7 @@ repos:
           [
             pytest,
           ]
+        exclude: "conf.py"
 -   repo: https://github.com/pycqa/flake8
     rev: '7.1.0'  # pick a git hash / tag to point to
     hooks:

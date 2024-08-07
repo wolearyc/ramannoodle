@@ -1,13 +1,21 @@
-﻿ramannoodle.io.vasp
-===================
+ramannoodle.io.vasp package
+===========================
+
+Submodules
+----------
+
+ramannoodle.io.vasp.vasp\_utils module
+--------------------------------------
+
+.. automodule:: ramannoodle.io.vasp.vasp_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: ramannoodle.io.vasp
-
-
-   .. rubric:: Functions
-
-   .. autosummary::
-
-      read_phonons_from_outcar
-      read_positions_and_polarizability_from_outcar
-      read_structural_symmetry_from_outcar
+   :members:
+   :undoc-members:
+   :show-inheritance:

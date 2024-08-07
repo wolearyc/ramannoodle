@@ -14,12 +14,18 @@ def _skip_file_until_line_contains(file: TextIO, content: str) -> str:
 
 
 def pathify(filepath: str | Path) -> Path:
-    """Convert filepath to Path."""
+    """Convert filepath to Path.
+
+    :meta private:
+    """
     return Path(filepath)
 
 
 def pathify_as_list(filepaths: str | Path | list[str] | list[Path]) -> list[Path]:
-    """Convert filepaths to list of Paths."""
+    """Convert filepaths to list of Paths.
+
+    :meta private:
+    """
     if isinstance(filepaths, list):
         paths = []
         for item in filepaths:

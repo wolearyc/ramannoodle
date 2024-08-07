@@ -6,19 +6,19 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.interpolate import make_interp_spline, BSpline
 
-from .. import polarizability_utils
-from .. import PolarizabilityModel
-from ...symmetry.symmetry_utils import (
+from . import polarizability_utils
+from . import PolarizabilityModel
+from ..symmetry.symmetry_utils import (
     is_orthogonal_to_all,
     calculate_displacement,
     is_collinear_with_all,
 )
-from ...symmetry import StructuralSymmetry
-from ...exceptions import InvalidDOFException, get_type_error
+from ..symmetry import StructuralSymmetry
+from ..exceptions import InvalidDOFException, get_type_error
 
-from ... import io
-from ...io.io_utils import pathify_as_list
-from ...exceptions import verify_ndarray_shape
+from .. import io
+from ..io.io_utils import pathify_as_list
+from ..exceptions import verify_ndarray_shape
 
 
 def get_amplitude(
@@ -256,6 +256,7 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         ----------
         filepaths
         file_format
+            supports: "outcar"
 
         Raises
         ------

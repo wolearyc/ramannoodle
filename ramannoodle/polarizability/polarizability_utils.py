@@ -10,7 +10,10 @@ from ..exceptions import get_type_error
 
 
 def find_duplicates(vectors: Iterable[ArrayLike]) -> NDArray | None:
-    """Return duplicate vector in a list or None if no duplicates found."""
+    """Return duplicate vector in a list or None if no duplicates found.
+
+    :meta private:
+    """
     try:
         combinations = itertools.combinations(vectors, 2)
     except TypeError as exc:

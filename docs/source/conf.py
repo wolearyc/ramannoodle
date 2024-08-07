@@ -1,26 +1,33 @@
-"""Configuration file for the Sphinx documentation builder."""
+"""Sphinx conf.py."""
+# pylint: skip-file
+# flake-8: noqa
+# cspell: disable
+# Configuration file for the Sphinx documentation builder.
+#
+# For the full list of built-in configuration values, see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+
+# -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
 import sys
 import os
 
-# -- Project information
-
 project = 'ramannoodle'
-copyright = "2023-present Willis O'Leary"
+copyright = "2024, Willis O'Leary"
 author = "Willis O'Leary"
+release = 'v.0.1.1-alpha'
 
-release = 'dev'
-version = 'dev'
-
-# -- General configuration
+# -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.duration',
-    'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
-    'sphinx_rtd_theme',
+    'nbsphinx',
+    'IPython.sphinxext.ipython_console_highlighting'
 ]
 autodoc_typehints = 'description'
 
@@ -33,15 +40,14 @@ intersphinx_mapping = {
 intersphinx_disabled_domains = ['std']
 
 templates_path = ['_templates']
+exclude_patterns = []
 
-# -- Options for HTML output
+language = 'Python'
 
-html_theme = 'sphinx_rtd_theme'
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# -- Options for EPUB output
-epub_show_urls = 'footnote'
+html_theme = 'furo'
+html_static_path = ['_static']
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../../'))

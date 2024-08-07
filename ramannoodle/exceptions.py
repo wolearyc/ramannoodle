@@ -51,7 +51,10 @@ def _shape_string(shape: Sequence[int | None]) -> str:
 
 
 def get_type_error(name: str, value: Any, correct_type: str) -> TypeError:
-    """Return TypeError for an ndarray argument."""
+    """Return TypeError for an ndarray argument.
+
+    :meta private:
+    """
     wrong_type = type(value).__name__
     return TypeError(f"{name} should have type {correct_type}, not {wrong_type}")
 
@@ -59,7 +62,10 @@ def get_type_error(name: str, value: Any, correct_type: str) -> TypeError:
 def get_shape_error(
     name: str, array: NDArray, desired_shape: Sequence[int | None]
 ) -> ValueError:
-    """Return ValueError for an ndarray with the wrong shape."""
+    """Return ValueError for an ndarray with the wrong shape.
+
+    :meta private:
+    """
     shape_spec = f"{_shape_string(array.shape)} != {_shape_string(desired_shape)}"
     return ValueError(f"{name} has wrong shape: {shape_spec}")
 
@@ -67,7 +73,7 @@ def get_shape_error(
 def verify_ndarray(name: str, array: NDArray) -> None:
     """Verify type of NDArray .
 
-    We should avoid calling this function wherever possible (EATF)
+    :meta private: We should avoid calling this function wherever possible (EATF)
     """
     try:
         _ = array.shape
@@ -80,7 +86,7 @@ def verify_ndarray_shape(
 ) -> None:
     """Verify an NDArray's shape.
 
-    We should avoid calling this function whenever possible (EATF).
+    :meta private: We should avoid calling this function whenever possible (EATF).
 
     Parameters
     ----------
@@ -98,7 +104,11 @@ def verify_ndarray_shape(
 
 
 def verify_positions(name: str, array: NDArray) -> None:
-    """Verify fractional positions according to dimensions and boundary conditions."""
+    """Verify fractional positions according to dimensions and boundary conditions.
+
+    :meta private:
+
+    """
     verify_ndarray_shape(name, array, (None, 3))
     if (0 > array).any() or (array > 1.0).any():
         raise ValueError(f"{name} has coordinates that are not between 0 and 1")

@@ -1,13 +1,29 @@
-﻿ramannoodle.io
-==============
+ramannoodle.io package
+======================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ramannoodle.io.vasp
+
+Submodules
+----------
+
+ramannoodle.io.io\_utils module
+-------------------------------
+
+.. automodule:: ramannoodle.io.io_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: ramannoodle.io
-
-
-   .. rubric:: Functions
-
-   .. autosummary::
-
-      read_phonons
-      read_positions_and_polarizability
-      read_structural_symmetry
+   :members:
+   :undoc-members:
+   :show-inheritance:

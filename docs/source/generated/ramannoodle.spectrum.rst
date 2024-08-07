@@ -1,11 +1,21 @@
-﻿ramannoodle.spectrum
-====================
+ramannoodle.spectrum package
+============================
+
+Submodules
+----------
+
+ramannoodle.spectrum.spectrum\_utils module
+-------------------------------------------
+
+.. automodule:: ramannoodle.spectrum.spectrum_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
 
 .. automodule:: ramannoodle.spectrum
-
-
-   .. rubric:: Classes
-
-   .. autosummary::
-
-      PhononRamanSpectrum
+   :members:
+   :undoc-members:
+   :show-inheritance:
