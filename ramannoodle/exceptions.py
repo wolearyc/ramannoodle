@@ -59,14 +59,12 @@ def get_type_error(name: str, value: Any, correct_type: str) -> TypeError:
     return TypeError(f"{name} should have type {correct_type}, not {wrong_type}")
 
 
-def get_shape_error(
-    name: str, array: NDArray, desired_shape: Sequence[int | None]
-) -> ValueError:
+def get_shape_error(name: str, array: NDArray, desired_shape: str) -> ValueError:
     """Return ValueError for an ndarray with the wrong shape.
 
     :meta private:
     """
-    shape_spec = f"{_shape_string(array.shape)} != {_shape_string(desired_shape)}"
+    shape_spec = f"{_shape_string(array.shape)} != {desired_shape}"
     return ValueError(f"{name} has wrong shape: {shape_spec}")
 
 
@@ -95,10 +93,10 @@ def verify_ndarray_shape(
     """
     try:
         if len(shape) != array.ndim:
-            raise get_shape_error(name, array, shape)
+            raise get_shape_error(name, array, _shape_string(shape))
         for d1, d2 in zip(array.shape, shape, strict=True):
             if d2 is not None and d1 != d2:
-                raise get_shape_error(name, array, shape)
+                raise get_shape_error(name, array, _shape_string(shape))
     except AttributeError as exc:
         raise get_type_error(name, array, "ndarray") from exc
 

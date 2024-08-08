@@ -190,7 +190,7 @@ def transform_fractional_positions(
     except TypeError as exc:
         raise get_type_error("rotation", rotation, "ndarray") from exc
     except ValueError as exc:
-        raise get_shape_error("rotation", rotation, (3, 3)) from exc
+        raise get_shape_error("rotation", rotation, "(3,3)") from exc
     rotated = apply_pbc(rotated)
     return displace_fractional_positions(rotated, translation)
 
