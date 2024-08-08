@@ -6,10 +6,14 @@
 ramannoodle documentation
 =========================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+**ramannoodle** is a Python API for calculating Raman spectra from first principles calculations in an efficient, flexible, and transparent way.
 
+.. note::
+
+   ramannoodle is currently in alpha.
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
@@ -18,4 +22,4 @@ documentation for details.
    introduction
    notebooks/Basic tutorial
    generated/api
-   generated/modules
+   dev guide
