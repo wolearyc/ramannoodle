@@ -22,11 +22,6 @@ def are_collinear(vector_1: NDArray[np.float64], vector_2: NDArray[np.float64]) 
     vector_2
         ndarray with shape (M,)
 
-    Raises
-    ------
-    TypeError
-    ValueError
-
     """
     try:
         vector_1 = vector_1 / float(np.linalg.norm(vector_1))
@@ -55,10 +50,6 @@ def is_orthogonal_to_all(
     -------
     int
         first index of non-orthogonal vector, otherwise -1
-
-    Raises
-    ------
-    TypeError
 
     """
     # This implementation could be made more efficient.
@@ -122,13 +113,7 @@ def compute_permutation_matrices(
     translations: NDArray[np.float64],
     fractional_positions: NDArray[np.float64],
 ) -> NDArray[np.float64]:
-    """Expresses a series of rotation/translations as permutation matrices.
-
-    Raises
-    ------
-    SymmetryException
-
-    """
+    """Expresses a series of rotation/translations as permutation matrices."""
     # Ensure no atom is at unit cell boundary by shifting
     # center of mass
     center_of_mass_shift = np.array([0.5, 0.5, 0.5]) - np.mean(
@@ -155,6 +140,11 @@ def _get_fractional_positions_permutation_matrix(
 ) -> NDArray[np.float64]:
     """Calculate a permutation matrix between reference and permuted positions.
 
+    .. warning::
+        Arguments must be true permutations of each other. This function does not
+        correct for periodic boundary conditions, so it needs to be supplied a
+        structure without atoms at the unit cell boundaries.
+
     Parameters
     ----------
     reference_positions
@@ -162,9 +152,6 @@ def _get_fractional_positions_permutation_matrix(
     permuted_positions
         A 2D array with shape (N,3).
 
-    Raises
-    ------
-    SymmetryException
     """
     reference_positions = apply_pbc(reference_positions)
     permuted_positions = apply_pbc(permuted_positions)
@@ -195,13 +182,7 @@ def transform_fractional_positions(
     rotation: NDArray[np.float64],
     translation: NDArray[np.float64],
 ) -> NDArray[np.float64]:
-    """Transform fractional coordinates under periodic boundary conditions.
-
-    Raises
-    ------
-    TypeError
-    ValueError
-    """
+    """Transform fractional coordinates under periodic boundary conditions."""
     verify_positions("positions", positions)
     positions = apply_pbc(positions)
     try:
@@ -229,10 +210,9 @@ def calculate_displacement(
     positions_1: NDArray[np.float64],
     positions_2: NDArray[np.float64],
 ) -> NDArray[np.float64]:
-    """Subtracts fractional positions under periodic boundary conditions.
+    """Calculate displacement between two fractional positions.
 
-    Returns a displacement.
-
+    Respects periodic boundary conditions.
     """
     positions_1 = apply_pbc(positions_1)
     positions_2 = apply_pbc(positions_2)

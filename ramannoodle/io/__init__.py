@@ -32,7 +32,9 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
     Raises
     ------
     InvalidFileException
-    ValueError
+        File has unexpected format.
+    FileNotFoundError
+        File could not be found.
     """
     try:
         return _PHONON_LOADERS[file_format](filepath)
@@ -61,7 +63,9 @@ def read_positions_and_polarizability(
     Raises
     ------
     InvalidFileException
-    ValueError
+        File has unexpected format.
+    FileNotFoundError
+        File could not be found.
     """
     try:
         return _POSITION_AND_POLARIZABILITY_LOADERS[file_format](filepath)
@@ -87,10 +91,9 @@ def read_structural_symmetry(
     Raises
     ------
     InvalidFileException
-        If the OUTCAR has an unexpected format.
-    SymmetryException
-        If OUTCAR was read but the symmetry search failed
-    ValueError
+        File has unexpected format.
+    FileNotFoundError
+        File could not be found.
     """
     try:
         return _STRUCTURAL_SYMMETRY_LOADERS[file_format](filepath)

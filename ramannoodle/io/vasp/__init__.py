@@ -32,8 +32,9 @@ def read_phonons_from_outcar(filepath: str | Path) -> Phonons:
     Raises
     ------
     FileNotFoundError
+        File not found.
     InvalidFileException
-        If the OUTCAR has an unexpected format.
+        File has an unexpected format.
     """
     wavenumbers = []
     eigenvectors = []

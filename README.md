@@ -27,7 +27,7 @@ ramannoodle is built from the ground up with the goals of being:
 
     ramannoodle is designed according to the philosophy that the user should understand *exactly* what is being calculated, without hidden corrections or assumptions.
 
-## Supported DFT Software
+**ramannoodle interfaces with...**
 
 * VASP (currently under development)
 * phonopy (planned)
@@ -40,6 +40,10 @@ ramannoodle can be installed via pip:
 pip install ramannoodle
 `
 
+## Documentation
+
+[https://ramannoodle.readthedocs.io/](https://ramannoodle.readthedocs.io/)
+
 ## Contributing
 
 Contributions in the form of bug reports, feature suggestions, and pull requests are always welcome!
@@ -50,16 +54,9 @@ coming soon...
 
 ## Roadmap
 
-Current release: v.0.1.0-alpha
+Current release: v0.1.1-alpha
 
 Future releases:
-
-**v.0.1.1-alpha**
-
-* Major improvements to exception and error handling.
-* Draft documentation, including a basic tutorial
-* Symmetry generation is now much faster
-* Minor bugfixes and documentation updates
 
 
 **v.0.1.2-alpha**

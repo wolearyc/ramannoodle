@@ -31,7 +31,7 @@ def get_amplitude(
     )
 
 
-class InterpolationPolarizabilityModel(PolarizabilityModel):
+class InterpolationModel(PolarizabilityModel):
     """Polarizability model based on interpolation around degrees of freedom.
 
     One is free to specify the interpolation order as well as the precise
@@ -49,11 +49,6 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
     equilibrium_polarizability
         2D array with shape (3,3) giving polarizability of system at equilibrium. This
         would usually correspond to the minimum energy structure.
-
-    Raises
-    ------
-    ValueError
-    TypeError
 
     """
 
@@ -85,10 +80,6 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         :
             2D array with shape (3,3)
 
-        Raises
-        ------
-        TypeError
-        ValueError
         """
         delta_polarizability: NDArray[np.float64] = np.zeros((3, 3))
         for basis_vector, interpolation in zip(
@@ -128,21 +119,22 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
         ----------
         displacement
             2D array with shape (N,3) where N is the number of atoms. Units
-            are arbitrary.
+            are arbitrary. Must be orthogonal to all previously added DOFs.
         amplitudes
-            1D array of length L containing amplitudes in angstroms.
+            1D array of length L containing amplitudes in angstroms. Duplicate
+            amplitudes are not allowed, including symmetrically equivalent
+            amplitudes.
         polarizabilities
             3D array with shape (L,3,3) containing known polarizabilities for
             each amplitude.
         interpolation_order
-            must be less than the number of total number of amplitudes after
+            Must be less than the number of total number of amplitudes after
             symmetry considerations.
 
         Raises
         ------
         InvalidDOFException
-        ValueError
-        TypeError
+            Provided degree of freedom was invalid.
 
         """
         try:
@@ -260,10 +252,10 @@ class InterpolationPolarizabilityModel(PolarizabilityModel):
 
         Raises
         ------
-        TypeError
         FileNotFoundError
+            File could not be found.
         InvalidDOFException
-        ValueError
+            DOF assembled from supplied files was invalid (see get_dof)
 
         """
         # Extract displacements, polarizabilities, and basis vector

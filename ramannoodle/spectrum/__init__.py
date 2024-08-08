@@ -17,10 +17,6 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
     raman_tensors
         an ndarray with shape (M,3,3)
 
-    Raises
-    ------
-    ValueError
-    TypeError
     """
 
     def __init__(
@@ -66,8 +62,8 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
 
         Raises
         ------
-        ValueError
         NotImplementedError
+            Raised when any orientation besides "polycrystalline" is supplied.
 
         """
         if orientation != "polycrystalline":

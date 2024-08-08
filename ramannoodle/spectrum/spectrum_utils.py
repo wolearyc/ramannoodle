@@ -55,10 +55,6 @@ def get_laser_correction(
     :
         Correction factor for each wavenumber.
 
-    Raises
-    ------
-    ValueError
-
     """
     try:
         if laser_wavenumber <= 0:
@@ -98,10 +94,6 @@ def convolve_intensities(
     :
         2-tuple containing wavenumbers and corresponding intensities
 
-    Raises
-    ------
-    ValueError
-    TypeError
     """
     if out_wavenumbers is None:
         out_wavenumbers = np.linspace(

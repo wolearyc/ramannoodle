@@ -23,6 +23,12 @@ class StructuralSymmetry:
         Symmetry precision parameter for spglib.
     angle_tolerance
         Symmetry precision parameter for spglib.
+
+    Raises
+    ------
+    SymmetryException
+        Symmetry could not be determined for supplied structure.
+
     """
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -48,7 +54,7 @@ class StructuralSymmetry:
             spglib.get_symmetry(cell, symprec=symprec, angle_tolerance=angle_tolerance)
         )
         if self._symmetry_dict is None:
-            raise SymmetryException("symmetry search failed")
+            raise SymmetryException("Symmetry search failed. Check structure.")
 
         self._rotations = self._symmetry_dict["rotations"]
         self._translations = self._symmetry_dict["translations"]

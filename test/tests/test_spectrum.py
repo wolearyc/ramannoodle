@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 
 import pytest
 
-from ramannoodle.polarizability.interpolation import InterpolationPolarizabilityModel
+from ramannoodle.polarizability.interpolation import InterpolationModel
 from ramannoodle.symmetry import StructuralSymmetry
 from ramannoodle import io
 from ramannoodle.spectrum.spectrum_utils import (
@@ -26,9 +26,7 @@ def _get_all_eps_outcars(directory: str) -> list[str]:
     return [str(item) for item in path.glob("*eps_OUTCAR")]
 
 
-def _validate_polarizabilities(
-    model: InterpolationPolarizabilityModel, data_directory: str
-) -> None:
+def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -> None:
     """Check that a model accurately predicts polarizabilities.
 
     This function will use all *eps_OUTCAR's in a directory as references.
@@ -77,7 +75,7 @@ def test_spectrum(
     _, polarizability = io.read_positions_and_polarizability(
         f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
     )
-    model = InterpolationPolarizabilityModel(symmetry, polarizability)
+    model = InterpolationModel(symmetry, polarizability)
     for outcar_names in dof_eps_outcars:
         model.add_dof_from_files(
             [f"{data_directory}/{name}" for name in outcar_names],

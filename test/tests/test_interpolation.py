@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 import pytest
 
 from ramannoodle.polarizability.polarizability_utils import find_duplicates
-from ramannoodle.polarizability.interpolation import InterpolationPolarizabilityModel
+from ramannoodle.polarizability.interpolation import InterpolationModel
 from ramannoodle.exceptions import InvalidDOFException
 from ramannoodle.symmetry import StructuralSymmetry
 
@@ -60,7 +60,7 @@ def test_add_dof(
 ) -> None:
     """Test add_dof (normal)."""
     symmetry = outcar_symmetry_fixture
-    model = InterpolationPolarizabilityModel(symmetry, np.zeros((3, 3)))
+    model = InterpolationModel(symmetry, np.zeros((3, 3)))
     displacement = symmetry._fractional_positions * 0
     displacement[displaced_atom_index][0] = 1.0
     polarizabilities = np.zeros((len(amplitudes), 3, 3))
@@ -177,7 +177,7 @@ def test_add_dof_exception(
 ) -> None:
     """Test add_dof (exception)."""
     symmetry = outcar_symmetry_fixture
-    model = InterpolationPolarizabilityModel(symmetry, np.zeros((3, 3)))
+    model = InterpolationModel(symmetry, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
         for atom_indexes in displaced_atom_indexes:
             for atom_index in atom_indexes:
@@ -248,7 +248,7 @@ def test_add_dof_from_files_exception(
 ) -> None:
     """Test add_dof_from_files (exception)."""
     symmetry = outcar_symmetry_fixture
-    model = InterpolationPolarizabilityModel(symmetry, np.zeros((3, 3)))
+    model = InterpolationModel(symmetry, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
         model.add_dof_from_files(outcar_files, "outcar", interpolation_order)
     assert in_reason in str(error.value)
