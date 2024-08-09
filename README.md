@@ -60,7 +60,7 @@ Future releases:
 
 
 **v.0.1.2-alpha**
-* Utilities to help set up calculations for `InterpolationPolarizabilityModel`, including displaced structure writing functionality.
+* Utilities to help set up calculations for `InterpolationModel`, including displaced structure writing functionality.
 * Additional tests, ideally achieving >95 % coverage
 * Add read/write support for other VASP files, namely POSCAR and vasprun.xml
 * Minor bugfixes and documentation updates

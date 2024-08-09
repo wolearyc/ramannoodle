@@ -12,7 +12,7 @@ With the atomic dynamics in hand, answering question (2), is, at least conceptua
 
 Unfortunately, the need to calculate so many polarizabilities can make Raman spectrum calculations rather computationally costly. These costs can quickly balloon, especially when treating large and/or complex systems. These costs ultimately make Raman spectra calculations impractical for many of the most interesting and technologically relevant materials.
 
-**ramannoodle** was designed to reduce the cost to calculate Raman spectra from first principles. It does this by providing an efficient :class:`~ramannoodle.polarizability.interpolation.InterpolationPolarizabilityModel`, which leverages structural symmetries to greatly reduce the number of required first principles polarizability calculations. The plan is to extend this API with additional models and capabilities that will make computing Raman spectra a breeze and, consequently, make Raman spectroscopy a more powerful characterization tool.
+**ramannoodle** was designed to reduce the cost to calculate Raman spectra from first principles. It does this by providing an efficient :class:`~ramannoodle.polarizability.interpolation.InterpolationModel`, which leverages structural symmetries to greatly reduce the number of required first principles polarizability calculations. The plan is to extend this API with additional models and capabilities that will make computing Raman spectra a breeze and, consequently, make Raman spectroscopy a more powerful characterization tool.
 
 Installation
 ------------
