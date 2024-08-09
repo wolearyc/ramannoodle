@@ -100,75 +100,47 @@ class InterpolationModel(PolarizabilityModel):
 
         return delta_polarizability + self._equilibrium_polarizability
 
-    def add_dof(  # pylint: disable=too-many-locals
+    def _get_dof(  # pylint: disable=too-many-locals
         self,
-        displacement: NDArray[np.float64],
+        parent_displacement: NDArray[np.float64],
         amplitudes: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
-        interpolation_order: int,
-    ) -> None:
-        """Add a degree of freedom (DOF).
-
-        Specification of a DOF requires a displacement (how the atoms move) alongside
-        displacement amplitudes and corresponding known polarizabilities for each
-        amplitude. Alongside the DOF specified, all DOFs related by the system's
-        symmetry will be added as well. The interpolation order can be specified,
-        though one must ensure that sufficient data is available.
+        include_equilibrium_polarizability: bool,
+    ) -> tuple[
+        list[NDArray[np.float64]], list[list[float]], list[list[NDArray[np.float64]]]
+    ]:
+        """Calculate and return basis vectors and interpolation points for DOF(s).
 
         Parameters
         ----------
-        displacement
-            2D array with shape (N,3) where N is the number of atoms. Units
-            are arbitrary. Must be orthogonal to all previously added DOFs.
+        parent_displacement
+            Displacement of the parent DOF.
         amplitudes
-            1D array of length L containing amplitudes in angstroms. Duplicate
-            amplitudes are not allowed, including symmetrically equivalent
-            amplitudes.
+            Amplitudes (of the parent DOF).
         polarizabilities
-            3D array with shape (L,3,3) containing known polarizabilities for
-            each amplitude.
-        interpolation_order
-            Must be less than the number of total number of amplitudes after
-            symmetry considerations.
+            Polarizabilities (of the parent DOF).
 
-        Raises
-        ------
-        InvalidDOFException
-            Provided degree of freedom was invalid.
-
+        Returns
+        -------
+        :
+            3-tuple of the form (basis vectors, interpolation_xs, interpolation_ys)
         """
-        try:
-            parent_displacement = displacement / (np.linalg.norm(displacement) * 10)
-        except TypeError as exc:
-            raise TypeError("displacement is not an ndarray") from exc
-        verify_ndarray_shape("amplitudes", amplitudes, (None,))
-        verify_ndarray_shape(
-            "polarizabilities", polarizabilities, (len(amplitudes), 3, 3)
-        )
-
-        parent_cartesian_basis_vector = (
-            self._structural_symmetry.get_cartesian_displacement(parent_displacement)
-        )
-        # Check that the parent displacement is orthogonal to existing basis vectors
-        result = is_orthogonal_to_all(
-            parent_cartesian_basis_vector, self._cartesian_basis_vectors
-        )
-        if result != -1:
-            raise InvalidDOFException(
-                f"new dof is not orthogonal with existing dof (index={result})"
-            )
-
         displacements_and_transformations = (
             self._structural_symmetry.get_equivalent_displacements(parent_displacement)
         )
 
-        basis_vectors_to_add: list[NDArray[np.float64]] = []
-        interpolations_to_add: list[BSpline] = []
+        basis_vectors: list[NDArray[np.float64]] = []
+        interpolation_xs: list[list[float]] = []
+        interpolation_ys: list[list[NDArray[np.float64]]] = []
         for dof_dictionary in displacements_and_transformations:
             child_displacement = dof_dictionary["displacements"][0]
 
-            interpolation_x = [0.0]
-            interpolation_y = [np.zeros((3, 3))]
+            interpolation_x: list[float] = []
+            interpolation_y: list[NDArray[np.float64]] = []
+            if include_equilibrium_polarizability:
+                interpolation_x.append(0.0)
+                interpolation_y.append(np.zeros((3, 3)))
+
             for collinear_displacement, transformation in zip(
                 dof_dictionary["displacements"], dof_dictionary["transformations"]
             ):
@@ -187,7 +159,34 @@ class InterpolationModel(PolarizabilityModel):
                     interpolation_y.append(
                         (np.linalg.inv(rotation) @ delta_polarizability @ rotation)
                     )
-            interpolation_x = np.array(interpolation_x)
+
+            child_cartesian_basis_vector = (
+                self._structural_symmetry.get_cartesian_displacement(child_displacement)
+            )
+            child_cartesian_basis_vector /= np.linalg.norm(child_cartesian_basis_vector)
+
+            basis_vectors.append(child_cartesian_basis_vector)
+            interpolation_xs.append(interpolation_x)
+            interpolation_ys.append(interpolation_y)
+
+        return (basis_vectors, interpolation_xs, interpolation_ys)
+
+    def _construct_and_add_interpolations(
+        self,
+        basis_vectors_to_add: list[NDArray[np.float64]],
+        interpolation_xs: list[list[float]],
+        interpolation_ys: list[list[NDArray[np.float64]]],
+        interpolation_order: int,
+    ) -> None:
+        """Construct  interpolations and add them to the model.
+
+        Raises
+        ------
+        InvalidDOFException
+        """
+        interpolations_to_add: list[BSpline] = []
+        for interpolation_x, interpolation_y in zip(interpolation_xs, interpolation_ys):
+
             # If duplicate amplitudes are generated, too much data has
             # been provided
             duplicate = polarizability_utils.find_duplicates(interpolation_x)
@@ -201,12 +200,6 @@ class InterpolationModel(PolarizabilityModel):
                     f"insufficient points ({len(interpolation_x)}) available for "
                     f"{interpolation_order}-order interpolation"
                 )
-
-            child_cartesian_basis_vector = (
-                self._structural_symmetry.get_cartesian_displacement(child_displacement)
-            )
-            child_cartesian_basis_vector /= np.linalg.norm(child_cartesian_basis_vector)
-            basis_vectors_to_add.append(child_cartesian_basis_vector)
 
             sort_indices = np.argsort(interpolation_x)
             try:
@@ -231,6 +224,84 @@ class InterpolationModel(PolarizabilityModel):
 
         self._cartesian_basis_vectors += basis_vectors_to_add
         self._interpolations += interpolations_to_add
+
+    def add_dof(  # pylint: disable=too-many-arguments
+        self,
+        displacement: NDArray[np.float64],
+        amplitudes: NDArray[np.float64],
+        polarizabilities: NDArray[np.float64],
+        interpolation_order: int,
+        include_equilibrium_polarizability: bool = True,
+    ) -> None:
+        """Add a degree of freedom (DOF).
+
+        Specification of a DOF requires a displacement (how the atoms move) alongside
+        displacement amplitudes and corresponding known polarizabilities for each
+        amplitude. Alongside the DOF specified, all DOFs related by the system's
+        symmetry will be added as well. The interpolation order can be specified,
+        though one must ensure that sufficient data is available.
+
+        Parameters
+        ----------
+        displacement
+            2D array with shape (N,3) where N is the number of atoms. Units
+            are arbitrary. Must be orthogonal to all previously added DOFs.
+        amplitudes
+            1D array of length L containing amplitudes in angstroms. Duplicate
+            amplitudes are not allowed, including symmetrically equivalent
+            amplitudes.
+        polarizabilities
+            3D array with shape (L,3,3) containing known polarizabilities for
+            each amplitude.
+        interpolation_order
+            Must be less than the number of total number of amplitudes after
+            symmetry considerations.
+        include_equilibrium_polarizability
+            If False, the equilibrium polarizability at 0.0 amplitude will not be used
+            in the interpolation.
+
+        Raises
+        ------
+        InvalidDOFException
+            Provided degree of freedom was invalid.
+
+        """
+        try:
+            parent_displacement = displacement / np.linalg.norm(displacement * 10.0)
+        except TypeError as exc:
+            raise TypeError("displacement is not an ndarray") from exc
+        verify_ndarray_shape("amplitudes", amplitudes, (None,))
+        verify_ndarray_shape(
+            "polarizabilities", polarizabilities, (len(amplitudes), 3, 3)
+        )
+
+        # Check that the parent displacement is orthogonal to existing basis vectors
+        parent_cartesian_basis_vector = (
+            self._structural_symmetry.get_cartesian_displacement(parent_displacement)
+        )
+        result = is_orthogonal_to_all(
+            parent_cartesian_basis_vector, self._cartesian_basis_vectors
+        )
+        if result != -1:
+            raise InvalidDOFException(
+                f"new dof is not orthogonal with existing dof (index={result})"
+            )
+
+        # Get information needed for DOF
+        basis_vectors_to_add, interpolation_xs, interpolation_ys = self._get_dof(
+            parent_displacement,
+            amplitudes,
+            polarizabilities,
+            include_equilibrium_polarizability,
+        )
+
+        # Then append the DOF.
+        self._construct_and_add_interpolations(
+            basis_vectors_to_add,
+            interpolation_xs,
+            interpolation_ys,
+            interpolation_order,
+        )
 
     def add_dof_from_files(
         self,
@@ -258,7 +329,34 @@ class InterpolationModel(PolarizabilityModel):
             DOF assembled from supplied files was invalid (see get_dof)
 
         """
-        # Extract displacements, polarizabilities, and basis vector
+        displacements, amplitudes, polarizabilities = self._read_dof(
+            filepaths, file_format
+        )
+
+        self.add_dof(
+            displacements[0],
+            amplitudes,
+            polarizabilities,
+            interpolation_order,
+        )
+
+    def _read_dof(
+        self, filepaths: str | Path | list[str] | list[Path], file_format: str
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
+        """Read displacements, amplitudes, and polarizabilities from file(s).
+
+        Returns
+        -------
+        :
+            3-tuple with the form (displacements, polarizabilities, basis vector)
+
+        Raises
+        ------
+        FileNotFoundError
+            File could not be found.
+        InvalidDOFException
+            DOF assembled from supplied files was invalid (see get_dof)
+        """
         displacements = []
         polarizabilities = []
         filepaths = pathify_as_list(filepaths)
@@ -294,10 +392,8 @@ class InterpolationModel(PolarizabilityModel):
             amplitudes.append(
                 get_amplitude(cartesian_basis_vector, cartesian_displacement)
             )
-
-        self.add_dof(
-            displacements[0],
+        return (
+            np.array(displacements),
             np.array(amplitudes),
             np.array(polarizabilities),
-            interpolation_order,
         )

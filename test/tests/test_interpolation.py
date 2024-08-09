@@ -1,4 +1,4 @@
-"""Testing for the polarizability."""
+"""Testing for InterpolationModel."""
 
 from typing import Type
 
