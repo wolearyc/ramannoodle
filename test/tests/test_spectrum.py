@@ -9,6 +9,7 @@ from numpy.typing import NDArray
 import pytest
 
 from ramannoodle.polarizability.interpolation import InterpolationModel
+from ramannoodle.polarizability.art import ARTModel
 from ramannoodle.symmetry import StructuralSymmetry
 from ramannoodle import io
 from ramannoodle.spectrum.spectrum_utils import (
@@ -64,12 +65,12 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
     ],
     indirect=["outcar_symmetry_fixture"],
 )
-def test_spectrum(
+def test_interpolation_spectrum(
     outcar_symmetry_fixture: StructuralSymmetry,
     data_directory: str,
     dof_eps_outcars: list[str],
 ) -> None:
-    """Test a full spectrum calculation."""
+    """Test a full spectrum calculation using InterpolationModel."""
     # Setup model
     symmetry = outcar_symmetry_fixture
     _, polarizability = io.read_positions_and_polarizability(
@@ -87,6 +88,63 @@ def test_spectrum(
 
     # Spectrum test
     with np.load(f"{data_directory}/known_spectrum.npz") as known_spectrum:
+        phonons = io.read_phonons(
+            f"{data_directory}/phonons_OUTCAR", file_format="outcar"
+        )
+        spectrum = phonons.get_raman_spectrum(model)
+        wavenumbers, intensities = spectrum.measure(
+            laser_correction=True,
+            laser_wavelength=532,
+            bose_einstein_correction=True,
+            temperature=300,
+        )
+
+        known_wavenumbers = known_spectrum["wavenumbers"]
+        known_intensities = known_spectrum["intensities"]
+
+        assert np.isclose(wavenumbers, known_wavenumbers).all()
+        assert np.isclose(intensities, known_intensities, atol=1e-4).all()
+
+
+@pytest.mark.parametrize(
+    "outcar_symmetry_fixture,data_directory,dof_eps_outcars",
+    [
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            "test/data/TiO2/",
+            [
+                ["Ti5_0.1z_eps_OUTCAR"],
+                ["Ti5_0.1x_eps_OUTCAR"],
+                [
+                    "O43_0.1z_eps_OUTCAR",
+                    "O43_m0.1z_eps_OUTCAR",
+                ],
+                ["O43_0.1x_eps_OUTCAR"],
+                ["O43_0.1y_eps_OUTCAR"],
+            ],
+        ),
+    ],
+    indirect=["outcar_symmetry_fixture"],
+)
+def test_art_spectrum(
+    outcar_symmetry_fixture: StructuralSymmetry,
+    data_directory: str,
+    dof_eps_outcars: list[str],
+) -> None:
+    """Test a full spectrum calculation using ARTModel."""
+    # Setup model
+    symmetry = outcar_symmetry_fixture
+    _, polarizability = io.read_positions_and_polarizability(
+        f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
+    )
+    model = ARTModel(symmetry, polarizability)
+    for outcar_names in dof_eps_outcars:
+        model.add_art_from_files(
+            [f"{data_directory}/{name}" for name in outcar_names], file_format="outcar"
+        )
+
+    # Spectrum test
+    with np.load(f"{data_directory}/known_art_spectrum.npz") as known_spectrum:
         phonons = io.read_phonons(
             f"{data_directory}/phonons_OUTCAR", file_format="outcar"
         )

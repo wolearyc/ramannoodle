@@ -4,6 +4,14 @@ ramannoodle.polarizability package
 Submodules
 ----------
 
+ramannoodle.polarizability.art module
+-------------------------------------
+
+.. automodule:: ramannoodle.polarizability.art
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ramannoodle.polarizability.interpolation module
 -----------------------------------------------
 
