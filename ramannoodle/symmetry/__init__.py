@@ -88,6 +88,8 @@ class StructuralSymmetry:
 
         """
         displacement = symmetry_utils.apply_pbc_displacement(displacement)
+        # Scale the displacement for numerical reasons.
+        displacement = displacement / (np.linalg.norm(displacement) * 10)
 
         ref_positions = symmetry_utils.displace_fractional_positions(
             self._fractional_positions, displacement
