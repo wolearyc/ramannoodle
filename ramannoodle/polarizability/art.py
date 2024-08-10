@@ -181,11 +181,39 @@ class ARTModel(InterpolationModel):
             basis_vectors_to_add, interpolation_xs, interpolation_ys, 1
         )
 
-    def get_status_dict(self) -> dict[str, int]:
-        """Return information on model status.
+    def get_specification_dict(
+        self,
+    ) -> dict[int, dict[str, list[int] | list[NDArray[np.float64]]]]:
+        """Return dictionary with information on model.
 
         Relevant information includes which ARTs are required for each atom and whether
         or not these ARTs have been specified.
 
+        Returns
+        -------
+        :
+            Dictionary of dictionaries. The outer dictionary is keyed by the indexes of
+            nonequivalent atoms. The inner dictionaries have two keys:
+                "specified_directions" gives directions of specified ARTs
+                "equivalent_atoms" gives list of equivalent atom indexes
+
         """
-        raise NotImplementedError
+        equivalent_atom_dict = self._structural_symmetry.get_equivalent_atom_dict()
+
+        status_dict = {}
+        for atom_index in equivalent_atom_dict:
+            status_dict[atom_index] = {
+                "specified_directions": self._get_art_directions(atom_index),
+                "equivalent_atoms": equivalent_atom_dict[atom_index],
+            }
+        return status_dict
+
+    def _get_art_directions(self, atom_index: int) -> list[NDArray[np.float64]]:
+        """Return specified art direction vectors for an atom."""
+        directions = []
+        for basis_vector in self._cartesian_basis_vectors:
+            direction = basis_vector[atom_index]
+            if not np.isclose(direction, 0, atol=1e-6).all():
+                directions.append(direction)
+        assert len(directions) <= 3
+        return directions

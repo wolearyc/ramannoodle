@@ -67,6 +67,17 @@ class StructuralSymmetry:
         assert self._symmetry_dict is not None
         return len(set(self._symmetry_dict["equivalent_atoms"]))
 
+    def get_equivalent_atom_dict(self) -> dict[int, list[int]]:
+        """Get dictionary of equivalent atoms."""
+        assert self._symmetry_dict is not None
+        result: dict[int, list[int]] = {}
+        for index, equiv_index in enumerate(self._symmetry_dict["equivalent_atoms"]):
+            if index == equiv_index:
+                result[index] = []
+            else:
+                result[equiv_index].append(index)
+        return result
+
     def get_equivalent_displacements(
         self, displacement: NDArray[np.float64]
     ) -> list[dict[str, list[NDArray[np.float64]]]]:
