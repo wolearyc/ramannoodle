@@ -244,3 +244,12 @@ ATOMIC_NUMBERS = {
 
 RAMAN_TENSOR_CENTRAL_DIFFERENCE = 0.001
 BOLTZMANN_CONSTANT = 8.617333262e-5  # Units: eV/K
+
+
+class AnsiColors:  # pylint: disable=too-few-public-methods
+    """Holds AnsiColors."""
+
+    OK_GREEN = "\x1b[1;32;40m"
+    WARNING_YELLOW = "\x1b[1;33;40m"
+    ERROR_RED = "\x1b[1;31;40m"
+    END = "\x1b[0m"

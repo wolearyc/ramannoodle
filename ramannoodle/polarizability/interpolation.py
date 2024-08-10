@@ -6,6 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.interpolate import make_interp_spline, BSpline
 
+from ..globals import AnsiColors
 from . import polarizability_utils
 from . import PolarizabilityModel
 from ..symmetry.symmetry_utils import (
@@ -187,8 +188,7 @@ class InterpolationModel(PolarizabilityModel):
         interpolations_to_add: list[BSpline] = []
         for interpolation_x, interpolation_y in zip(interpolation_xs, interpolation_ys):
 
-            # If duplicate amplitudes are generated, too much data has
-            # been provided
+            # Duplicate amplitudes means too much data has been provided.
             duplicate = polarizability_utils.find_duplicates(interpolation_x)
             if duplicate is not None:
                 raise InvalidDOFException(
@@ -397,3 +397,17 @@ class InterpolationModel(PolarizabilityModel):
             np.array(amplitudes),
             np.array(polarizabilities),
         )
+
+    def __repr__(self) -> str:
+        """Return string representation."""
+        total_dofs = 3 * len(self._structural_symmetry.get_fractional_positions())
+        specified_dofs = len(self._cartesian_basis_vectors)
+        core = f"{specified_dofs}/{total_dofs}"
+        if specified_dofs == total_dofs:
+            core = AnsiColors.OK_GREEN + core + AnsiColors.END
+        elif 1 <= specified_dofs < total_dofs:
+            core = AnsiColors.WARNING_YELLOW + core + AnsiColors.END
+        else:
+            core = AnsiColors.ERROR_RED + core + AnsiColors.END
+
+        return f"InterpolationModel with {core} degrees of freedom specified"

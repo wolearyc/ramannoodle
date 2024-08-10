@@ -4,7 +4,9 @@ from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
+from tabulate import tabulate
 
+from ..globals import AnsiColors
 from .interpolation import InterpolationModel
 from ..exceptions import (
     get_type_error,
@@ -12,6 +14,26 @@ from ..exceptions import (
     verify_ndarray_shape,
     InvalidDOFException,
 )
+
+
+def _get_directions_str(directions: list[NDArray[np.float64]]) -> str:
+    """Return easy-to-read string for directions."""
+    direction_strs = []
+    for direction in directions:
+        direction_strs.append(
+            np.array2string(direction, precision=5, suppress_small=True, sign="+")
+        )
+    return ", ".join(direction_strs)
+
+
+def _get_specified_str(num_specified: int) -> str:
+    """Return ansi-colored string for number of specified models."""
+    core = f"{num_specified}/3"
+    if num_specified == 3:
+        return AnsiColors.OK_GREEN + core + AnsiColors.END
+    if 1 <= num_specified <= 2:
+        return AnsiColors.WARNING_YELLOW + core + AnsiColors.END
+    return AnsiColors.ERROR_RED + core + AnsiColors.END
 
 
 class ARTModel(InterpolationModel):
@@ -181,39 +203,54 @@ class ARTModel(InterpolationModel):
             basis_vectors_to_add, interpolation_xs, interpolation_ys, 1
         )
 
-    def get_specification_dict(
+    def get_specification_tuples(
         self,
-    ) -> dict[int, dict[str, list[int] | list[NDArray[np.float64]]]]:
-        """Return dictionary with information on model.
-
-        Relevant information includes which ARTs are required for each atom and whether
-        or not these ARTs have been specified.
+    ) -> list[tuple[int, list[int], list[NDArray[np.float64]]]]:
+        """Return tuples with information on model.
 
         Returns
         -------
         :
-            Dictionary of dictionaries. The outer dictionary is keyed by the indexes of
-            nonequivalent atoms. The inner dictionaries have two keys:
-                "specified_directions" gives directions of specified ARTs
-                "equivalent_atoms" gives list of equivalent atom indexes
+            3-tuple. First element is an atom index, second element is a list of atom
+            indexes that are symmetrically equivalent, and the third element is a list
+            currently specified ART directions.
 
         """
         equivalent_atom_dict = self._structural_symmetry.get_equivalent_atom_dict()
 
-        status_dict = {}
+        specification_tuples = []
         for atom_index in equivalent_atom_dict:
-            status_dict[atom_index] = {
-                "specified_directions": self._get_art_directions(atom_index),
-                "equivalent_atoms": equivalent_atom_dict[atom_index],
-            }
-        return status_dict
+            specification_tuples.append(
+                (
+                    atom_index,
+                    equivalent_atom_dict[atom_index],
+                    self._get_art_directions(atom_index),
+                )
+            )
+        return specification_tuples
 
     def _get_art_directions(self, atom_index: int) -> list[NDArray[np.float64]]:
         """Return specified art direction vectors for an atom."""
         directions = []
         for basis_vector in self._cartesian_basis_vectors:
             direction = basis_vector[atom_index]
-            if not np.isclose(direction, 0, atol=1e-6).all():
+            if not np.isclose(direction, 0, atol=1e-5).all():
                 directions.append(direction)
         assert len(directions) <= 3
         return directions
+
+    def __repr__(self) -> str:
+        """Get string representation."""
+        specification_tuples = self.get_specification_tuples()
+
+        table = [["Atom index", "Directions", "Specified", "Equivalent atoms"]]
+
+        for atom_index, equivalent_atom_indexes, directions in specification_tuples:
+            row = [str(atom_index)]
+            row.append(_get_directions_str(directions))
+            row.append(_get_specified_str(len(directions)))
+            row.append(str(len(equivalent_atom_indexes)))
+            table.append(row)
+
+        result = tabulate(table, headers="firstrow", tablefmt="rounded_outline")
+        return result

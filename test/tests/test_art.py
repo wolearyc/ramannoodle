@@ -212,7 +212,7 @@ def test_add_art_from_files_exception(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,atom_index, direction, amplitudes, known_dict_len,"
+    "outcar_symmetry_fixture,atom_index, direction, amplitudes, known_tuples_len,"
     "known_atom_index, known_directions, known_equivalent_atoms",
     [
         (
@@ -238,26 +238,27 @@ def test_add_art_from_files_exception(
     ],
     indirect=["outcar_symmetry_fixture"],
 )
-def test_get_specification_dict(
+def test_get_specification_tuples(
     outcar_symmetry_fixture: StructuralSymmetry,
     atom_index: int,
     direction: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
-    known_dict_len: int,
+    known_tuples_len: int,
     known_atom_index: int,
     known_directions: list[NDArray[np.float64]],
     known_equivalent_atoms: list[int],
 ) -> None:
-    """Test get_specification_dict."""
+    """Test get_specification_tuples."""
     symmetry = outcar_symmetry_fixture
     model = ARTModel(symmetry, np.zeros((3, 3)))
     model.add_art(atom_index, direction, amplitudes, np.zeros((amplitudes.size, 3, 3)))
-    status_dict = model.get_specification_dict()
+    specification_tuples = model.get_specification_tuples()
 
-    assert len(status_dict) == known_dict_len
+    assert len(specification_tuples) == known_tuples_len
+    assert specification_tuples[0][0] == known_atom_index
     assert np.isclose(
-        status_dict[known_atom_index]["specified_directions"],
+        specification_tuples[0][2],
         known_directions,
         atol=1e-7,
     ).all()
-    assert status_dict[known_atom_index]["equivalent_atoms"] == known_equivalent_atoms
+    assert specification_tuples[0][1] == known_equivalent_atoms
