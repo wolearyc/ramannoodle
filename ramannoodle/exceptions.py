@@ -26,6 +26,13 @@ class InvalidDOFException(Exception):
         pass
 
 
+class DOFWarning(UserWarning):
+    """Used when something may be wrong with a DOF."""
+
+    def __init__(self, reason: str):
+        pass
+
+
 class SymmetryException(Exception):
     """Raised when something goes wrong with an operation involving symmetry."""
 

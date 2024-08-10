@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import copy
+from warnings import warn
 
 import numpy as np
 from numpy.typing import NDArray
@@ -24,7 +25,7 @@ from ..exceptions import InvalidDOFException, get_type_error
 
 from .. import io
 from ..io.io_utils import pathify_as_list
-from ..exceptions import verify_ndarray_shape
+from ..exceptions import verify_ndarray_shape, DOFWarning
 
 
 def get_amplitude(
@@ -213,6 +214,20 @@ class InterpolationModel(PolarizabilityModel):
             if duplicate is not None:
                 raise InvalidDOFException(
                     f"due to symmetry, amplitude {duplicate} should not be specified"
+                )
+
+            # Warn user if amplitudes don't span zero
+            max_amplitude = np.max(interpolation_x)
+            min_amplitude = np.min(interpolation_x)
+            if np.isclose(max_amplitude, 0, atol=1e-3).all() or max_amplitude <= 0:
+                warn(
+                    "max amplitude <= 0, when usually it should be > 0",
+                    DOFWarning,
+                )
+            if np.isclose(min_amplitude, 0, atol=1e-3).all() or min_amplitude >= 0:
+                warn(
+                    "min amplitude >= 0, when usually it should be < 0",
+                    DOFWarning,
                 )
 
             if len(interpolation_x) <= interpolation_order:
