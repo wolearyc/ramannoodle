@@ -1,7 +1,10 @@
 """Polarizability models."""
 
+# This is not ideal, but is required for Python 3.10 support.
+# In future versions, we can use "from typing import Self"
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Self
 import copy
 
 import numpy as np
@@ -424,7 +427,7 @@ class InterpolationModel(PolarizabilityModel):
         verify_ndarray_shape("mask", mask, self._mask.shape)
         self._mask = mask
 
-    def get_masked_model(self, dof_indexes_to_mask: list[int]) -> Self:
+    def get_masked_model(self, dof_indexes_to_mask: list[int]) -> InterpolationModel:
         """Return new model with certain degrees of freedom deactivated.
 
         Model masking allows for the calculation of partial Raman spectra in which only

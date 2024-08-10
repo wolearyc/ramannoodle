@@ -1,5 +1,8 @@
 """Polarizability model based on atomic Raman tensors (ARTs)."""
 
+from __future__ import annotations
+from typing import cast
+
 from pathlib import Path
 
 import numpy as np
@@ -284,3 +287,12 @@ class ARTModel(InterpolationModel):
 
         result = tabulate(table, headers="firstrow", tablefmt="rounded_outline")
         return result
+
+    def get_masked_model(self, dof_indexes_to_mask: list[int]) -> ARTModel:
+        """Return new model with certain degrees of freedom deactivated.
+
+        Model masking allows for the calculation of partial Raman spectra in which only
+        certain degrees of freedom are considered.
+        """
+        # We "cast" here, due to how typing is done.
+        return cast(ARTModel, super().get_masked_model(dof_indexes_to_mask))
