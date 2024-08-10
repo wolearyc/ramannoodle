@@ -277,15 +277,20 @@ class ARTModel(InterpolationModel):
         specification_tuples = self.get_specification_tuples()
 
         table = [["Atom index", "Directions", "Specified", "Equivalent atoms"]]
-
         for atom_index, equivalent_atom_indexes, directions in specification_tuples:
             row = [str(atom_index)]
             row.append(_get_directions_str(directions))
             row.append(_get_specified_str(len(directions)))
             row.append(str(len(equivalent_atom_indexes)))
             table.append(row)
-
         result = tabulate(table, headers="firstrow", tablefmt="rounded_outline")
+
+        num_masked = np.sum(self._mask)
+        if num_masked > 0:
+            num_arts = len(self._cartesian_basis_vectors)
+            msg = f"ATTENTION: {num_masked}/{num_arts} atomic Raman tensors are masked."
+            result += f"\n {AnsiColors.WARNING_YELLOW} {msg} {AnsiColors.END}"
+
         return result
 
     def get_masked_model(self, dof_indexes_to_mask: list[int]) -> ARTModel:
@@ -294,5 +299,5 @@ class ARTModel(InterpolationModel):
         Model masking allows for the calculation of partial Raman spectra in which only
         certain degrees of freedom are considered.
         """
-        # We "cast" here, due to how typing is done.
+        # We "cast" here, due to how typing is done to support 3.10.
         return cast(ARTModel, super().get_masked_model(dof_indexes_to_mask))

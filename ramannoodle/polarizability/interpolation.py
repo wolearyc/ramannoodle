@@ -103,7 +103,7 @@ class InterpolationModel(PolarizabilityModel):
                     "cartesian_displacement has incompatible length "
                     f"({len(cartesian_displacement)}!={len(basis_vector)})"
                 ) from exc
-            delta_polarizability += mask * np.array(
+            delta_polarizability += (1 - mask) * np.array(
                 interpolation(amplitude), dtype="float64"
             )
 
@@ -244,7 +244,8 @@ class InterpolationModel(PolarizabilityModel):
 
         self._cartesian_basis_vectors += basis_vectors_to_add
         self._interpolations += interpolations_to_add
-        self._mask = np.append(self._mask, [True] * len(basis_vectors_to_add))
+        # FALSE -> not masking, TRUE -> masking
+        self._mask = np.append(self._mask, [False] * len(basis_vectors_to_add))
 
     def add_dof(  # pylint: disable=too-many-arguments
         self,
@@ -435,14 +436,14 @@ class InterpolationModel(PolarizabilityModel):
         """
         result = copy.deepcopy(self)
         new_mask = result.get_mask()
-        new_mask[:] = True
-        new_mask[dof_indexes_to_mask] = False
+        new_mask[:] = False
+        new_mask[dof_indexes_to_mask] = True
         result.set_mask(new_mask)
         return result
 
     def unmask(self) -> None:
         """Clear mask, activating all specified DOFs."""
-        self._mask[:] = True
+        self._mask[:] = False
 
     def __repr__(self) -> str:
         """Return string representation."""
@@ -456,4 +457,12 @@ class InterpolationModel(PolarizabilityModel):
         else:
             core = AnsiColors.ERROR_RED + core + AnsiColors.END
 
-        return f"InterpolationModel with {core} degrees of freedom specified"
+        result = f"InterpolationModel with {core} degrees of freedom specified."
+
+        num_masked = np.sum(self._mask)
+        if num_masked > 0:
+            num_arts = len(self._cartesian_basis_vectors)
+            msg = f"ATTENTION: {num_masked}/{num_arts} degrees of freedom are masked."
+            result += f"\n {AnsiColors.WARNING_YELLOW} {msg} {AnsiColors.END}"
+
+        return result

@@ -251,7 +251,7 @@ BOLTZMANN_CONSTANT = 8.617333262e-5  # Units: eV/K
 class AnsiColors:  # pylint: disable=too-few-public-methods
     """Holds AnsiColors."""
 
-    OK_GREEN = "\x1b[1;32;40m"
-    WARNING_YELLOW = "\x1b[1;33;40m"
-    ERROR_RED = "\x1b[1;31;40m"
+    OK_GREEN = "\x1b[1;32;49m"
+    WARNING_YELLOW = "\x1b[1;33;49m"
+    ERROR_RED = "\x1b[1;31;49m"
     END = "\x1b[0m"
