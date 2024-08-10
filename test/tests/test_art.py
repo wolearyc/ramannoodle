@@ -143,19 +143,21 @@ def test_add_art_exception(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,outcar_files,exception_type,in_reason",
+    "outcar_symmetry_fixture,outcar_file_groups,exception_type,in_reason",
     [
         (
             "test/data/STO_RATTLED_OUTCAR",
-            ["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"],
+            [["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"]],
             InvalidDOFException,
             "incompatible outcar",
         ),
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
-                "test/data/TiO2/Ti5_0.2x_eps_OUTCAR",
+                [
+                    "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                    "test/data/TiO2/Ti5_0.2x_eps_OUTCAR",
+                ]
             ],
             InvalidDOFException,
             "wrong number of amplitudes: 4 != 2",
@@ -163,8 +165,10 @@ def test_add_art_exception(
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
-                "test/data/TiO2/Ti5_m0.1x_eps_OUTCAR",
+                [
+                    "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                    "test/data/TiO2/Ti5_m0.1x_eps_OUTCAR",
+                ]
             ],
             InvalidDOFException,
             "wrong number of amplitudes: 4 != 2",
@@ -172,7 +176,9 @@ def test_add_art_exception(
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "this_outcar_does_not_exist",
+                [
+                    "this_outcar_does_not_exist",
+                ]
             ],
             FileNotFoundError,
             "No such file or directory",
@@ -180,8 +186,10 @@ def test_add_art_exception(
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
-                "test/data/TiO2/Ti5_0.1y_eps_OUTCAR",
+                [
+                    "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                    "test/data/TiO2/Ti5_0.1y_eps_OUTCAR",
+                ]
             ],
             InvalidDOFException,
             "is not collinear",
@@ -189,17 +197,32 @@ def test_add_art_exception(
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "test/data/TiO2/O43_0.1z_eps_OUTCAR",
+                [
+                    "test/data/TiO2/O43_0.1z_eps_OUTCAR",
+                ]
             ],
             InvalidDOFException,
             "wrong number of amplitudes: 1 != 2",
+        ),
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            [
+                [
+                    "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                ],
+                [
+                    "test/data/TiO2/Ti5_0.1y_eps_OUTCAR",
+                ],
+            ],
+            InvalidDOFException,
+            "is not orthogonal",
         ),
     ],
     indirect=["outcar_symmetry_fixture"],
 )
 def test_add_art_from_files_exception(
     outcar_symmetry_fixture: StructuralSymmetry,
-    outcar_files: list[str],
+    outcar_file_groups: list[str],
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
@@ -207,7 +230,8 @@ def test_add_art_from_files_exception(
     symmetry = outcar_symmetry_fixture
     model = ARTModel(symmetry, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
-        model.add_art_from_files(outcar_files, "outcar")
+        for outcar_files in outcar_file_groups:
+            model.add_art_from_files(outcar_files, "outcar")
     assert in_reason in str(error.value)
 
 

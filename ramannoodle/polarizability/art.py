@@ -229,14 +229,44 @@ class ARTModel(InterpolationModel):
             )
         return specification_tuples
 
+    def get_dof_indexes(
+        self, atom_indexes_or_symbols: int | str | list[int | str]
+    ) -> list[int]:
+        """Return art (DOF) indexes for certain atoms.
+
+        Parameters
+        ----------
+        atom_indexes_or_symbols
+            If integer or list of integers, specifies atom indexes. If string or list
+            of strings, specifies atom symbols. Mixtures of integers and strings are
+            allowed.
+
+        """
+        if not isinstance(atom_indexes_or_symbols, list):
+            atom_indexes_or_symbols = list([atom_indexes_or_symbols])
+
+        atom_indexes = []
+        for item in atom_indexes_or_symbols:
+            if isinstance(item, str):
+                atom_indexes += self._structural_symmetry.get_atom_indexes(item)
+            else:
+                atom_indexes += [item]
+        atom_indexes = list(set(atom_indexes))
+
+        dof_indexes = []
+        for atom_index in atom_indexes:
+            for index, basis_vector in enumerate(self._cartesian_basis_vectors):
+                direction = basis_vector[atom_index]
+                if not np.isclose(direction, 0, atol=1e-5).all():
+                    dof_indexes.append(index)
+        return dof_indexes
+
     def _get_art_directions(self, atom_index: int) -> list[NDArray[np.float64]]:
         """Return specified art direction vectors for an atom."""
-        directions = []
-        for basis_vector in self._cartesian_basis_vectors:
-            direction = basis_vector[atom_index]
-            if not np.isclose(direction, 0, atol=1e-5).all():
-                directions.append(direction)
-        assert len(directions) <= 3
+        indexes = self.get_dof_indexes(atom_index)
+        directions = [
+            self._cartesian_basis_vectors[index][atom_index] for index in indexes
+        ]
         return directions
 
     def __repr__(self) -> str:

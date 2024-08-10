@@ -191,18 +191,19 @@ def test_add_dof_exception(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,outcar_files,interpolation_order,exception_type,in_reason",
+    "outcar_symmetry_fixture,outcar_file_groups,interpolation_order,exception_type,"
+    "in_reason",
     [
         (
             "test/data/STO_RATTLED_OUTCAR",
-            ["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"],
+            [["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"]],
             1,
             InvalidDOFException,
             "incompatible outcar",
         ),
         (
             "test/data/TiO2/phonons_OUTCAR",
-            ["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"],
+            [["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"]],
             3,
             InvalidDOFException,
             "insufficient points (3)",
@@ -210,8 +211,10 @@ def test_add_dof_exception(
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
-                "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                [
+                    "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                    "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                ]
             ],
             1,
             InvalidDOFException,
@@ -220,7 +223,9 @@ def test_add_dof_exception(
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "this_outcar_does_not_exist",
+                [
+                    "this_outcar_does_not_exist",
+                ]
             ],
             1,
             FileNotFoundError,
@@ -229,19 +234,31 @@ def test_add_dof_exception(
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
-                "test/data/TiO2/Ti5_0.1y_eps_OUTCAR",
+                [
+                    "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                    "test/data/TiO2/Ti5_0.1y_eps_OUTCAR",
+                ]
             ],
             1,
             InvalidDOFException,
             "is not collinear",
+        ),
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            [
+                ["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"],
+                ["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"],
+            ],
+            1,
+            InvalidDOFException,
+            "new dof is not orthogonal with existing dof (index=0)",
         ),
     ],
     indirect=["outcar_symmetry_fixture"],
 )
 def test_add_dof_from_files_exception(
     outcar_symmetry_fixture: StructuralSymmetry,
-    outcar_files: list[str],
+    outcar_file_groups: list[str],
     interpolation_order: int,
     exception_type: Type[Exception],
     in_reason: str,
@@ -250,5 +267,6 @@ def test_add_dof_from_files_exception(
     symmetry = outcar_symmetry_fixture
     model = InterpolationModel(symmetry, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
-        model.add_dof_from_files(outcar_files, "outcar", interpolation_order)
+        for outcar_files in outcar_file_groups:
+            model.add_dof_from_files(outcar_files, "outcar", interpolation_order)
     assert in_reason in str(error.value)

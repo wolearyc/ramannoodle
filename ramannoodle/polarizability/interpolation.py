@@ -1,6 +1,8 @@
 """Polarizability models."""
 
 from pathlib import Path
+from typing import Self
+import copy
 
 import numpy as np
 from numpy.typing import NDArray
@@ -65,6 +67,7 @@ class InterpolationModel(PolarizabilityModel):
         self._equilibrium_polarizability = equilibrium_polarizability
         self._cartesian_basis_vectors: list[NDArray[np.float64]] = []
         self._interpolations: list[BSpline] = []
+        self._mask: NDArray[np.bool] = np.array([], dtype="bool")
 
     def get_polarizability(
         self, cartesian_displacement: NDArray[np.float64]
@@ -83,8 +86,8 @@ class InterpolationModel(PolarizabilityModel):
 
         """
         delta_polarizability: NDArray[np.float64] = np.zeros((3, 3))
-        for basis_vector, interpolation in zip(
-            self._cartesian_basis_vectors, self._interpolations
+        for basis_vector, interpolation, mask in zip(
+            self._cartesian_basis_vectors, self._interpolations, self._mask
         ):
             try:
                 amplitude = np.dot(
@@ -97,7 +100,9 @@ class InterpolationModel(PolarizabilityModel):
                     "cartesian_displacement has incompatible length "
                     f"({len(cartesian_displacement)}!={len(basis_vector)})"
                 ) from exc
-            delta_polarizability += interpolation(amplitude)
+            delta_polarizability += mask * np.array(
+                interpolation(amplitude), dtype="float64"
+            )
 
         return delta_polarizability + self._equilibrium_polarizability
 
@@ -126,6 +131,18 @@ class InterpolationModel(PolarizabilityModel):
         :
             3-tuple of the form (basis vectors, interpolation_xs, interpolation_ys)
         """
+        # Check that the parent displacement is orthogonal to existing basis vectors
+        parent_cartesian_basis_vector = (
+            self._structural_symmetry.get_cartesian_displacement(parent_displacement)
+        )
+        result = is_orthogonal_to_all(
+            parent_cartesian_basis_vector, self._cartesian_basis_vectors
+        )
+        if result != -1:
+            raise InvalidDOFException(
+                f"new dof is not orthogonal with existing dof (index={result})"
+            )
+
         displacements_and_transformations = (
             self._structural_symmetry.get_equivalent_displacements(parent_displacement)
         )
@@ -224,6 +241,7 @@ class InterpolationModel(PolarizabilityModel):
 
         self._cartesian_basis_vectors += basis_vectors_to_add
         self._interpolations += interpolations_to_add
+        self._mask = np.append(self._mask, [True] * len(basis_vectors_to_add))
 
     def add_dof(  # pylint: disable=too-many-arguments
         self,
@@ -274,18 +292,6 @@ class InterpolationModel(PolarizabilityModel):
         verify_ndarray_shape(
             "polarizabilities", polarizabilities, (len(amplitudes), 3, 3)
         )
-
-        # Check that the parent displacement is orthogonal to existing basis vectors
-        parent_cartesian_basis_vector = (
-            self._structural_symmetry.get_cartesian_displacement(parent_displacement)
-        )
-        result = is_orthogonal_to_all(
-            parent_cartesian_basis_vector, self._cartesian_basis_vectors
-        )
-        if result != -1:
-            raise InvalidDOFException(
-                f"new dof is not orthogonal with existing dof (index={result})"
-            )
 
         # Get information needed for DOF
         basis_vectors_to_add, interpolation_xs, interpolation_ys = self._get_dof(
@@ -397,6 +403,43 @@ class InterpolationModel(PolarizabilityModel):
             np.array(amplitudes),
             np.array(polarizabilities),
         )
+
+    def get_mask(self) -> NDArray[np.bool]:
+        """Return mask."""
+        return self._mask
+
+    def set_mask(self, mask: NDArray[np.bool]) -> None:
+        """Set mask.
+
+        ..warning:: To avoid unintentional use of masked models, we discourage masking
+                    in-place. Instead, consider using `get masked_model`.
+
+        Parameters
+        ----------
+        mask
+            1D array of size (N,) where N is the number of specified degrees
+            of freedom (DOFs). If an element is False, its corresponding DOF will be
+            "masked" and therefore excluded from polarizability calculations.
+        """
+        verify_ndarray_shape("mask", mask, self._mask.shape)
+        self._mask = mask
+
+    def get_masked_model(self, dof_indexes_to_mask: list[int]) -> Self:
+        """Return new model with certain degrees of freedom deactivated.
+
+        Model masking allows for the calculation of partial Raman spectra in which only
+        certain degrees of freedom are considered.
+        """
+        result = copy.deepcopy(self)
+        new_mask = result.get_mask()
+        new_mask[:] = True
+        new_mask[dof_indexes_to_mask] = False
+        result.set_mask(new_mask)
+        return result
+
+    def unmask(self) -> None:
+        """Clear mask, activating all specified DOFs."""
+        self._mask[:] = True
 
     def __repr__(self) -> str:
         """Return string representation."""

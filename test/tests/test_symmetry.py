@@ -257,3 +257,22 @@ def test_structural_symmetry_exception(
     with pytest.raises(exception_type) as error:
         StructuralSymmetry(atomic_numbers, lattice, fractional_positions)
     assert in_reason in str(error.value)
+
+
+@pytest.mark.parametrize(
+    "outcar_symmetry_fixture, atom_symbols, known_atom_indexes",
+    [
+        ("test/data/TiO2/phonons_OUTCAR", "Ti", list(range(0, 36))),
+        ("test/data/STO_RATTLED_OUTCAR", "O", list(range(54, 135))),
+        ("test/data/LLZO/LLZO_OUTCAR", "La", list(range(56, 80))),
+    ],
+    indirect=["outcar_symmetry_fixture"],
+)
+def test_get_atom_indexes(
+    outcar_symmetry_fixture: StructuralSymmetry,
+    atom_symbols: str | list[str],
+    known_atom_indexes: list[int],
+) -> None:
+    """Test get_atom_indexes."""
+    symmetry = outcar_symmetry_fixture
+    assert symmetry.get_atom_indexes(atom_symbols) == known_atom_indexes

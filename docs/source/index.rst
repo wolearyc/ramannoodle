@@ -20,6 +20,6 @@ Contents
    :caption: Contents:
 
    introduction
-   notebooks/Basic tutorial
+   tutorials
    generated/api
    dev guide

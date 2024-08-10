@@ -4,8 +4,9 @@ import numpy as np
 from numpy.typing import NDArray
 import spglib
 
+from ..globals import ATOM_SYMBOLS
 from . import symmetry_utils
-from ..exceptions import SymmetryException, verify_ndarray_shape
+from ..exceptions import SymmetryException, verify_ndarray_shape, get_type_error
 
 
 class StructuralSymmetry:
@@ -182,3 +183,25 @@ class StructuralSymmetry:
     def get_fractional_positions(self) -> NDArray[np.float64]:
         """Return fractional positions."""
         return self._fractional_positions
+
+    def get_atom_indexes(self, atom_symbols: str | list[str]) -> list[int]:
+        """Return atom indexes with matching symbols.
+
+        Parameters
+        ----------
+        atom_symbols
+            If integer or list of integers, specifies atom indexes. If string or list
+            of strings, specifies atom symbols. Mixtures of integers and strings are
+            allowed.
+        """
+        symbols = [ATOM_SYMBOLS[number] for number in self._atomic_numbers]
+        indexes = []
+        if isinstance(atom_symbols, str):
+            atom_symbols = [atom_symbols]
+        try:
+            for index, symbol in enumerate(symbols):
+                if symbol in atom_symbols:
+                    indexes.append(index)
+        except TypeError as err:
+            raise get_type_error("atom_symbols", atom_symbols, "list") from err
+        return indexes

@@ -18,7 +18,7 @@ from ramannoodle.spectrum.spectrum_utils import (
     get_laser_correction,
 )
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access,too-many-locals
 
 
 def _get_all_eps_outcars(directory: str) -> list[str]:
@@ -48,7 +48,7 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
     [
         (
             "test/data/TiO2/phonons_OUTCAR",
-            "test/data/TiO2/",
+            "test/data/TiO2",
             [
                 ["Ti5_0.1z_eps_OUTCAR", "Ti5_0.2z_eps_OUTCAR"],
                 ["Ti5_0.1x_eps_OUTCAR", "Ti5_0.2x_eps_OUTCAR"],
@@ -155,6 +155,81 @@ def test_art_spectrum(
             bose_einstein_correction=True,
             temperature=300,
         )
+
+        known_wavenumbers = known_spectrum["wavenumbers"]
+        known_intensities = known_spectrum["intensities"]
+
+        assert np.isclose(wavenumbers, known_wavenumbers).all()
+        assert np.isclose(intensities, known_intensities, atol=1e-4).all()
+
+
+@pytest.mark.parametrize(
+    "outcar_symmetry_fixture,data_directory,dof_eps_outcars,atoms_to_mask,"
+    "known_spectrum_file",
+    [
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            "test/data/TiO2/",
+            [
+                ["Ti5_0.1z_eps_OUTCAR"],
+                ["Ti5_0.1x_eps_OUTCAR"],
+                [
+                    "O43_0.1z_eps_OUTCAR",
+                    "O43_m0.1z_eps_OUTCAR",
+                ],
+                ["O43_0.1x_eps_OUTCAR"],
+                ["O43_0.1y_eps_OUTCAR"],
+            ],
+            "Ti",
+            "known_art_O_spectrum.npz",
+        ),
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            "test/data/TiO2/",
+            [
+                ["Ti5_0.1z_eps_OUTCAR"],
+                ["Ti5_0.1x_eps_OUTCAR"],
+                [
+                    "O43_0.1z_eps_OUTCAR",
+                    "O43_m0.1z_eps_OUTCAR",
+                ],
+                ["O43_0.1x_eps_OUTCAR"],
+                ["O43_0.1y_eps_OUTCAR"],
+            ],
+            "O",
+            "known_art_Ti_spectrum.npz",
+        ),
+    ],
+    indirect=["outcar_symmetry_fixture"],
+)
+def test_art_masked_spectrum(
+    outcar_symmetry_fixture: StructuralSymmetry,
+    data_directory: str,
+    dof_eps_outcars: list[str],
+    atoms_to_mask: str,
+    known_spectrum_file: str,
+) -> None:
+    """Test a masked spectrum calculation using ARTModel."""
+    # Setup model
+    symmetry = outcar_symmetry_fixture
+    _, polarizability = io.read_positions_and_polarizability(
+        f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
+    )
+    model = ARTModel(symmetry, polarizability)
+    for outcar_names in dof_eps_outcars:
+        model.add_art_from_files(
+            [f"{data_directory}/{name}" for name in outcar_names], file_format="outcar"
+        )
+    masked_dofs = model.get_dof_indexes(atoms_to_mask)
+    model = model.get_masked_model(masked_dofs)
+
+    # Spectrum test
+    with np.load(f"{data_directory}/{known_spectrum_file}") as known_spectrum:
+        phonons = io.read_phonons(
+            f"{data_directory}/phonons_OUTCAR", file_format="outcar"
+        )
+        spectrum = phonons.get_raman_spectrum(model)
+        wavenumbers, intensities = spectrum.measure()
 
         known_wavenumbers = known_spectrum["wavenumbers"]
         known_intensities = known_spectrum["intensities"]
