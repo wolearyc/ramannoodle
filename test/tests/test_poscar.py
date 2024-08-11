@@ -82,7 +82,7 @@ def test_write_read_poscar(
         lattice,
         atomic_numbers,
         fractional_positions,
-        "test/data/temp/temp",
+        "test/data/temp",
         file_format="poscar",
         overwrite="true",
     )
@@ -105,7 +105,7 @@ def test_write_read_poscar(
             np.ones((2, 3)),
             [1, 1, 1, 3, 4, 4, 4, 30, 30],
             np.zeros((9, 3)),
-            "test/data/TiO2",
+            "test/data/temp",
             ValueError,
             "lattice has wrong shape: (2,3) != (3,3)",
             {},
