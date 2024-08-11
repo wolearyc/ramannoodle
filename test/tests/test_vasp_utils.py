@@ -5,10 +5,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 import pytest
-
-from ramannoodle.io.vasp import (
-    vasp_utils,
-)
+from ramannoodle.io.vasp import vasp_utils
 from ramannoodle.exceptions import InvalidFileException
 
 # pylint: disable=protected-access

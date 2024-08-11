@@ -28,7 +28,7 @@ from ramannoodle.exceptions import (
     verify_ndarray_shape,
     DOFWarning,
 )
-from ramannoodle import io
+import ramannoodle.io as rn_io
 from ramannoodle.io.io_utils import pathify_as_list
 
 
@@ -408,8 +408,8 @@ class InterpolationModel(PolarizabilityModel):
         polarizabilities = []
         filepaths = pathify_as_list(filepaths)
         for filepath in filepaths:
-            fractional_positions, polarizability = io.read_positions_and_polarizability(
-                filepath, file_format
+            fractional_positions, polarizability = (
+                rn_io.read_positions_and_polarizability(filepath, file_format)
             )
             try:
                 displacement = calculate_displacement(

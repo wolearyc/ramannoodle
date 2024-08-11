@@ -1,4 +1,4 @@
-"""Defines some useful globals."""
+"""Useful globals."""
 
 ATOMIC_WEIGHTS = {
     "H": 1.008,

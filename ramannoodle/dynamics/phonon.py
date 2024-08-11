@@ -3,7 +3,7 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from ramannoodle.dynamics import Dynamics
+from ramannoodle.dynamics.abstract import Dynamics
 from ramannoodle.globals import RAMAN_TENSOR_CENTRAL_DIFFERENCE
 from ramannoodle.polarizability import PolarizabilityModel
 from ramannoodle.spectrum.raman import PhononRamanSpectrum

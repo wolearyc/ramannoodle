@@ -8,7 +8,7 @@ import pytest
 from pytest import FixtureRequest
 
 from ramannoodle.symmetry.structural import ReferenceStructure
-from ramannoodle import io
+import ramannoodle.io as rn_io
 
 
 @pytest.fixture(scope="session")
@@ -37,7 +37,7 @@ ref_structure_cache = {}
 def outcar_ref_structure_fixture(request: FixtureRequest) -> ReferenceStructure:
     """Return a reference structure."""
     if request.param not in ref_structure_cache:
-        ref_structure_cache[request.param] = io.read_ref_structure(
+        ref_structure_cache[request.param] = rn_io.read_ref_structure(
             request.param, file_format="outcar"
         )
     return ref_structure_cache[request.param]

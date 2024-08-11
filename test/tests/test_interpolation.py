@@ -4,7 +4,6 @@ from typing import Type
 
 import numpy as np
 from numpy.typing import NDArray
-
 import pytest
 
 from ramannoodle.polarizability.interpolation import find_duplicates
