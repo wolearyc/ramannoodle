@@ -3,7 +3,16 @@
 from typing import TextIO
 from pathlib import Path
 
-from ramannoodle.exceptions import NoMatchingLineFoundException
+import numpy as np
+from numpy.typing import NDArray
+
+from ramannoodle.exceptions import (
+    NoMatchingLineFoundException,
+    verify_ndarray_shape,
+    verify_positions,
+    verify_list_len,
+)
+from ramannoodle.globals import ATOM_SYMBOLS
 
 
 def _skip_file_until_line_contains(file: TextIO, content: str) -> str:
@@ -39,3 +48,18 @@ def pathify_as_list(filepaths: str | Path | list[str] | list[Path]) -> list[Path
         return [Path(filepaths)]
     except TypeError as exc:
         raise TypeError(f"{filepaths} cannot be resolved as a filepath") from exc
+
+
+def verify_structure(
+    lattice: NDArray[np.float64],
+    atomic_numbers: list[int],
+    positions: NDArray[np.float64],
+) -> None:
+    """Verify a structure."""
+    verify_ndarray_shape("lattice", lattice, (3, 3))
+    verify_list_len("atomic_numbers", atomic_numbers, None)
+    for atomic_number in atomic_numbers:
+        if atomic_number not in ATOM_SYMBOLS.keys():
+            raise ValueError(f"unrecognized atomic number: {atomic_number}")
+    verify_ndarray_shape("positions", positions, (len(atomic_numbers), 3))
+    verify_positions("positions", positions)

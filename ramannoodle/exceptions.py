@@ -19,6 +19,13 @@ class InvalidFileException(Exception):
         pass
 
 
+class InvalidOptionException(Exception):
+    """Raised when an optional argument is not supported."""
+
+    def __init__(self, reason: str):
+        pass
+
+
 class InvalidDOFException(Exception):
     """Raised when things a degree of freedom is invalid in some way."""
 
@@ -106,6 +113,24 @@ def verify_ndarray_shape(
                 raise get_shape_error(name, array, _shape_string(shape))
     except AttributeError as exc:
         raise get_type_error(name, array, "ndarray") from exc
+
+
+def verify_list_len(name: str, array: list[Any], length: int | None) -> None:
+    """Verify an list's shape.
+
+    We should avoid calling this function whenever possible (EATF).
+
+    :meta private:
+
+    Parameters
+    ----------
+    length
+        length. If None, not checked.
+    """
+    if not isinstance(array, list):
+        raise get_type_error(name, array, "list")
+    if length is not None and len(array) is not length:
+        raise ValueError(f"{name} has wrong length: {len(array)} != length")
 
 
 def verify_positions(name: str, array: NDArray) -> None:

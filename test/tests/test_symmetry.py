@@ -220,24 +220,24 @@ def test_apply_pbc_displacement(
             np.diag([1, 1, 1]),
             np.zeros((4, 3)),
             TypeError,
-            "atomic_numbers should have type ndarray, not tuple",
+            "atomic_numbers should have type list, not tuple",
         ),
         (
-            np.array((1, 2, 3, 4)),
+            [1, 2, 3, 4],
             np.diag([1, 1]),
             np.zeros((4, 3)),
             ValueError,
             "lattice has wrong shape: (2,2) != (3,3)",
         ),
         (
-            np.array((1, 2, 3, 4)),
+            [1, 2, 3, 4],
             np.diag([1, 1, 1]),
             np.zeros((4, 2)),
             ValueError,
             "fractional_positions has wrong shape: (4,2) != (4,3)",
         ),
         (
-            np.array((1, 2, 3, 4)),
+            [1, 2, 3, 4],
             np.diag([1, 1, 1]),
             np.zeros((3, 3)),
             ValueError,
@@ -246,7 +246,7 @@ def test_apply_pbc_displacement(
     ],
 )
 def test_ref_structure_exception(
-    atomic_numbers: NDArray[np.int32],
+    atomic_numbers: list[int],
     lattice: NDArray[np.float64],
     fractional_positions: NDArray[np.float64],
     exception_type: Type[Exception],

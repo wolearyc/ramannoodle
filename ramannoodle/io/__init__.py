@@ -98,3 +98,45 @@ def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStruc
         return _REFERENCE_STRUCTURE_READERS[file_format](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
+
+
+_STRUCTURE_WRITERS = {"poscar": vasp.poscar.write_structure}
+
+
+def write_structure(
+    lattice: NDArray[np.float64],
+    atomic_numbers: list[int],
+    fractional_positions: NDArray[np.float64],
+    filepath: str | Path,
+    file_format: str,
+    **options: str,
+) -> None:
+    """Write structure to file.
+
+    Parameters
+    ----------
+    lattice
+    atomic_numbers
+    fractional_positions
+    filepath
+    file_format
+        supports: "poscar"
+    overwrite
+    options
+        Additional, file-format-dependent options. See IO.
+
+    Raises
+    ------
+    InvalidFileException
+        File has unexpected format.
+    """
+    try:
+        _STRUCTURE_WRITERS[file_format](
+            lattice,
+            atomic_numbers,
+            fractional_positions,
+            filepath,
+            **options,
+        )
+    except KeyError as exc:
+        raise ValueError(f"unsupported format: {file_format}") from exc

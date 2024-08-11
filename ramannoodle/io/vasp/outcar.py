@@ -348,12 +348,12 @@ def read_ref_structure(
     """
     lattice = np.array([])
     fractional_positions = np.array([])
-    atomic_numbers = np.array([], dtype=np.int32)
+    atomic_numbers = []
 
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as outcar_file:
         atomic_symbols = _read_atomic_symbols(outcar_file)
-        atomic_numbers = np.array([ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols])
+        atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
         lattice = _read_lattice(outcar_file)
         fractional_positions = _read_fractional_positions(
             outcar_file, len(atomic_symbols)

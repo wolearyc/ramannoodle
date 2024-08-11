@@ -8,6 +8,7 @@ from ramannoodle.exceptions import (
     SymmetryException,
     get_type_error,
     verify_ndarray_shape,
+    verify_list_len,
 )
 from ramannoodle.globals import ATOM_SYMBOLS
 from ramannoodle.symmetry import structural_utils
@@ -38,13 +39,13 @@ class ReferenceStructure:
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
-        atomic_numbers: NDArray[np.int32],
+        atomic_numbers: list[int],
         lattice: NDArray[np.float64],
         fractional_positions: NDArray[np.float64],
         symprec: float = 1e-5,
         angle_tolerance: float = -1.0,
     ) -> None:
-        verify_ndarray_shape("atomic_numbers", atomic_numbers, (None,))
+        verify_list_len("atomic_numbers", atomic_numbers, None)
         verify_ndarray_shape("lattice", lattice, (3, 3))
         verify_ndarray_shape(
             "fractional_positions", fractional_positions, (len(atomic_numbers), 3)
@@ -54,7 +55,7 @@ class ReferenceStructure:
         self._lattice = lattice
         self._fractional_positions = fractional_positions
 
-        cell = (list(lattice), list(fractional_positions), list(atomic_numbers))
+        cell = (list(lattice), list(fractional_positions), atomic_numbers)
         self._symmetry_dict: dict[str, NDArray[np.float64]] | None = (
             spglib.get_symmetry(cell, symprec=symprec, angle_tolerance=angle_tolerance)
         )
