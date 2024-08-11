@@ -49,7 +49,7 @@ def test_add_art(
     "exception_type,in_reason",
     [
         (
-            "test/data/STO_RATTLED_OUTCAR",
+            "test/data/STO_RATTLED_OUTCAR",  # This case gives a warning.
             [0],
             np.array([[1, 0, 0]]),
             np.array([0.1]),
@@ -226,7 +226,7 @@ def test_add_art_from_files_exception(
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
-    """Test add_dof_from_files (exception)."""
+    """Test add_art_from_files (exception)."""
     ref_structure = outcar_ref_structure_fixture
     model = ARTModel(ref_structure, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:

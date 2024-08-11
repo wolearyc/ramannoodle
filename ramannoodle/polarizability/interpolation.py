@@ -238,6 +238,12 @@ class InterpolationModel(PolarizabilityModel):
                     f"due to symmetry, amplitude {duplicate} should not be specified"
                 )
 
+            if len(interpolation_x) <= interpolation_order:
+                raise InvalidDOFException(
+                    f"insufficient points ({len(interpolation_x)}) available for "
+                    f"{interpolation_order}-order interpolation"
+                )
+
             # Warn user if amplitudes don't span zero
             max_amplitude = np.max(interpolation_x)
             min_amplitude = np.min(interpolation_x)
@@ -250,12 +256,6 @@ class InterpolationModel(PolarizabilityModel):
                 warn(
                     "min amplitude >= 0, when usually it should be < 0",
                     DOFWarning,
-                )
-
-            if len(interpolation_x) <= interpolation_order:
-                raise InvalidDOFException(
-                    f"insufficient points ({len(interpolation_x)}) available for "
-                    f"{interpolation_order}-order interpolation"
                 )
 
             sort_indices = np.argsort(interpolation_x)
