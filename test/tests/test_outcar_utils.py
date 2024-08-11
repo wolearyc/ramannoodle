@@ -5,7 +5,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 import pytest
-from ramannoodle.io.vasp import vasp_utils
+import ramannoodle.io.vasp.outcar as vasp_outcar
 from ramannoodle.exceptions import InvalidFileException
 
 # pylint: disable=protected-access
@@ -20,7 +20,7 @@ from ramannoodle.exceptions import InvalidFileException
 )
 def test_get_atomic_symbol_from_potcar_line(potcar_line: str, known: str) -> None:
     """Test get_atomic_symbol_from_potcar_line (normal)."""
-    result = vasp_utils._get_atomic_symbol_from_potcar_line(potcar_line)
+    result = vasp_outcar._get_atomic_symbol_from_potcar_line(potcar_line)
     assert result == known
 
 
@@ -51,7 +51,7 @@ def test_get_atomic_symbol_from_potcar_line_exception(
 ) -> None:
     """Test get_atomic_symbol_from_potcar_line (exception)."""
     with pytest.raises(exception_type) as error:
-        vasp_utils._get_atomic_symbol_from_potcar_line(potcar_line)
+        vasp_outcar._get_atomic_symbol_from_potcar_line(potcar_line)
     assert in_reason in str(error.value)
 
 
@@ -71,7 +71,7 @@ def test_read_atomic_symbols_from_outcar(
     known: list[str],
 ) -> None:
     """Test _read_atomic_symbols_from_outcar (normal)."""
-    atomic_symbols = vasp_utils._read_atomic_symbols_from_outcar(outcar_file_fixture)
+    atomic_symbols = vasp_outcar._read_atomic_symbols(outcar_file_fixture)
     assert atomic_symbols == known
 
 
@@ -98,7 +98,7 @@ def test_read_atomic_symbols_from_outcar_exception(
 ) -> None:
     """Test _read_atomic_symbols_from_outcar (exception)."""
     with pytest.raises(exception_type) as error:
-        vasp_utils._read_atomic_symbols_from_outcar(outcar_file_fixture)
+        vasp_outcar._read_atomic_symbols(outcar_file_fixture)
     assert in_reason in str(error.value)
 
 
@@ -119,7 +119,7 @@ def test_read_cartesian_positions_from_outcar(
     known_last_position: NDArray[np.float64],
 ) -> None:
     """Test _read_cartesian_positions_from_outcar (normal)."""
-    cartesian_positions = vasp_utils._read_cartesian_positions_from_outcar(
+    cartesian_positions = vasp_outcar._read_cartesian_positions(
         outcar_file_fixture, 135
     )
 
@@ -151,7 +151,7 @@ def test_read_cartesian_positions_from_outcar_exception(
 ) -> None:
     """Test _read_cartesian_positions_from_outcar (exception)."""
     with pytest.raises(exception_type) as error:
-        vasp_utils._read_cartesian_positions_from_outcar(outcar_file_fixture, 20)
+        vasp_outcar._read_cartesian_positions(outcar_file_fixture, 20)
     assert in_reason in str(error.value)
 
 
@@ -172,7 +172,7 @@ def test_read_fractional_positions_from_outcar(
     known_last_position: NDArray[np.float64],
 ) -> None:
     """Test _read_fractional_positions_from_outcar (normal)."""
-    fractional_positions = vasp_utils._read_fractional_positions_from_outcar(
+    fractional_positions = vasp_outcar._read_fractional_positions(
         outcar_file_fixture, 135
     )
 
@@ -204,7 +204,7 @@ def test_read_fractional_positions_from_outcar_exception(
 ) -> None:
     """Test _read_fractional_positions_from_outcar (exception)."""
     with pytest.raises(exception_type) as error:
-        vasp_utils._read_fractional_positions_from_outcar(outcar_file_fixture, 20)
+        vasp_outcar._read_fractional_positions(outcar_file_fixture, 20)
     assert in_reason in str(error.value)
 
 
@@ -229,7 +229,7 @@ def test_read_polarizability_from_outcar(
     known_polarizability: NDArray[np.float64],
 ) -> None:
     """Test _read_polarizability_from_outcar (normal)."""
-    polarizability = vasp_utils._read_polarizability_from_outcar(outcar_file_fixture)
+    polarizability = vasp_outcar._read_polarizability(outcar_file_fixture)
 
     assert np.isclose(polarizability, known_polarizability).all()
 
@@ -257,7 +257,7 @@ def test_read_polarizability_from_outcar_exception(
 ) -> None:
     """Test _read_polarizability_from_outcar (normal)."""
     with pytest.raises(exception_type) as error:
-        vasp_utils._read_polarizability_from_outcar(outcar_file_fixture)
+        vasp_outcar._read_polarizability(outcar_file_fixture)
     assert in_reason in str(error.value)
 
 
@@ -291,7 +291,7 @@ def test_read_lattice_from_outcar(
     outcar_file_fixture: TextIO, known_lattice: NDArray[np.float64]
 ) -> None:
     """Test _read_lattice_from_outcar (normal)."""
-    result = vasp_utils._read_lattice_from_outcar(outcar_file_fixture)
+    result = vasp_outcar._read_lattice(outcar_file_fixture)
     assert np.isclose(result, known_lattice).all()
 
 
@@ -318,5 +318,5 @@ def test_read_lattice_from_outcar_exception(
 ) -> None:
     """Test _read_lattice_from_outcar (exception)."""
     with pytest.raises(exception_type) as error:
-        vasp_utils._read_lattice_from_outcar(outcar_file_fixture)
+        vasp_outcar._read_lattice(outcar_file_fixture)
     assert in_reason in str(error.value)

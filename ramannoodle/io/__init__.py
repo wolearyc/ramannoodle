@@ -10,11 +10,11 @@ from ramannoodle.symmetry.structural import ReferenceStructure
 from ramannoodle.io import vasp
 
 # These dictionaries map between file_format's and appropriate loading functions.
-_PHONON_LOADERS = {"outcar": vasp.read_phonons_from_outcar}
-_POSITION_AND_POLARIZABILITY_LOADERS = {
-    "outcar": vasp.read_positions_and_polarizability_from_outcar
+_PHONON_READERS = {"outcar": vasp.outcar.read_phonons}
+_POSITION_AND_POLARIZABILITY_READERS = {
+    "outcar": vasp.outcar.read_positions_and_polarizability
 }
-_REFERENCE_STRUCTURE_LOADERS = {"outcar": vasp.read_ref_structure_from_outcar}
+_REFERENCE_STRUCTURE_READERS = {"outcar": vasp.outcar.read_ref_structure}
 
 
 def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
@@ -38,7 +38,7 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
         File could not be found.
     """
     try:
-        return _PHONON_LOADERS[file_format](filepath)
+        return _PHONON_READERS[file_format](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
@@ -69,7 +69,7 @@ def read_positions_and_polarizability(
         File could not be found.
     """
     try:
-        return _POSITION_AND_POLARIZABILITY_LOADERS[file_format](filepath)
+        return _POSITION_AND_POLARIZABILITY_READERS[file_format](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
@@ -95,6 +95,6 @@ def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStruc
         File could not be found.
     """
     try:
-        return _REFERENCE_STRUCTURE_LOADERS[file_format](filepath)
+        return _REFERENCE_STRUCTURE_READERS[file_format](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
