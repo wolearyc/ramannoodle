@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 from typing import cast
-
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 from tabulate import tabulate
 
-from ..globals import AnsiColors
-from .interpolation import InterpolationModel
-from ..exceptions import (
+from ramannoodle.globals import AnsiColors
+from ramannoodle.polarizability.interpolation import InterpolationModel
+from ramannoodle.exceptions import (
     get_type_error,
     get_shape_error,
     verify_ndarray_shape,
@@ -61,7 +60,7 @@ class ARTModel(InterpolationModel):
 
     Parameters
     ----------
-    structural_symmetry
+    ref_structure
     equilibrium_polarizability
         2D array with shape (3,3) giving polarizability of system at equilibrium. This
         would usually correspond to the minimum energy structure.
@@ -141,7 +140,7 @@ class ARTModel(InterpolationModel):
             "polarizabilities", polarizabilities, (amplitudes.size, 3, 3)
         )
 
-        displacement = self._structural_symmetry.get_fractional_positions() * 0
+        displacement = self._ref_structure.get_fractional_positions() * 0
         try:
             displacement[atom_index] = direction / np.linalg.norm(direction * 10.0)
         except TypeError as exc:
@@ -219,7 +218,7 @@ class ARTModel(InterpolationModel):
             currently specified ART directions.
 
         """
-        equivalent_atom_dict = self._structural_symmetry.get_equivalent_atom_dict()
+        equivalent_atom_dict = self._ref_structure.get_equivalent_atom_dict()
 
         specification_tuples = []
         for atom_index in equivalent_atom_dict:
@@ -251,7 +250,7 @@ class ARTModel(InterpolationModel):
         atom_indexes = []
         for item in atom_indexes_or_symbols:
             if isinstance(item, str):
-                atom_indexes += self._structural_symmetry.get_atom_indexes(item)
+                atom_indexes += self._ref_structure.get_atom_indexes(item)
             else:
                 atom_indexes += [item]
         atom_indexes = list(set(atom_indexes))

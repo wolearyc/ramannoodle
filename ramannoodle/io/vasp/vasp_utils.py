@@ -9,10 +9,10 @@ from typing import TextIO
 import numpy as np
 from numpy.typing import NDArray
 
-from ..io_utils import _skip_file_until_line_contains
-from ...exceptions import InvalidFileException, NoMatchingLineFoundException
-from ...globals import ATOMIC_NUMBERS
-from ...exceptions import get_type_error
+from ramannoodle.io.io_utils import _skip_file_until_line_contains
+from ramannoodle.exceptions import InvalidFileException, NoMatchingLineFoundException
+from ramannoodle.globals import ATOMIC_NUMBERS
+from ramannoodle.exceptions import get_type_error
 
 
 def _get_atomic_symbol_from_potcar_line(line: str) -> str:

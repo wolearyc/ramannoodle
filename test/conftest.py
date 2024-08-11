@@ -7,7 +7,7 @@ from collections.abc import Generator
 import pytest
 from pytest import FixtureRequest
 
-from ramannoodle.symmetry import StructuralSymmetry
+from ramannoodle.symmetry.structural import ReferenceStructure
 from ramannoodle import io
 
 
@@ -30,14 +30,14 @@ def outcar_file_fixture(
 
 
 # HACK: indirect fixtures are unable to be scoped, so manually cache.
-symmetry_cache = {}
+ref_structure_cache = {}
 
 
 @pytest.fixture(scope="session")
-def outcar_symmetry_fixture(request: FixtureRequest) -> StructuralSymmetry:
-    """Return a structural symmetry."""
-    if request.param not in symmetry_cache:
-        symmetry_cache[request.param] = io.read_structural_symmetry(
+def outcar_ref_structure_fixture(request: FixtureRequest) -> ReferenceStructure:
+    """Return a reference structure."""
+    if request.param not in ref_structure_cache:
+        ref_structure_cache[request.param] = io.read_ref_structure(
             request.param, file_format="outcar"
         )
-    return symmetry_cache[request.param]
+    return ref_structure_cache[request.param]

@@ -1,19 +1,20 @@
 """Routines for interacting with files used and produced by DFT codes."""
 
 from pathlib import Path
+
 import numpy as np
 from numpy.typing import NDArray
 
-from ..dynamics import Phonons
-from ..symmetry import StructuralSymmetry
-from . import vasp
+from ramannoodle.dynamics.phonon import Phonons
+from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.io import vasp
 
 # These dictionaries map between file_format's and appropriate loading functions.
 _PHONON_LOADERS = {"outcar": vasp.read_phonons_from_outcar}
 _POSITION_AND_POLARIZABILITY_LOADERS = {
     "outcar": vasp.read_positions_and_polarizability_from_outcar
 }
-_STRUCTURAL_SYMMETRY_LOADERS = {"outcar": vasp.read_structural_symmetry_from_outcar}
+_REFERENCE_STRUCTURE_LOADERS = {"outcar": vasp.read_ref_structure_from_outcar}
 
 
 def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
@@ -73,10 +74,8 @@ def read_positions_and_polarizability(
         raise ValueError(f"unsupported format: {file_format}") from exc
 
 
-def read_structural_symmetry(
-    filepath: str | Path, file_format: str
-) -> StructuralSymmetry:
-    """Read structural symmetry from a file.
+def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStructure:
+    """Read reference structure from a file.
 
     Parameters
     ----------
@@ -96,6 +95,6 @@ def read_structural_symmetry(
         File could not be found.
     """
     try:
-        return _STRUCTURAL_SYMMETRY_LOADERS[file_format](filepath)
+        return _REFERENCE_STRUCTURE_LOADERS[file_format](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc

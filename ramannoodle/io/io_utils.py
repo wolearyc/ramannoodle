@@ -2,7 +2,8 @@
 
 from typing import TextIO
 from pathlib import Path
-from ..exceptions import NoMatchingLineFoundException
+
+from ramannoodle.exceptions import NoMatchingLineFoundException
 
 
 def _skip_file_until_line_contains(file: TextIO, content: str) -> str:

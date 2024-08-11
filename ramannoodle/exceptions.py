@@ -1,4 +1,4 @@
-"""Exceptions and warnings for ramannoodle."""
+"""Exceptions, warnings, and related functions."""
 
 from typing import Any, Sequence
 

@@ -48,5 +48,5 @@ repos:
         args: [--max-line-length=88, --docstring-convention=numpy]
         additional_dependencies:
           [
-            flake8-bugbear, flake8-docstrings
+            flake8-bugbear, flake8-docstrings, flake8-absolute-import
           ]

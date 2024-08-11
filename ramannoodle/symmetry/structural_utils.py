@@ -1,11 +1,11 @@
-"""Utility functions relevant to symmetry."""
+"""Utility functions relevant to ReferenceStructure."""
 
 from typing import Iterable
 
 import numpy as np
 from numpy.typing import NDArray
 
-from ..exceptions import (
+from ramannoodle.exceptions import (
     get_type_error,
     verify_positions,
     get_shape_error,

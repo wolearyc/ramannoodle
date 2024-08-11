@@ -4,18 +4,18 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from ...dynamics import Phonons
-from ...symmetry import StructuralSymmetry
-from ...globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
-from .vasp_utils import (
+from ramannoodle.dynamics.phonon import Phonons
+from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
+from ramannoodle.io.vasp.vasp_utils import (
     _read_atomic_symbols_from_outcar,
     _read_eigenvector_from_outcar,
     _read_polarizability_from_outcar,
     _read_fractional_positions_from_outcar,
     _read_lattice_from_outcar,
 )
-from ..io_utils import _skip_file_until_line_contains, pathify
-from ...exceptions import NoMatchingLineFoundException, InvalidFileException
+from ramannoodle.io.io_utils import _skip_file_until_line_contains, pathify
+from ramannoodle.exceptions import NoMatchingLineFoundException, InvalidFileException
 
 
 def read_phonons_from_outcar(filepath: str | Path) -> Phonons:
@@ -110,10 +110,10 @@ def read_positions_and_polarizability_from_outcar(
         return positions, polarizability
 
 
-def read_structural_symmetry_from_outcar(
+def read_ref_structure_from_outcar(
     filepath: str | Path,
-) -> StructuralSymmetry:
-    """Extract structural symmetry from a VASP OUTCAR file.
+) -> ReferenceStructure:
+    """Extract reference structure from a VASP OUTCAR file.
 
     Parameters
     ----------
@@ -144,4 +144,4 @@ def read_structural_symmetry_from_outcar(
             outcar_file, len(atomic_symbols)
         )
 
-    return StructuralSymmetry(atomic_numbers, lattice, fractional_positions)
+    return ReferenceStructure(atomic_numbers, lattice, fractional_positions)

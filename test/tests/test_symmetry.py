@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 
 import pytest
 
-from ramannoodle.symmetry.symmetry_utils import (
+from ramannoodle.symmetry.structural_utils import (
     is_collinear_with_all,
     is_non_collinear_with_all,
     are_collinear,
@@ -16,7 +16,7 @@ from ramannoodle.symmetry.symmetry_utils import (
     apply_pbc,
     apply_pbc_displacement,
 )
-from ramannoodle.symmetry import StructuralSymmetry
+from ramannoodle.symmetry.structural import ReferenceStructure
 
 
 @pytest.mark.parametrize(
@@ -129,33 +129,33 @@ def test_is_non_collinear_with_all(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture, known_nonequivalent_atoms,"
+    "outcar_ref_structure_fixture, known_nonequivalent_atoms,"
     "known_orthogonal_displacements, known_displacements_shape",
     [
         ("test/data/TiO2/phonons_OUTCAR", 2, 36, [2] * 36),
         ("test/data/STO_RATTLED_OUTCAR", 135, 1, [1]),
         ("test/data/LLZO/LLZO_OUTCAR", 9, 32, [1] * 32),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
-def test_structural_symmetry(
-    outcar_symmetry_fixture: StructuralSymmetry,
+def test_ref_structure(
+    outcar_ref_structure_fixture: ReferenceStructure,
     known_nonequivalent_atoms: int,
     known_orthogonal_displacements: int,
     known_displacements_shape: list[int],
 ) -> None:
     """Test StructuralSymmetry (normal)."""
     # Equivalent atoms test
-    symmetry = outcar_symmetry_fixture
-    assert symmetry.get_num_nonequivalent_atoms() == known_nonequivalent_atoms
+    ref_structure = outcar_ref_structure_fixture
+    assert ref_structure.get_num_nonequivalent_atoms() == known_nonequivalent_atoms
 
     # Equivalent displacement test
     displacement = (
-        symmetry._fractional_positions * 0  # pylint: disable=protected-access
+        ref_structure._fractional_positions * 0  # pylint: disable=protected-access
     )
     displacement[0, 2] += 0.1
     print(displacement.shape)
-    displacements = symmetry.get_equivalent_displacements(displacement)
+    displacements = ref_structure.get_equivalent_displacements(displacement)
     assert len(displacements) == known_orthogonal_displacements
     assert [len(d["displacements"]) for d in displacements] == known_displacements_shape
 
@@ -246,7 +246,7 @@ def test_apply_pbc_displacement(
         ),
     ],
 )
-def test_structural_symmetry_exception(
+def test_ref_structure_exception(
     atomic_numbers: NDArray[np.int32],
     lattice: NDArray[np.float64],
     fractional_positions: NDArray[np.float64],
@@ -255,24 +255,24 @@ def test_structural_symmetry_exception(
 ) -> None:
     """Test StructuralSymmetry (exception)."""
     with pytest.raises(exception_type) as error:
-        StructuralSymmetry(atomic_numbers, lattice, fractional_positions)
+        ReferenceStructure(atomic_numbers, lattice, fractional_positions)
     assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture, atom_symbols, known_atom_indexes",
+    "outcar_ref_structure_fixture, atom_symbols, known_atom_indexes",
     [
         ("test/data/TiO2/phonons_OUTCAR", "Ti", list(range(0, 36))),
         ("test/data/STO_RATTLED_OUTCAR", "O", list(range(54, 135))),
         ("test/data/LLZO/LLZO_OUTCAR", "La", list(range(56, 80))),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_get_atom_indexes(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     atom_symbols: str | list[str],
     known_atom_indexes: list[int],
 ) -> None:
     """Test get_atom_indexes."""
-    symmetry = outcar_symmetry_fixture
-    assert symmetry.get_atom_indexes(atom_symbols) == known_atom_indexes
+    ref_structure = outcar_ref_structure_fixture
+    assert ref_structure.get_atom_indexes(atom_symbols) == known_atom_indexes

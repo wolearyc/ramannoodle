@@ -11,8 +11,6 @@ from ramannoodle.io.vasp import (
 )
 from ramannoodle.exceptions import InvalidFileException
 
-from .. import EPS_OUTCAR_NUM_ATOMS
-
 # pylint: disable=protected-access
 
 
@@ -125,10 +123,10 @@ def test_read_cartesian_positions_from_outcar(
 ) -> None:
     """Test _read_cartesian_positions_from_outcar (normal)."""
     cartesian_positions = vasp_utils._read_cartesian_positions_from_outcar(
-        outcar_file_fixture, EPS_OUTCAR_NUM_ATOMS
+        outcar_file_fixture, 135
     )
 
-    assert len(cartesian_positions) == EPS_OUTCAR_NUM_ATOMS
+    assert len(cartesian_positions) == 135
     assert np.isclose(cartesian_positions[0], known_first_position).all()
     assert np.isclose(cartesian_positions[-1], known_last_position).all()
 
@@ -178,10 +176,10 @@ def test_read_fractional_positions_from_outcar(
 ) -> None:
     """Test _read_fractional_positions_from_outcar (normal)."""
     fractional_positions = vasp_utils._read_fractional_positions_from_outcar(
-        outcar_file_fixture, EPS_OUTCAR_NUM_ATOMS
+        outcar_file_fixture, 135
     )
 
-    assert len(fractional_positions) == EPS_OUTCAR_NUM_ATOMS
+    assert len(fractional_positions) == 135
     assert np.isclose(fractional_positions[0], known_first_position).all()
     assert np.isclose(fractional_positions[-1], known_last_position).all()
 

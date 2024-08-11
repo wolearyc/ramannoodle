@@ -7,10 +7,10 @@ from numpy.typing import NDArray
 
 import pytest
 
-from ramannoodle.polarizability.polarizability_utils import find_duplicates
+from ramannoodle.polarizability.interpolation import find_duplicates
 from ramannoodle.polarizability.interpolation import InterpolationModel
 from ramannoodle.exceptions import InvalidDOFException
-from ramannoodle.symmetry import StructuralSymmetry
+from ramannoodle.symmetry.structural import ReferenceStructure
 
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments
@@ -45,23 +45,23 @@ def test_find_duplicates_exception(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,displaced_atom_index, amplitudes, known_dof_added",
+    "outcar_ref_structure_fixture,displaced_atom_index, amplitudes, known_dof_added",
     [
         ("test/data/STO_RATTLED_OUTCAR", 0, np.array([-0.05, 0.05, 0.01, -0.01]), 1),
         ("test/data/TiO2/phonons_OUTCAR", 0, np.array([0.01]), 72),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_add_dof(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     displaced_atom_index: int,
     amplitudes: NDArray[np.float64],
     known_dof_added: int,
 ) -> None:
     """Test add_dof (normal)."""
-    symmetry = outcar_symmetry_fixture
-    model = InterpolationModel(symmetry, np.zeros((3, 3)))
-    displacement = symmetry._fractional_positions * 0
+    ref_structure = outcar_ref_structure_fixture
+    model = InterpolationModel(ref_structure, np.zeros((3, 3)))
+    displacement = ref_structure._fractional_positions * 0
     displacement[displaced_atom_index][0] = 1.0
     polarizabilities = np.zeros((len(amplitudes), 3, 3))
     model.add_dof(displacement, amplitudes, polarizabilities, 1)
@@ -70,7 +70,7 @@ def test_add_dof(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,displaced_atom_indexes, amplitudes,polarizabilities,"
+    "outcar_ref_structure_fixture,displaced_atom_indexes, amplitudes,polarizabilities,"
     "interpolation_order,exception_type,in_reason",
     [
         (
@@ -164,10 +164,10 @@ def test_add_dof(
             "due to symmetry, amplitude 0.1 should not be specified",
         ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_add_dof_exception(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     displaced_atom_indexes: list[list[int]],
     amplitudes: NDArray[np.float64],
     polarizabilities: NDArray[np.float64],
@@ -176,12 +176,12 @@ def test_add_dof_exception(
     in_reason: str,
 ) -> None:
     """Test add_dof (exception)."""
-    symmetry = outcar_symmetry_fixture
-    model = InterpolationModel(symmetry, np.zeros((3, 3)))
+    ref_structure = outcar_ref_structure_fixture
+    model = InterpolationModel(ref_structure, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
         for atom_indexes in displaced_atom_indexes:
             for atom_index in atom_indexes:
-                displacement = symmetry.get_fractional_positions() * 0
+                displacement = ref_structure.get_fractional_positions() * 0
                 displacement[atom_index] = 1
                 model.add_dof(
                     displacement, amplitudes, polarizabilities, interpolation_order
@@ -191,8 +191,8 @@ def test_add_dof_exception(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,outcar_file_groups,interpolation_order,exception_type,"
-    "in_reason",
+    "outcar_ref_structure_fixture,outcar_file_groups,interpolation_order,"
+    "exception_type,in_reason",
     [
         (
             "test/data/STO_RATTLED_OUTCAR",
@@ -254,18 +254,18 @@ def test_add_dof_exception(
             "new dof is not orthogonal with existing dof (index=0)",
         ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_add_dof_from_files_exception(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     outcar_file_groups: list[str],
     interpolation_order: int,
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
     """Test add_dof_from_files (exception)."""
-    symmetry = outcar_symmetry_fixture
-    model = InterpolationModel(symmetry, np.zeros((3, 3)))
+    ref_structure = outcar_ref_structure_fixture
+    model = InterpolationModel(ref_structure, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
         for outcar_files in outcar_file_groups:
             model.add_dof_from_files(outcar_files, "outcar", interpolation_order)

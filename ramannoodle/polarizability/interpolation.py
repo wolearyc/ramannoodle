@@ -1,4 +1,4 @@
-"""Polarizability models."""
+"""Polarizability model based on interpolation around degrees of freedom."""
 
 # This is not ideal, but is required for Python 3.10 support.
 # In future versions, we can use "from typing import Self"
@@ -6,26 +6,30 @@ from __future__ import annotations
 
 from pathlib import Path
 import copy
+from typing import Iterable
 from warnings import warn
+import itertools
 
 import numpy as np
-from numpy.typing import NDArray
+from numpy.typing import NDArray, ArrayLike
 from scipy.interpolate import make_interp_spline, BSpline
 
-from ..globals import AnsiColors
-from . import polarizability_utils
-from . import PolarizabilityModel
-from ..symmetry.symmetry_utils import (
+from ramannoodle.globals import AnsiColors
+from ramannoodle.polarizability import PolarizabilityModel
+from ramannoodle.symmetry.structural_utils import (
     is_orthogonal_to_all,
     calculate_displacement,
     is_collinear_with_all,
 )
-from ..symmetry import StructuralSymmetry
-from ..exceptions import InvalidDOFException, get_type_error
-
-from .. import io
-from ..io.io_utils import pathify_as_list
-from ..exceptions import verify_ndarray_shape, DOFWarning
+from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.exceptions import (
+    InvalidDOFException,
+    get_type_error,
+    verify_ndarray_shape,
+    DOFWarning,
+)
+from ramannoodle import io
+from ramannoodle.io.io_utils import pathify_as_list
 
 
 def get_amplitude(
@@ -36,6 +40,24 @@ def get_amplitude(
     return float(
         np.dot(cartesian_basis_vector.flatten(), cartesian_displacement.flatten())
     )
+
+
+def find_duplicates(vectors: Iterable[ArrayLike]) -> NDArray | None:
+    """Return duplicate vector in a list or None if no duplicates found.
+
+    :meta private:
+    """
+    try:
+        combinations = itertools.combinations(vectors, 2)
+    except TypeError as exc:
+        raise get_type_error("vectors", vectors, "Iterable") from exc
+    try:
+        for vector_1, vector_2 in combinations:
+            if np.isclose(vector_1, vector_2).all():
+                return np.array(vector_1)
+        return None
+    except TypeError as exc:
+        raise TypeError("elements of vectors are not array_like") from exc
 
 
 class InterpolationModel(PolarizabilityModel):
@@ -52,7 +74,7 @@ class InterpolationModel(PolarizabilityModel):
 
     Parameters
     ----------
-    structural_symmetry
+    ref_structure
     equilibrium_polarizability
         2D array with shape (3,3) giving polarizability of system at equilibrium. This
         would usually correspond to the minimum energy structure.
@@ -61,13 +83,13 @@ class InterpolationModel(PolarizabilityModel):
 
     def __init__(
         self,
-        structural_symmetry: StructuralSymmetry,
+        ref_structure: ReferenceStructure,
         equilibrium_polarizability: NDArray[np.float64],
     ) -> None:
         verify_ndarray_shape(
             "equilibrium_polarizability", equilibrium_polarizability, (3, 3)
         )
-        self._structural_symmetry = structural_symmetry
+        self._ref_structure = ref_structure
         self._equilibrium_polarizability = equilibrium_polarizability
         self._cartesian_basis_vectors: list[NDArray[np.float64]] = []
         self._interpolations: list[BSpline] = []
@@ -136,8 +158,8 @@ class InterpolationModel(PolarizabilityModel):
             3-tuple of the form (basis vectors, interpolation_xs, interpolation_ys)
         """
         # Check that the parent displacement is orthogonal to existing basis vectors
-        parent_cartesian_basis_vector = (
-            self._structural_symmetry.get_cartesian_displacement(parent_displacement)
+        parent_cartesian_basis_vector = self._ref_structure.get_cartesian_displacement(
+            parent_displacement
         )
         result = is_orthogonal_to_all(
             parent_cartesian_basis_vector, self._cartesian_basis_vectors
@@ -148,7 +170,7 @@ class InterpolationModel(PolarizabilityModel):
             )
 
         displacements_and_transformations = (
-            self._structural_symmetry.get_equivalent_displacements(parent_displacement)
+            self._ref_structure.get_equivalent_displacements(parent_displacement)
         )
 
         basis_vectors: list[NDArray[np.float64]] = []
@@ -183,7 +205,7 @@ class InterpolationModel(PolarizabilityModel):
                     )
 
             child_cartesian_basis_vector = (
-                self._structural_symmetry.get_cartesian_displacement(child_displacement)
+                self._ref_structure.get_cartesian_displacement(child_displacement)
             )
             child_cartesian_basis_vector /= np.linalg.norm(child_cartesian_basis_vector)
 
@@ -210,7 +232,7 @@ class InterpolationModel(PolarizabilityModel):
         for interpolation_x, interpolation_y in zip(interpolation_xs, interpolation_ys):
 
             # Duplicate amplitudes means too much data has been provided.
-            duplicate = polarizability_utils.find_duplicates(interpolation_x)
+            duplicate = find_duplicates(interpolation_x)
             if duplicate is not None:
                 raise InvalidDOFException(
                     f"due to symmetry, amplitude {duplicate} should not be specified"
@@ -392,7 +414,7 @@ class InterpolationModel(PolarizabilityModel):
             try:
                 displacement = calculate_displacement(
                     fractional_positions,
-                    self._structural_symmetry.get_fractional_positions(),
+                    self._ref_structure.get_fractional_positions(),
                 )
             except ValueError as exc:
                 raise InvalidDOFException(f"incompatible outcar: {filepath}") from exc
@@ -403,7 +425,7 @@ class InterpolationModel(PolarizabilityModel):
             raise InvalidDOFException(
                 f"displacement (file-index={result}) is not collinear"
             )
-        cartesian_basis_vector = self._structural_symmetry.get_cartesian_displacement(
+        cartesian_basis_vector = self._ref_structure.get_cartesian_displacement(
             displacements[0]
         )
         cartesian_basis_vector /= np.linalg.norm(cartesian_basis_vector)
@@ -411,8 +433,8 @@ class InterpolationModel(PolarizabilityModel):
         # Calculate amplitudes
         amplitudes = []
         for displacement in displacements:
-            cartesian_displacement = (
-                self._structural_symmetry.get_cartesian_displacement(displacement)
+            cartesian_displacement = self._ref_structure.get_cartesian_displacement(
+                displacement
             )
             amplitudes.append(
                 get_amplitude(cartesian_basis_vector, cartesian_displacement)
@@ -462,7 +484,7 @@ class InterpolationModel(PolarizabilityModel):
 
     def __repr__(self) -> str:
         """Return string representation."""
-        total_dofs = 3 * len(self._structural_symmetry.get_fractional_positions())
+        total_dofs = 3 * len(self._ref_structure.get_fractional_positions())
         specified_dofs = len(self._cartesian_basis_vectors)
         core = f"{specified_dofs}/{total_dofs}"
         if specified_dofs == total_dofs:

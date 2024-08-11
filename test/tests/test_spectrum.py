@@ -10,13 +10,13 @@ import pytest
 
 from ramannoodle.polarizability.interpolation import InterpolationModel
 from ramannoodle.polarizability.art import ARTModel
-from ramannoodle.symmetry import StructuralSymmetry
-from ramannoodle import io
-from ramannoodle.spectrum.spectrum_utils import (
-    convolve_intensities,
+from ramannoodle.spectrum.raman import (
     get_bose_einstein_correction,
     get_laser_correction,
 )
+from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle import io
+from ramannoodle.spectrum.spectrum_utils import convolve_spectrum
 
 # pylint: disable=protected-access,too-many-locals
 
@@ -36,15 +36,15 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
         positions, known_polarizability = io.read_positions_and_polarizability(
             f"{outcar_path}", file_format="outcar"
         )
-        cartesian_displacement = model._structural_symmetry.get_cartesian_displacement(
-            positions - model._structural_symmetry.get_fractional_positions()
+        cartesian_displacement = model._ref_structure.get_cartesian_displacement(
+            positions - model._ref_structure.get_fractional_positions()
         )
         model_polarizability = model.get_polarizability(cartesian_displacement)
         assert np.isclose(model_polarizability, known_polarizability, atol=1e-4).all()
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,data_directory,dof_eps_outcars",
+    "outcar_ref_structure_fixture,data_directory,dof_eps_outcars",
     [
         (
             "test/data/TiO2/phonons_OUTCAR",
@@ -63,20 +63,20 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
             ],
         ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_interpolation_spectrum(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     data_directory: str,
     dof_eps_outcars: list[str],
 ) -> None:
     """Test a full spectrum calculation using InterpolationModel."""
     # Setup model
-    symmetry = outcar_symmetry_fixture
+    ref_structure = outcar_ref_structure_fixture
     _, polarizability = io.read_positions_and_polarizability(
         f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
     )
-    model = InterpolationModel(symmetry, polarizability)
+    model = InterpolationModel(ref_structure, polarizability)
     for outcar_names in dof_eps_outcars:
         model.add_dof_from_files(
             [f"{data_directory}/{name}" for name in outcar_names],
@@ -107,7 +107,7 @@ def test_interpolation_spectrum(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,data_directory,dof_eps_outcars",
+    "outcar_ref_structure_fixture,data_directory,dof_eps_outcars",
     [
         (
             "test/data/TiO2/phonons_OUTCAR",
@@ -124,20 +124,20 @@ def test_interpolation_spectrum(
             ],
         ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_art_spectrum(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     data_directory: str,
     dof_eps_outcars: list[str],
 ) -> None:
     """Test a full spectrum calculation using ARTModel."""
     # Setup model
-    symmetry = outcar_symmetry_fixture
+    ref_structure = outcar_ref_structure_fixture
     _, polarizability = io.read_positions_and_polarizability(
         f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
     )
-    model = ARTModel(symmetry, polarizability)
+    model = ARTModel(ref_structure, polarizability)
     for outcar_names in dof_eps_outcars:
         model.add_art_from_files(
             [f"{data_directory}/{name}" for name in outcar_names], file_format="outcar"
@@ -164,7 +164,7 @@ def test_art_spectrum(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,data_directory,dof_eps_outcars,atoms_to_mask,"
+    "outcar_ref_structure_fixture,data_directory,dof_eps_outcars,atoms_to_mask,"
     "known_spectrum_file",
     [
         (
@@ -200,10 +200,10 @@ def test_art_spectrum(
             "known_art_Ti_spectrum.npz",
         ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_art_masked_spectrum(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     data_directory: str,
     dof_eps_outcars: list[str],
     atoms_to_mask: str,
@@ -211,11 +211,11 @@ def test_art_masked_spectrum(
 ) -> None:
     """Test a masked spectrum calculation using ARTModel."""
     # Setup model
-    symmetry = outcar_symmetry_fixture
+    ref_structure = outcar_ref_structure_fixture
     _, polarizability = io.read_positions_and_polarizability(
         f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
     )
-    model = ARTModel(symmetry, polarizability)
+    model = ARTModel(ref_structure, polarizability)
     for outcar_names in dof_eps_outcars:
         model.add_art_from_files(
             [f"{data_directory}/{name}" for name in outcar_names], file_format="outcar"
@@ -258,7 +258,7 @@ def test_convolve_intensities(
         wavenumbers = spectrum["wavenumbers"]
         intensities = spectrum["intensities"]
 
-        gaussian_wavenumbers, gaussian_intensities = convolve_intensities(
+        gaussian_wavenumbers, gaussian_intensities = convolve_spectrum(
             wavenumbers, intensities, "gaussian"
         )
         with np.load(known_gaussian_spectrum_path) as known_spectrum:
@@ -267,7 +267,7 @@ def test_convolve_intensities(
             assert np.isclose(gaussian_wavenumbers, known_wavenumbers).all()
             assert np.isclose(gaussian_intensities, known_intensities).all()
 
-        lorentzian_wavenumbers, lorentzian_intensities = convolve_intensities(
+        lorentzian_wavenumbers, lorentzian_intensities = convolve_spectrum(
             wavenumbers, intensities, "lorentzian"
         )
         with np.load(known_lorentzian_spectrum_path) as known_spectrum:
@@ -365,7 +365,7 @@ def test_convolve_intensities_exception(  # pylint: disable=too-many-arguments
 ) -> None:
     """Test convolve_intensities (exception)."""
     with pytest.raises(exception_type) as error:
-        convolve_intensities(wavenumbers, intensities, function, width, out_wavenumbers)
+        convolve_spectrum(wavenumbers, intensities, function, width, out_wavenumbers)
     assert in_reason in str(error.value)
 
 

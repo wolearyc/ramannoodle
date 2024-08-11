@@ -9,14 +9,14 @@ import pytest
 
 from ramannoodle.polarizability.art import ARTModel
 from ramannoodle.exceptions import InvalidDOFException
-from ramannoodle.symmetry import StructuralSymmetry
+from ramannoodle.symmetry.structural import ReferenceStructure
 
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,atom_index, direction, amplitudes, known_dof_added",
+    "outcar_ref_structure_fixture,atom_index, direction, amplitudes, known_dof_added",
     [
         (
             "test/data/STO_RATTLED_OUTCAR",
@@ -27,25 +27,25 @@ from ramannoodle.symmetry import StructuralSymmetry
         ),
         ("test/data/TiO2/phonons_OUTCAR", 0, np.array([1, 0, 0]), np.array([0.01]), 72),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_add_art(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     atom_index: int,
     direction: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
     known_dof_added: int,
 ) -> None:
     """Test add_art (normal)."""
-    symmetry = outcar_symmetry_fixture
-    model = ARTModel(symmetry, np.zeros((3, 3)))
+    ref_structure = outcar_ref_structure_fixture
+    model = ARTModel(ref_structure, np.zeros((3, 3)))
     model.add_art(atom_index, direction, amplitudes, np.zeros((amplitudes.size, 3, 3)))
     assert len(model._cartesian_basis_vectors) == known_dof_added
     assert np.isclose(np.linalg.norm(model._cartesian_basis_vectors[0]), 1)
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,atom_indexes,directions,amplitudes,polarizabilities,"
+    "outcar_ref_structure_fixture,atom_indexes,directions,amplitudes,polarizabilities,"
     "exception_type,in_reason",
     [
         (
@@ -121,10 +121,10 @@ def test_add_art(
             "due to symmetry, amplitude 0.1 should not be specified",
         ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_add_art_exception(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     atom_indexes: list[int],
     directions: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
@@ -133,8 +133,8 @@ def test_add_art_exception(
     in_reason: str,
 ) -> None:
     """Test add_art (exception)."""
-    symmetry = outcar_symmetry_fixture
-    model = ARTModel(symmetry, np.zeros((3, 3)))
+    ref_structure = outcar_ref_structure_fixture
+    model = ARTModel(ref_structure, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
         for atom_index, direction in zip(atom_indexes, directions):
             model.add_art(atom_index, direction, amplitudes, polarizabilities)
@@ -143,7 +143,7 @@ def test_add_art_exception(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,outcar_file_groups,exception_type,in_reason",
+    "outcar_ref_structure_fixture,outcar_file_groups,exception_type,in_reason",
     [
         (
             "test/data/STO_RATTLED_OUTCAR",
@@ -218,17 +218,17 @@ def test_add_art_exception(
             "is not orthogonal",
         ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_add_art_from_files_exception(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     outcar_file_groups: list[str],
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
     """Test add_dof_from_files (exception)."""
-    symmetry = outcar_symmetry_fixture
-    model = ARTModel(symmetry, np.zeros((3, 3)))
+    ref_structure = outcar_ref_structure_fixture
+    model = ARTModel(ref_structure, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
         for outcar_files in outcar_file_groups:
             model.add_art_from_files(outcar_files, "outcar")
@@ -236,7 +236,7 @@ def test_add_art_from_files_exception(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,atom_index, direction, amplitudes, known_tuples_len,"
+    "outcar_ref_structure_fixture,atom_index, direction, amplitudes, known_tuples_len,"
     "known_atom_index, known_directions, known_equivalent_atoms",
     [
         (
@@ -260,10 +260,10 @@ def test_add_art_from_files_exception(
             list(range(1, 36)),
         ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_get_specification_tuples(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     atom_index: int,
     direction: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
@@ -273,8 +273,8 @@ def test_get_specification_tuples(
     known_equivalent_atoms: list[int],
 ) -> None:
     """Test get_specification_tuples."""
-    symmetry = outcar_symmetry_fixture
-    model = ARTModel(symmetry, np.zeros((3, 3)))
+    ref_structure = outcar_ref_structure_fixture
+    model = ARTModel(ref_structure, np.zeros((3, 3)))
     model.add_art(atom_index, direction, amplitudes, np.zeros((amplitudes.size, 3, 3)))
     specification_tuples = model.get_specification_tuples()
 

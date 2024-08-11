@@ -11,8 +11,6 @@ from ramannoodle.io import (
 )
 from ramannoodle.globals import ATOMIC_WEIGHTS
 
-from .. import PHONONS_OUTCAR_NUM_ATOMS
-
 
 @pytest.mark.parametrize(
     "outcar_path_fixture, known_num_atoms, known_wavenumbers,"
@@ -20,7 +18,7 @@ from .. import PHONONS_OUTCAR_NUM_ATOMS
     [
         (
             "test/data/TiO2/phonons_OUTCAR",
-            PHONONS_OUTCAR_NUM_ATOMS,
+            108,
             np.array([811.691808, 811.691808, 811.691808, 811.691808]),
             np.array([-0.068172, 0.046409, 0.000000]) / np.sqrt(ATOMIC_WEIGHTS["Ti"]),
             np.array([-0.011752, 0.074105, 0.000000]) / np.sqrt(ATOMIC_WEIGHTS["O"]),

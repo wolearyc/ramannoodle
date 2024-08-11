@@ -6,6 +6,7 @@
     "dictionaryDefinitions": [],
     "dictionaries": [],
     "words": [
+        "__repr__",
         "anharmonic",
         "argmax",
         "automodule",
@@ -45,6 +46,7 @@
         "pytest",
         "Raman",
         "ramannoodle",
+        "repr",
         "spglib",
         "symprec",
         "tablefmt",
