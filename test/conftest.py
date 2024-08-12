@@ -12,13 +12,13 @@ import ramannoodle.io as rn_io
 
 
 @pytest.fixture(scope="session")
-def outcar_path_fixture(request: FixtureRequest) -> Path:
+def path_fixture(request: FixtureRequest) -> Path:
     """Return an outcar path."""
     return Path(request.param)
 
 
 @pytest.fixture(scope="session")
-def outcar_file_fixture(
+def file_fixture(
     request: FixtureRequest,
 ) -> Generator[TextIO, None, None]:
     """Return an outcar file."""

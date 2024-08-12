@@ -11,7 +11,7 @@ from ramannoodle.globals import ATOMIC_WEIGHTS
 
 
 @pytest.mark.parametrize(
-    "outcar_path_fixture, known_num_atoms, known_wavenumbers,"
+    "path_fixture, known_num_atoms, known_wavenumbers,"
     "known_first_displacement, known_last_displacement",
     [
         (
@@ -22,17 +22,17 @@ from ramannoodle.globals import ATOMIC_WEIGHTS
             np.array([-0.011752, 0.074105, 0.000000]) / np.sqrt(ATOMIC_WEIGHTS["O"]),
         ),
     ],
-    indirect=["outcar_path_fixture"],
+    indirect=["path_fixture"],
 )
 def test_read_phonons_from_outcar(
-    outcar_path_fixture: Path,
+    path_fixture: Path,
     known_num_atoms: int,
     known_wavenumbers: NDArray[np.float64],
     known_first_displacement: NDArray[np.float64],
     known_last_displacement: NDArray[np.float64],
 ) -> None:
     """Test read_phonons for outcar (normal)."""
-    phonons = rn_io.read_phonons(outcar_path_fixture, file_format="outcar")
+    phonons = rn_io.read_phonons(path_fixture, file_format="outcar")
 
     known_degrees_of_freedom = known_num_atoms * 3
     assert phonons.get_wavenumbers().shape == (known_degrees_of_freedom,)
