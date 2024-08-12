@@ -1,13 +1,150 @@
 """Functions for interacting with VASP POSCAR files."""
 
 from pathlib import Path
+from typing import TextIO
 
 import numpy as np
 from numpy.typing import NDArray
 
 from ramannoodle.io.io_utils import verify_structure, pathify
-from ramannoodle.exceptions import InvalidOptionException
-from ramannoodle.globals import ATOM_SYMBOLS
+from ramannoodle.exceptions import InvalidOptionException, InvalidFileException
+from ramannoodle.globals import ATOM_SYMBOLS, ATOMIC_NUMBERS
+from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.io.vasp.outcar import _get_lattice_vector_from_outcar_line
+
+
+def _read_lattice(poscar_file: TextIO) -> NDArray[np.float64]:
+    """Read all three lattice vectors (in angstroms) from a VASP POSCAR file.
+
+    Raises
+    ------
+    InvalidFileException
+    """
+    try:
+        poscar_file.readline()
+        line = poscar_file.readline()
+        scale_factor = float(line)
+    except ValueError as exc:
+        raise InvalidFileException(f"scale factor could not be parsed: {line}") from exc
+
+    lattice = []
+    for _ in range(3):
+        try:
+            line = poscar_file.readline()
+            vector = _get_lattice_vector_from_outcar_line(line)
+        except (EOFError, ValueError) as exc:
+            raise InvalidFileException(f"lattice could not be parsed: {line}") from exc
+        if vector.shape != (3,):
+            raise InvalidFileException(f"lattice could not be parsed: {line}")
+        lattice.append(vector)
+
+    return np.array(lattice) * scale_factor
+
+
+def _read_atomic_symbols(poscar_file: TextIO) -> list[str]:
+    """Read atomic symbols from a VASP POSCAR file.
+
+    Raises
+    ------
+    InvalidFileException
+
+    """
+    # First read symbols
+    line = poscar_file.readline()
+    symbols = line.split()
+    if len(symbols) == 0:
+        raise InvalidFileException(f"atom symbols not found: {line}")
+    for symbol in symbols:
+        if symbol not in ATOMIC_NUMBERS:
+            raise InvalidFileException(f"unrecognized atom symbol: {symbol}")
+
+    # Then read ion counts
+    line = poscar_file.readline()
+    str_counts = line.split()
+    if len(str_counts) != len(symbols):
+        spec = f"{len(str_counts)} != {len(symbols)}"
+        raise InvalidFileException(f"wrong number of ion counts: {spec}")
+    int_counts = []
+    for count in str_counts:
+        try:
+            int_counts.append(int(count))
+        except ValueError as err:
+            raise InvalidFileException(f"could not parse counts: {line}") from err
+
+    result = []
+    for symbol, int_count in zip(symbols, int_counts):
+        result += [symbol] * int_count
+    return result
+
+
+def _read_fractional_positions(
+    poscar_file: TextIO, lattice: NDArray[np.float64], num_atoms: int
+) -> NDArray[np.float64]:
+    """Read atomic symbols from a VASP POSCAR file.
+
+    Raises
+    ------
+    InvalidFileException
+
+    """
+    cartesian_mode = False
+    label = poscar_file.readline()
+    if label[0].lower() == "s":  # selective dynamics
+        label = poscar_file.readline()
+    if label[0].lower() == "c":
+        cartesian_mode = True
+    elif label[0].lower() != "d":
+        raise InvalidFileException(f"unrecognized coordinate format: {label}")
+
+    positions = []
+    for _ in range(num_atoms):
+        try:
+            line = poscar_file.readline()
+            position = [float(item) for item in line.split()[0:3]]
+        except (EOFError, ValueError, IndexError) as exc:
+            raise InvalidFileException(
+                f"positions could not be parsed: {line}"
+            ) from exc
+        if len(position) != 3:
+            raise InvalidFileException(f"positions could not be parsed: {line}")
+        positions.append(position)
+
+    if cartesian_mode:
+        return np.array(positions) @ np.linalg.inv(lattice)
+    return np.array(positions)
+
+
+def read_ref_structure(
+    filepath: str | Path,
+) -> ReferenceStructure:
+    """Extract reference structure from a VASP POSCAR file.
+
+    Parameters
+    ----------
+    filepath
+
+    Raises
+    ------
+    InvalidFileException
+        If the POSCAR has an unexpected format.
+    SymmetryException
+        If POSCAR was read but the symmetry search failed
+    FileNotFoundError
+    """
+    lattice = np.array([])
+    fractional_positions = np.array([])
+    atomic_numbers = []
+
+    filepath = pathify(filepath)
+    with open(filepath, "r", encoding="utf-8") as poscar_file:
+        lattice = _read_lattice(poscar_file)
+        atomic_symbols = _read_atomic_symbols(poscar_file)
+        atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
+        fractional_positions = _read_fractional_positions(
+            poscar_file, lattice, len(atomic_symbols)
+        )
+
+    return ReferenceStructure(atomic_numbers, lattice, fractional_positions)
 
 
 def _scrub_options(**options: str) -> dict[str, str]:

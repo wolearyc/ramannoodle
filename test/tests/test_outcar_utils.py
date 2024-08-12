@@ -79,12 +79,12 @@ def test_read_atomic_symbols_from_outcar(
     "file_fixture, exception_type, in_reason",
     [
         (
-            "test/data/invalid_vasp/no_elements_OUTCAR",
+            "test/data/malformed/vasp.outcar/no_elements_OUTCAR",
             InvalidFileException,
             "POTCAR block not found",
         ),
         (
-            "test/data/invalid_vasp/no_ion_count_OUTCAR",
+            "test/data/malformed/vasp.outcar/no_ion_count_OUTCAR",
             InvalidFileException,
             "ion number block could not be parsed",
         ),
@@ -130,12 +130,12 @@ def test_read_cartesian_positions_from_outcar(
     "file_fixture, exception_type, in_reason",
     [
         (
-            "test/data/invalid_vasp/empty_file",
+            "test/data/malformed/empty_file",
             InvalidFileException,
             "cartesian positions not found",
         ),
         (
-            "test/data/invalid_vasp/invalid_positions_OUTCAR",
+            "test/data/malformed/vasp.outcar/invalid_positions_OUTCAR",
             InvalidFileException,
             "cartesian positions could not be parsed",
         ),
@@ -181,12 +181,12 @@ def test_read_fractional_positions_from_outcar(
     "file_fixture, exception_type, in_reason",
     [
         (
-            "test/data/invalid_vasp/empty_file",
+            "test/data/malformed/empty_file",
             InvalidFileException,
             "fractional positions not found",
         ),
         (
-            "test/data/invalid_vasp/invalid_positions_OUTCAR",
+            "test/data/malformed/vasp.outcar/invalid_positions_OUTCAR",
             InvalidFileException,
             "fractional positions could not be parsed",
         ),
@@ -234,12 +234,12 @@ def test_read_polarizability_from_outcar(
     "file_fixture, exception_type, in_reason",
     [
         (
-            "test/data/invalid_vasp/invalid_positions_OUTCAR",
+            "test/data/malformed/vasp.outcar/invalid_positions_OUTCAR",
             InvalidFileException,
             "polarizability not found",
         ),
         (
-            "test/data/invalid_vasp/invalid_eps_OUTCAR",
+            "test/data/malformed/vasp.outcar/invalid_eps_OUTCAR",
             InvalidFileException,
             "polarizability could not be parsed",
         ),
@@ -295,12 +295,12 @@ def test_read_lattice_from_outcar(
     "file_fixture, exception_type, in_reason",
     [
         (
-            "test/data/invalid_vasp/empty_file",
+            "test/data/malformed/empty_file",
             InvalidFileException,
             "outcar does not have expected format",
         ),
         (
-            "test/data/invalid_vasp/invalid_positions_lattice_OUTCAR",
+            "test/data/malformed/vasp.outcar/invalid_positions_lattice_OUTCAR",
             InvalidFileException,
             "lattice could not be parsed:  ",
         ),

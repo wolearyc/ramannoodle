@@ -1,6 +1,7 @@
 """Tests for VASP-POSCAR-related routines."""
 
 from typing import Type
+from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
@@ -9,6 +10,7 @@ import pytest
 
 from ramannoodle.io.vasp import poscar
 import ramannoodle.io as rn_io
+from ramannoodle.exceptions import InvalidFileException
 
 
 # pylint: disable=protected-access
@@ -86,6 +88,14 @@ def test_write_read_poscar(
         file_format="poscar",
         overwrite="true",
     )
+    reference_structure = rn_io.read_ref_structure(
+        "test/data/temp", file_format="poscar"
+    )
+    assert np.isclose(reference_structure._lattice, lattice).all()
+    assert np.isclose(reference_structure._atomic_numbers, atomic_numbers).all()
+    assert np.isclose(
+        reference_structure._fractional_positions, fractional_positions
+    ).all()
 
 
 @pytest.mark.parametrize(
@@ -150,3 +160,55 @@ def test_write_poscar_exception(  # pylint: disable=too-many-arguments
             **options,
         )
     assert in_reason in str(err.value)
+
+
+@pytest.mark.parametrize(
+    "path_fixture, exception_type, in_reason",
+    [
+        (
+            "test/data/malformed/vasp.poscar/bogus_label",
+            InvalidFileException,
+            "unrecognized coordinate format: hello world!",
+        ),
+        (
+            "test/data/malformed/vasp.poscar/missing_atoms",
+            InvalidFileException,
+            "positions could not be parsed:",
+        ),
+        (
+            "test/data/malformed/vasp.poscar/missing_basis",
+            InvalidFileException,
+            "lattice could not be parsed:",
+        ),
+        (
+            "test/data/malformed/vasp.poscar/missing_count",
+            InvalidFileException,
+            "wrong number of ion counts: 1 != 2",
+        ),
+        (
+            "test/data/malformed/vasp.poscar/missing_ion",
+            InvalidFileException,
+            "wrong number of ion counts: 2 != 1",
+        ),
+        (
+            "test/data/malformed/vasp.poscar/missing_label",
+            InvalidFileException,
+            "scale factor could not be parsed:",
+        ),
+        (
+            "test/data/malformed/vasp.poscar/too_many_labels",
+            InvalidFileException,
+            "positions could not be parsed: This shouldn't be here",
+        ),
+    ],
+    indirect=["path_fixture"],
+)
+def test_read_poscar_exception(
+    path_fixture: Path,
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test poscar reading (exception)."""
+    with pytest.raises(exception_type) as error:
+        rn_io.read_ref_structure(path_fixture, file_format="poscar")
+    assert in_reason in str(error.value)

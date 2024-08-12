@@ -14,7 +14,10 @@ _PHONON_READERS = {"outcar": vasp.outcar.read_phonons}
 _POSITION_AND_POLARIZABILITY_READERS = {
     "outcar": vasp.outcar.read_positions_and_polarizability
 }
-_REFERENCE_STRUCTURE_READERS = {"outcar": vasp.outcar.read_ref_structure}
+_REFERENCE_STRUCTURE_READERS = {
+    "outcar": vasp.outcar.read_ref_structure,
+    "poscar": vasp.poscar.read_ref_structure,
+}
 
 
 def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
