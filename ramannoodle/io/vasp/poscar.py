@@ -87,12 +87,12 @@ def _read_positions(
     InvalidFileException
 
     """
-    cartesian_mode = False
+    cart_mode = False
     label = poscar_file.readline()
     if label[0].lower() == "s":  # selective dynamics
         label = poscar_file.readline()
     if label[0].lower() == "c":
-        cartesian_mode = True
+        cart_mode = True
     elif label[0].lower() != "d":
         raise InvalidFileException(f"unrecognized coordinate format: {label}")
 
@@ -109,7 +109,7 @@ def _read_positions(
             raise InvalidFileException(f"positions could not be parsed: {line}")
         positions.append(position)
 
-    if cartesian_mode:
+    if cart_mode:
         return np.array(positions) @ np.linalg.inv(lattice)
     return np.array(positions)
 

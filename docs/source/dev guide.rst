@@ -49,7 +49,7 @@ In no particular order, here are some guidelines that are followed throughout ra
 
 * Docstring descriptions for array arguments should provide a dimension and shape. Uppercase letters can be used for cases where shape is variable. For example, "4D array with shape (M,N,3) where M is ... and N is ...".
 
-* Unless otherwise noted, fractional coordinates are always used. Variables that are in Cartesian coordinates always have "cartesian\_" appended.
+* For all coordinates, vectors, displacements, etc, ramannoodle works in fractional coordinates. Variables and arguments in cartesian coordinates will also have  "cart\_" appended.
 
 * Use classes widely. Sometimes, a regular function is all that is needed!
 

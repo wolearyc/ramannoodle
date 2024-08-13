@@ -71,7 +71,7 @@ class ARTModel(InterpolationModel):
 
     def add_dof(  # pylint: disable=too-many-arguments
         self,
-        displacement: NDArray[np.float64],
+        cart_displacement: NDArray[np.float64],
         amplitudes: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
         interpolation_order: int,
@@ -108,7 +108,7 @@ class ARTModel(InterpolationModel):
     def add_art(
         self,
         atom_index: int,
-        direction: NDArray[np.float64],
+        cart_direction: NDArray[np.float64],
         amplitudes: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
     ) -> None:
@@ -124,7 +124,7 @@ class ARTModel(InterpolationModel):
         atom_index
             Index of atom, consistent with the StructuralSymmetry used to initialize
             the model.
-        direction
+        cart_direction
             1D array with shape (3,). Must be orthogonal to all previously added ARTs
             belonging to specified atom.
         amplitudes
@@ -141,6 +141,9 @@ class ARTModel(InterpolationModel):
             Provided ART was invalid.
 
         """
+        direction = self.ref_structure.get_fractional_displacement(
+            np.array([cart_direction])
+        )
         if not isinstance(atom_index, int):
             raise get_type_error("atom_index", atom_index, "int")
         try:
@@ -164,7 +167,7 @@ class ARTModel(InterpolationModel):
 
         # Checks amplitudes and displacements
         super().add_dof(
-            displacement,
+            self.ref_structure.get_cart_displacement(displacement),
             amplitudes,
             polarizabilities,
             1,
@@ -244,7 +247,7 @@ class ARTModel(InterpolationModel):
                 (
                     atom_index,
                     equivalent_atom_dict[atom_index],
-                    self._get_art_directions(atom_index),
+                    self._get_art_cart_directions(atom_index),
                 )
             )
         return specification_tuples
@@ -275,36 +278,40 @@ class ARTModel(InterpolationModel):
 
         dof_indexes = []
         for atom_index in atom_indexes:
-            for index, basis_vector in enumerate(self._cartesian_basis_vectors):
+            for index, basis_vector in enumerate(self._cart_basis_vectors):
                 direction = basis_vector[atom_index]
                 if not np.isclose(direction, 0, atol=1e-5).all():
                     dof_indexes.append(index)
         return dof_indexes
 
-    def _get_art_directions(self, atom_index: int) -> list[NDArray[np.float64]]:
-        """Return specified art direction vectors for an atom."""
+    def _get_art_cart_directions(self, atom_index: int) -> list[NDArray[np.float64]]:
+        """Return specified art cartesian direction vectors for an atom."""
         indexes = self.get_dof_indexes(atom_index)
-        directions = [
-            self._cartesian_basis_vectors[index][atom_index] for index in indexes
+        cart_directions = [
+            self._cart_basis_vectors[index][atom_index] for index in indexes
         ]
-        return directions
+        return cart_directions
 
     def __repr__(self) -> str:
         """Get string representation."""
         specification_tuples = self.get_specification_tuples()
 
         table = [["Atom index", "Directions", "Specified", "Equivalent atoms"]]
-        for atom_index, equivalent_atom_indexes, directions in specification_tuples:
+        for (
+            atom_index,
+            equivalent_atom_indexes,
+            cart_directions,
+        ) in specification_tuples:
             row = [str(atom_index)]
-            row.append(_get_directions_str(directions))
-            row.append(_get_specified_str(len(directions)))
+            row.append(_get_directions_str(cart_directions))
+            row.append(_get_specified_str(len(cart_directions)))
             row.append(str(len(equivalent_atom_indexes)))
             table.append(row)
         result = tabulate(table, headers="firstrow", tablefmt="rounded_outline")
 
         num_masked = np.sum(self._mask)
         if num_masked > 0:
-            num_arts = len(self._cartesian_basis_vectors)
+            num_arts = len(self._cart_basis_vectors)
             msg = f"ATTENTION: {num_masked}/{num_arts} atomic Raman tensors are masked."
             result += f"\n {AnsiColors.WARNING_YELLOW} {msg} {AnsiColors.END}"
         if self._is_dummy_model > 0:

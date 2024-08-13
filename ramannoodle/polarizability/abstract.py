@@ -11,13 +11,13 @@ class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
 
     @abstractmethod
     def get_polarizability(
-        self, cartesian_displacement: NDArray[np.float64]
+        self, cart_displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
         """Return an estimated polarizability for a given cartesian displacement.
 
         Parameters
         ----------
-        cartesian_displacement
+        cart_displacement
             2D array with shape (N,3) where N is the number of atoms
 
         Returns

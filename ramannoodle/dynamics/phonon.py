@@ -21,7 +21,7 @@ class Phonons(Dynamics):
     ----------
     wavenumbers
         1D array with length M
-    cartesian_displacements
+    cart_displacements
         3D array with shape (M,N,3) where N is the number of atoms
 
     """
@@ -29,7 +29,7 @@ class Phonons(Dynamics):
     def __init__(
         self,
         wavenumbers: NDArray[np.float64],
-        cartesian_displacements: NDArray[np.float64],
+        cart_displacements: NDArray[np.float64],
     ) -> None:
         try:
             if wavenumbers.ndim != 1:
@@ -37,21 +37,17 @@ class Phonons(Dynamics):
         except AttributeError as exc:
             raise TypeError("wavenumbers is not an ndarray") from exc
         try:
-            if (
-                cartesian_displacements.ndim != 3
-                or cartesian_displacements.shape[2] != 3
-            ):
-                raise ValueError("cartesian_displacements does not have shape (_,_,3)")
-            if cartesian_displacements.shape[0] != wavenumbers.shape[0]:
+            if cart_displacements.ndim != 3 or cart_displacements.shape[2] != 3:
+                raise ValueError("cart_displacements does not have shape (_,_,3)")
+            if cart_displacements.shape[0] != wavenumbers.shape[0]:
                 raise ValueError(
-                    "wavenumbers and cartesian_displacements do not have the same"
-                    "length"
+                    "wavenumbers and cart_displacements do not have the same length"
                 )
         except AttributeError as exc:
-            raise TypeError("cartesian_displacements is not an ndarray") from exc
+            raise TypeError("cart_displacements is not an ndarray") from exc
 
         self._wavenumbers: NDArray[np.float64] = wavenumbers
-        self._cartesian_displacements: NDArray[np.float64] = cartesian_displacements
+        self._cart_displacements: NDArray[np.float64] = cart_displacements
 
     @property
     def wavenumbers(self) -> NDArray[np.float64]:
@@ -65,7 +61,7 @@ class Phonons(Dynamics):
         return self._wavenumbers
 
     @property
-    def cartesian_displacements(self) -> NDArray[np.float64]:
+    def cart_displacements(self) -> NDArray[np.float64]:
         """Get cartesian displacements.
 
         Returns
@@ -74,20 +70,20 @@ class Phonons(Dynamics):
             3D array with shape (M,N,3) where M is the number of displacements
             and N is the number of atoms
         """
-        return self._cartesian_displacements
+        return self._cart_displacements
 
     def get_raman_spectrum(
         self, polarizability_model: PolarizabilityModel
     ) -> PhononRamanSpectrum:
         """Calculate a raman spectrum using a polarizability model."""
         raman_tensors = []
-        for cartesian_displacement in self._cartesian_displacements:
+        for cart_displacement in self._cart_displacements:
             try:
                 plus = polarizability_model.get_polarizability(
-                    cartesian_displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
+                    cart_displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
                 )
                 minus = polarizability_model.get_polarizability(
-                    -cartesian_displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
+                    -cart_displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
                 )
             except ValueError as exc:
                 raise ValueError(

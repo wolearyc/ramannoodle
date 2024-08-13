@@ -97,9 +97,7 @@ def _read_eigenvector(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64
         raise InvalidFileException(f"eigenvector could not be parsed: {line}") from exc
 
 
-def _read_cartesian_positions(
-    outcar_file: TextIO, num_atoms: int
-) -> NDArray[np.float64]:
+def _read_cart_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64]:
     """Read atomic cartesian positions from a VASP OUTCAR file.
 
     Raises
@@ -112,17 +110,17 @@ def _read_cartesian_positions(
         )
     except NoMatchingLineFoundException as exc:
         raise InvalidFileException("cartesian positions not found") from exc
-    cartesian_coordinates = []
+    cart_coordinates = []
     for _ in range(num_atoms):
         try:
             line = outcar_file.readline()
-            cartesian_coordinates.append([float(item) for item in line.split()[0:3]])
+            cart_coordinates.append([float(item) for item in line.split()[0:3]])
         except (EOFError, ValueError, IndexError) as exc:
             raise InvalidFileException(
                 f"cartesian positions could not be parsed: {line}"
             ) from exc
 
-    return np.array(cartesian_coordinates)
+    return np.array(cart_coordinates)
 
 
 def _read_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64]:
@@ -139,16 +137,16 @@ def _read_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64]:
     except NoMatchingLineFoundException as exc:
         raise InvalidFileException("fractional positions not found") from exc
 
-    fractional_coordinates = []
+    positions = []
     for _ in range(num_atoms):
         try:
             line = outcar_file.readline()
-            fractional_coordinates.append([float(item) for item in line.split()[0:3]])
+            positions.append([float(item) for item in line.split()[0:3]])
         except (EOFError, ValueError, IndexError) as exc:
             raise InvalidFileException(
                 f"fractional positions could not be parsed: {line}"
             ) from exc
-    return np.array(fractional_coordinates)
+    return np.array(positions)
 
 
 def _read_polarizability(outcar_file: TextIO) -> NDArray[np.float64]:
@@ -285,9 +283,9 @@ def read_phonons(filepath: str | Path) -> Phonons:
         # Divide eigenvectors by sqrt(mass) to get cartesian displacements
         wavenumbers = np.array(wavenumbers)
         eigenvectors = np.array(eigenvectors)
-        cartesian_displacements = eigenvectors / np.sqrt(atomic_weights)[:, np.newaxis]
+        cart_displacements = eigenvectors / np.sqrt(atomic_weights)[:, np.newaxis]
 
-        return Phonons(wavenumbers, cartesian_displacements)
+        return Phonons(wavenumbers, cart_displacements)
 
 
 def read_positions_and_polarizability(

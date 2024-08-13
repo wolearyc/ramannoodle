@@ -15,7 +15,8 @@ from ramannoodle.structure.reference import ReferenceStructure
 
 
 @pytest.mark.parametrize(
-    "outcar_ref_structure_fixture,atom_index, direction, amplitudes, known_dof_added",
+    "outcar_ref_structure_fixture,atom_index, cart_direction, amplitudes,"
+    "known_dof_added",
     [
         (
             "test/data/STO_RATTLED_OUTCAR",
@@ -31,21 +32,23 @@ from ramannoodle.structure.reference import ReferenceStructure
 def test_add_art(
     outcar_ref_structure_fixture: ReferenceStructure,
     atom_index: int,
-    direction: NDArray[np.float64],
+    cart_direction: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
     known_dof_added: int,
 ) -> None:
     """Test add_art (normal)."""
     ref_structure = outcar_ref_structure_fixture
     model = ARTModel(ref_structure, np.zeros((3, 3)))
-    model.add_art(atom_index, direction, amplitudes, np.zeros((amplitudes.size, 3, 3)))
-    assert len(model._cartesian_basis_vectors) == known_dof_added
-    assert np.isclose(np.linalg.norm(model._cartesian_basis_vectors[0]), 1)
+    model.add_art(
+        atom_index, cart_direction, amplitudes, np.zeros((amplitudes.size, 3, 3))
+    )
+    assert len(model._cart_basis_vectors) == known_dof_added
+    assert np.isclose(np.linalg.norm(model._cart_basis_vectors[0]), 1)
 
 
 @pytest.mark.parametrize(
-    "outcar_ref_structure_fixture,atom_indexes,directions,amplitudes,polarizabilities,"
-    "exception_type,in_reason",
+    "outcar_ref_structure_fixture,atom_indexes,cart_directions,amplitudes,"
+    "polarizabilities,exception_type,in_reason",
     [
         (
             "test/data/STO_RATTLED_OUTCAR",  # This case gives a warning.
@@ -125,7 +128,7 @@ def test_add_art(
 def test_add_art_exception(
     outcar_ref_structure_fixture: ReferenceStructure,
     atom_indexes: list[int],
-    directions: NDArray[np.float64],
+    cart_directions: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
     polarizabilities: NDArray[np.float64],
     exception_type: Type[Exception],
@@ -135,7 +138,7 @@ def test_add_art_exception(
     ref_structure = outcar_ref_structure_fixture
     model = ARTModel(ref_structure, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
-        for atom_index, direction in zip(atom_indexes, directions):
+        for atom_index, direction in zip(atom_indexes, cart_directions):
             model.add_art(atom_index, direction, amplitudes, polarizabilities)
 
     assert in_reason in str(error.value)
@@ -235,8 +238,8 @@ def test_add_art_from_files_exception(
 
 
 @pytest.mark.parametrize(
-    "outcar_ref_structure_fixture,atom_index, direction, amplitudes, known_tuples_len,"
-    "known_atom_index, known_directions, known_equivalent_atoms",
+    "outcar_ref_structure_fixture,atom_index, cart_direction, amplitudes, "
+    "known_tuples_len,known_atom_index, known_directions, known_equivalent_atoms",
     [
         (
             "test/data/STO_RATTLED_OUTCAR",
@@ -264,7 +267,7 @@ def test_add_art_from_files_exception(
 def test_get_specification_tuples(
     outcar_ref_structure_fixture: ReferenceStructure,
     atom_index: int,
-    direction: NDArray[np.float64],
+    cart_direction: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
     known_tuples_len: int,
     known_atom_index: int,
@@ -274,7 +277,9 @@ def test_get_specification_tuples(
     """Test get_specification_tuples."""
     ref_structure = outcar_ref_structure_fixture
     model = ARTModel(ref_structure, np.zeros((3, 3)))
-    model.add_art(atom_index, direction, amplitudes, np.zeros((amplitudes.size, 3, 3)))
+    model.add_art(
+        atom_index, cart_direction, amplitudes, np.zeros((amplitudes.size, 3, 3))
+    )
     specification_tuples = model.get_specification_tuples()
 
     assert len(specification_tuples) == known_tuples_len

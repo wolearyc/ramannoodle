@@ -34,13 +34,11 @@ from ramannoodle.io.io_utils import pathify_as_list
 
 
 def get_amplitude(
-    cartesian_basis_vector: NDArray[np.float64],
-    cartesian_displacement: NDArray[np.float64],
+    cart_basis_vector: NDArray[np.float64],
+    cart_displacement: NDArray[np.float64],
 ) -> float:
     """Get amplitude of a displacement in angstroms."""
-    return float(
-        np.dot(cartesian_basis_vector.flatten(), cartesian_displacement.flatten())
-    )
+    return float(np.dot(cart_basis_vector.flatten(), cart_displacement.flatten()))
 
 
 def find_duplicates(vectors: Iterable[ArrayLike]) -> NDArray | None:
@@ -99,7 +97,7 @@ class InterpolationModel(PolarizabilityModel):
         self._ref_structure = ref_structure
         self._equilibrium_polarizability = equilibrium_polarizability
         self._is_dummy_model = is_dummy_model
-        self._cartesian_basis_vectors: list[NDArray[np.float64]] = []
+        self._cart_basis_vectors: list[NDArray[np.float64]] = []
         self._interpolations: list[BSpline] = []
         self._mask: NDArray[np.bool] = np.array([], dtype="bool")
 
@@ -119,9 +117,9 @@ class InterpolationModel(PolarizabilityModel):
         return self._is_dummy_model
 
     @property
-    def cartesian_basis_vectors(self) -> list[NDArray[np.float64]]:
+    def cart_basis_vectors(self) -> list[NDArray[np.float64]]:
         """Get cartesian basis vectors."""
-        return self._cartesian_basis_vectors
+        return self._cart_basis_vectors
 
     @property
     def interpolations(self) -> list[BSpline]:
@@ -151,13 +149,13 @@ class InterpolationModel(PolarizabilityModel):
         self._mask = value
 
     def get_polarizability(
-        self, cartesian_displacement: NDArray[np.float64]
+        self, cart_displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
         """Return an estimated polarizability for a given cartesian displacement.
 
         Parameters
         ----------
-        cartesian_displacement
+        cart_displacement
             2D array with shape (N,3) where N is the number of atoms
 
         Returns
@@ -174,21 +172,21 @@ class InterpolationModel(PolarizabilityModel):
         delta_polarizability: NDArray[np.float64] = np.zeros((3, 3))
         try:
             for basis_vector, interpolation, mask in zip(
-                self._cartesian_basis_vectors,
+                self._cart_basis_vectors,
                 self._interpolations,
                 self._mask,
                 strict=True,
             ):
                 try:
                     amplitude = np.dot(
-                        basis_vector.flatten(), cartesian_displacement.flatten()
+                        basis_vector.flatten(), cart_displacement.flatten()
                     )
                 except AttributeError as exc:
-                    raise TypeError("cartesian_displacement is not an ndarray") from exc
+                    raise TypeError("cart_displacement is not an ndarray") from exc
                 except ValueError as exc:
                     raise ValueError(
-                        "cartesian_displacement has incompatible length "
-                        f"({len(cartesian_displacement)}!={len(basis_vector)})"
+                        "cart_displacement has incompatible length "
+                        f"({len(cart_displacement)}!={len(basis_vector)})"
                     ) from exc
                 delta_polarizability += (1 - mask) * np.array(
                     interpolation(amplitude), dtype="float64"
@@ -233,11 +231,11 @@ class InterpolationModel(PolarizabilityModel):
             3-tuple of the form (basis vectors, interpolation_xs, interpolation_ys)
         """
         # Check that the parent displacement is orthogonal to existing basis vectors
-        parent_cartesian_basis_vector = self._ref_structure.get_cartesian_displacement(
+        parent_cart_basis_vector = self._ref_structure.get_cart_displacement(
             parent_displacement
         )
         result = is_orthogonal_to_all(
-            parent_cartesian_basis_vector, self._cartesian_basis_vectors
+            parent_cart_basis_vector, self._cart_basis_vectors
         )
         if result != -1:
             raise InvalidDOFException(
@@ -279,12 +277,12 @@ class InterpolationModel(PolarizabilityModel):
                         (np.linalg.inv(rotation) @ delta_polarizability @ rotation)
                     )
 
-            child_cartesian_basis_vector = (
-                self._ref_structure.get_cartesian_displacement(child_displacement)
+            child_cart_basis_vector = self._ref_structure.get_cart_displacement(
+                child_displacement
             )
-            child_cartesian_basis_vector /= np.linalg.norm(child_cartesian_basis_vector)
+            child_cart_basis_vector /= np.linalg.norm(child_cart_basis_vector)
 
-            basis_vectors.append(child_cartesian_basis_vector)
+            basis_vectors.append(child_cart_basis_vector)
             interpolation_xs.append(interpolation_x)
             interpolation_ys.append(interpolation_y)
 
@@ -354,7 +352,7 @@ class InterpolationModel(PolarizabilityModel):
                     "interpolation_order", interpolation_order, "int"
                 ) from exc
 
-        self._cartesian_basis_vectors += basis_vectors_to_add
+        self._cart_basis_vectors += basis_vectors_to_add
         if not self._is_dummy_model:
             self._interpolations += interpolations_to_add
         # FALSE -> not masking, TRUE -> masking
@@ -362,7 +360,7 @@ class InterpolationModel(PolarizabilityModel):
 
     def add_dof(  # pylint: disable=too-many-arguments
         self,
-        displacement: NDArray[np.float64],
+        cart_displacement: NDArray[np.float64],
         amplitudes: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
         interpolation_order: int,
@@ -378,7 +376,7 @@ class InterpolationModel(PolarizabilityModel):
 
         Parameters
         ----------
-        displacement
+        cart_displacement
             2D array with shape (N,3) where N is the number of atoms. Units
             are arbitrary. Must be orthogonal to all previously added DOFs.
         amplitudes
@@ -402,6 +400,10 @@ class InterpolationModel(PolarizabilityModel):
 
         """
         try:
+            displacement = self.ref_structure.get_fractional_displacement(
+                cart_displacement
+            )
+
             parent_displacement = displacement / np.linalg.norm(displacement * 10.0)
         except TypeError as exc:
             raise TypeError("displacement is not an ndarray") from exc
@@ -462,7 +464,7 @@ class InterpolationModel(PolarizabilityModel):
 
         # Checks amplitudes
         self.add_dof(
-            displacements[0],
+            self.ref_structure.get_cart_displacement(displacements[0]),
             amplitudes,
             polarizabilities,
             interpolation_order,
@@ -519,20 +521,14 @@ class InterpolationModel(PolarizabilityModel):
             raise InvalidDOFException(
                 f"displacement (file-index={result}) is not collinear"
             )
-        cartesian_basis_vector = self._ref_structure.get_cartesian_displacement(
-            displacements[0]
-        )
-        cartesian_basis_vector /= np.linalg.norm(cartesian_basis_vector)
+        cart_basis_vector = self._ref_structure.get_cart_displacement(displacements[0])
+        cart_basis_vector /= np.linalg.norm(cart_basis_vector)
 
         # Calculate amplitudes
         amplitudes = []
         for displacement in displacements:
-            cartesian_displacement = self._ref_structure.get_cartesian_displacement(
-                displacement
-            )
-            amplitudes.append(
-                get_amplitude(cartesian_basis_vector, cartesian_displacement)
-            )
+            cart_displacement = self._ref_structure.get_cart_displacement(displacement)
+            amplitudes.append(get_amplitude(cart_basis_vector, cart_displacement))
         return (
             np.array(displacements),
             np.array(amplitudes),
@@ -559,7 +555,7 @@ class InterpolationModel(PolarizabilityModel):
     def __repr__(self) -> str:
         """Return string representation."""
         total_dofs = 3 * len(self._ref_structure.positions)
-        specified_dofs = len(self._cartesian_basis_vectors)
+        specified_dofs = len(self._cart_basis_vectors)
         core = f"{specified_dofs}/{total_dofs}"
         if specified_dofs == total_dofs:
             core = AnsiColors.OK_GREEN + core + AnsiColors.END
@@ -572,7 +568,7 @@ class InterpolationModel(PolarizabilityModel):
 
         num_masked = np.sum(self._mask)
         if num_masked > 0:
-            num_arts = len(self._cartesian_basis_vectors)
+            num_arts = len(self._cart_basis_vectors)
             msg = f"ATTENTION: {num_masked}/{num_arts} degrees of freedom are masked."
             result += f"\n {AnsiColors.WARNING_YELLOW} {msg} {AnsiColors.END}"
         if self._is_dummy_model:

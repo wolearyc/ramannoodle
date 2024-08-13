@@ -14,10 +14,11 @@ from ramannoodle.structure.structure_utils import (
     displace_positions,
     transform_positions,
     apply_pbc,
+    apply_pbc_displacement,
+    calculate_displacement,
 )
 from ramannoodle.globals import ATOM_SYMBOLS
 from ramannoodle.structure import symmetry_utils
-import ramannoodle.structure.structure_utils
 
 
 def _compute_permutation_matrices(
@@ -188,15 +189,11 @@ class ReferenceStructure:
             transform the parameter `displacements` into that degree of freedom.
 
         """
-        displacement = ramannoodle.structure.structure_utils.apply_pbc_displacement(
-            displacement
-        )
+        displacement = apply_pbc_displacement(displacement)
         # Scale the displacement for numerical reasons.
         displacement = displacement / (np.linalg.norm(displacement) * 10)
 
-        ref_positions = ramannoodle.structure.structure_utils.displace_positions(
-            self._positions, displacement
-        )
+        ref_positions = displace_positions(self._positions, displacement)
 
         result = []
         orthogonal_displacements: list[NDArray[np.float64]] = []
@@ -205,16 +202,12 @@ class ReferenceStructure:
         ):
 
             # Transform, permute, then get candidate displacement
-            candidate_positions = (
-                ramannoodle.structure.structure_utils.transform_positions(
-                    ref_positions, rotation, translation
-                )
+            candidate_positions = transform_positions(
+                ref_positions, rotation, translation
             )
             candidate_positions = permutation_matrix @ candidate_positions
-            candidate_displacement = (
-                ramannoodle.structure.structure_utils.calculate_displacement(
-                    candidate_positions, self._positions
-                )
+            candidate_displacement = calculate_displacement(
+                candidate_positions, self._positions
             )
 
             orthogonal_result = symmetry_utils.is_orthogonal_to_all(
@@ -259,23 +252,32 @@ class ReferenceStructure:
 
         return result
 
-    def get_cartesian_displacement(
-        self, fractional_displacement: NDArray[np.float64]
+    def get_cart_displacement(
+        self, displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
         """Convert a fractional displacement into cartesian coordinates.
 
         Parameters
         ----------
-        fractional_displacement
+        displacement
             2D array with shape (N,3) where N is the number of atoms
         """
-        fractional_displacement = (
-            ramannoodle.structure.structure_utils.apply_pbc_displacement(
-                fractional_displacement
-            )
-        )
+        displacement = apply_pbc_displacement(displacement)
 
-        return fractional_displacement @ self._lattice
+        return displacement @ self._lattice
+
+    def get_fractional_displacement(
+        self, cart_displacement: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
+        """Convert a Cartesian displacement into fractional coordinates.
+
+        Parameters
+        ----------
+        displacement
+            2D array with shape (N,3) where N is the number of atoms
+        """
+        displacement = cart_displacement @ np.linalg.inv(self.lattice)
+        return apply_pbc_displacement(displacement)
 
     def get_atom_indexes(self, atom_symbols: str | list[str]) -> list[int]:
         """Return atom indexes with matching symbols.

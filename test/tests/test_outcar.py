@@ -37,15 +37,11 @@ def test_read_phonons_from_outcar(
     known_degrees_of_freedom = known_num_atoms * 3
     assert phonons.wavenumbers.shape == (known_degrees_of_freedom,)
     assert np.isclose(phonons.wavenumbers[0:4], known_wavenumbers).all()
-    assert phonons.cartesian_displacements.shape == (
+    assert phonons.cart_displacements.shape == (
         known_degrees_of_freedom,
         known_num_atoms,
         3,
     )
-    assert np.isclose(
-        phonons.cartesian_displacements[0, 0], known_first_displacement
-    ).all()
-    print(phonons.cartesian_displacements[-1, -1])
-    assert np.isclose(
-        phonons.cartesian_displacements[-1, -1], known_last_displacement
-    ).all()
+    assert np.isclose(phonons.cart_displacements[0, 0], known_first_displacement).all()
+    print(phonons.cart_displacements[-1, -1])
+    assert np.isclose(phonons.cart_displacements[-1, -1], known_last_displacement).all()
