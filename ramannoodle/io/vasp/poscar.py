@@ -114,6 +114,32 @@ def _read_fractional_positions(
     return np.array(positions)
 
 
+def read_positions(
+    filepath: str | Path,
+) -> NDArray[np.float64]:
+    """Extract fractional positions from a VASP POSCAR file.
+
+    Parameters
+    ----------
+    filepath
+
+    Raises
+    ------
+    InvalidFileException
+        If the POSCAR has an unexpected format.
+    SymmetryException
+        If POSCAR was read but the symmetry search failed
+    """
+    filepath = pathify(filepath)
+    with open(filepath, "r", encoding="utf-8") as poscar_file:
+        lattice = _read_lattice(poscar_file)
+        atomic_symbols = _read_atomic_symbols(poscar_file)
+        fractional_positions = _read_fractional_positions(
+            poscar_file, lattice, len(atomic_symbols)
+        )
+        return fractional_positions
+
+
 def read_ref_structure(
     filepath: str | Path,
 ) -> ReferenceStructure:
@@ -130,10 +156,6 @@ def read_ref_structure(
     SymmetryException
         If POSCAR was read but the symmetry search failed
     """
-    lattice = np.array([])
-    fractional_positions = np.array([])
-    atomic_numbers = []
-
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as poscar_file:
         lattice = _read_lattice(poscar_file)
@@ -142,8 +164,7 @@ def read_ref_structure(
         fractional_positions = _read_fractional_positions(
             poscar_file, lattice, len(atomic_symbols)
         )
-
-    return ReferenceStructure(atomic_numbers, lattice, fractional_positions)
+        return ReferenceStructure(atomic_numbers, lattice, fractional_positions)
 
 
 def _get_symbols_str(atomic_numbers: list[int]) -> str:

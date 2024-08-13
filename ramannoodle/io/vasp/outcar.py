@@ -318,10 +318,34 @@ def read_positions_and_polarizability(
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as outcar_file:
-        num_atoms = len(_read_atomic_symbols(outcar_file))
-        positions = _read_fractional_positions(outcar_file, num_atoms)
+        positions = read_positions(filepath)
         polarizability = _read_polarizability(outcar_file)
         return positions, polarizability
+
+
+def read_positions(filepath: str | Path) -> NDArray[np.float64]:
+    """Extract fractional positions from a VASP OUTCAR file.
+
+    Parameters
+    ----------
+    filepath
+
+    Returns
+    -------
+    :
+        2D array with shape (N,3) where N is the number of atoms.
+
+    Raises
+    ------
+    FileNotFoundError
+    InvalidFileException
+        If the OUTCAR has an unexpected format.
+    """
+    filepath = pathify(filepath)
+    with open(filepath, "r", encoding="utf-8") as outcar_file:
+        num_atoms = len(_read_atomic_symbols(outcar_file))
+        positions = _read_fractional_positions(outcar_file, num_atoms)
+        return positions
 
 
 def read_ref_structure(
@@ -357,5 +381,4 @@ def read_ref_structure(
         fractional_positions = _read_fractional_positions(
             outcar_file, len(atomic_symbols)
         )
-
-    return ReferenceStructure(atomic_numbers, lattice, fractional_positions)
+        return ReferenceStructure(atomic_numbers, lattice, fractional_positions)

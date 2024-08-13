@@ -14,15 +14,20 @@ from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.symmetry.structural import ReferenceStructure
 import ramannoodle.io.vasp as vasp_io
 
-# These  map between file_format's and appropriate reading functions.
+# These  map between file formats and appropriate IO functions.
 _PHONON_READERS = {"outcar": vasp_io.outcar.read_phonons}
 _POSITION_AND_POLARIZABILITY_READERS = {
     "outcar": vasp_io.outcar.read_positions_and_polarizability
+}
+_POSITION_READERS = {
+    "outcar": vasp_io.outcar.read_positions,
+    "poscar": vasp_io.poscar.read_positions,
 }
 _REFERENCE_STRUCTURE_READERS = {
     "outcar": vasp_io.outcar.read_ref_structure,
     "poscar": vasp_io.poscar.read_ref_structure,
 }
+_STRUCTURE_WRITERS = {"poscar": vasp_io.poscar.write_structure}
 
 
 def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
@@ -82,6 +87,36 @@ def read_positions_and_polarizability(
         raise ValueError(f"unsupported format: {file_format}") from exc
 
 
+def read_positions(
+    filepath: str | Path,
+    file_format: str,
+) -> NDArray[np.float64]:
+    """Read fractional positions from a file.
+
+    Parameters
+    ----------
+    filepath
+    file_format
+        supports: "outcar", "poscar"
+
+    Returns
+    -------
+    :
+        2D array with shape (N,3) where N is the number of atoms.
+
+    Raises
+    ------
+    InvalidFileException
+        File has unexpected format.
+    FileNotFoundError
+        File could not be found.
+    """
+    try:
+        return _POSITION_READERS[file_format](filepath)
+    except KeyError as exc:
+        raise ValueError(f"unsupported format: {file_format}") from exc
+
+
 def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStructure:
     """Read reference structure from a file.
 
@@ -106,9 +141,6 @@ def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStruc
         return _REFERENCE_STRUCTURE_READERS[file_format](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
-
-
-_STRUCTURE_WRITERS = {"poscar": vasp_io.poscar.write_structure}
 
 
 def write_structure(  # pylint: disable=too-many-arguments
