@@ -26,7 +26,7 @@ def apply_pbc_displacement(displacement: NDArray[np.float64]) -> NDArray[np.floa
         raise get_type_error("displacement", displacement, "ndarray") from exc
 
 
-def displace_fractional_positions(
+def displace_positions(
     positions: NDArray[np.float64],
     displacement: NDArray[np.float64],
 ) -> NDArray[np.float64]:
@@ -37,7 +37,7 @@ def displace_fractional_positions(
     return apply_pbc(positions + displacement)
 
 
-def transform_fractional_positions(
+def transform_positions(
     positions: NDArray[np.float64],
     rotation: NDArray[np.float64],
     translation: NDArray[np.float64],
@@ -52,7 +52,7 @@ def transform_fractional_positions(
     except ValueError as exc:
         raise get_shape_error("rotation", rotation, "(3,3)") from exc
     rotated = apply_pbc(rotated)
-    return displace_fractional_positions(rotated, translation)
+    return displace_positions(rotated, translation)
 
 
 def calculate_displacement(

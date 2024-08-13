@@ -103,6 +103,53 @@ class InterpolationModel(PolarizabilityModel):
         self._interpolations: list[BSpline] = []
         self._mask: NDArray[np.bool] = np.array([], dtype="bool")
 
+    @property
+    def ref_structure(self) -> ReferenceStructure:
+        """Get reference structure."""
+        return self._ref_structure
+
+    @property
+    def equilibrium_polarizability(self) -> NDArray[np.float64]:
+        """Get reference structure."""
+        return self._equilibrium_polarizability
+
+    @property
+    def is_dummy_model(self) -> bool:
+        """Get is_dummy_model."""
+        return self._is_dummy_model
+
+    @property
+    def cartesian_basis_vectors(self) -> list[NDArray[np.float64]]:
+        """Get cartesian basis vectors."""
+        return self._cartesian_basis_vectors
+
+    @property
+    def interpolations(self) -> list[BSpline]:
+        """Get interpolations."""
+        return self._interpolations
+
+    @property
+    def mask(self) -> NDArray[np.bool]:
+        """Get mask."""
+        return self._mask
+
+    @mask.setter
+    def mask(self, value: NDArray[np.bool]) -> None:
+        """Set mask.
+
+        ..warning:: To avoid unintentional use of masked models, we discourage masking
+                    in-place. Instead, consider using `get masked_model`.
+
+        Parameters
+        ----------
+        mask
+            1D array of size (N,) where N is the number of specified degrees
+            of freedom (DOFs). If an element is False, its corresponding DOF will be
+            "masked" and therefore excluded from polarizability calculations.
+        """
+        verify_ndarray_shape("mask", value, self._mask.shape)
+        self._mask = value
+
     def get_polarizability(
         self, cartesian_displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
@@ -451,17 +498,17 @@ class InterpolationModel(PolarizabilityModel):
         filepaths = pathify_as_list(filepaths)
         for filepath in filepaths:
             if not self._is_dummy_model:
-                fractional_positions, polarizability = (
+                positions, polarizability = (
                     generic_io.read_positions_and_polarizability(filepath, file_format)
                 )
             else:
-                fractional_positions = generic_io.read_positions(filepath, file_format)
+                positions = generic_io.read_positions(filepath, file_format)
                 polarizability = np.zeros((3, 3))
 
             try:
                 displacement = calculate_displacement(
-                    fractional_positions,
-                    self._ref_structure.get_fractional_positions(),
+                    positions,
+                    self._ref_structure.positions,
                 )
             except ValueError as exc:
                 raise InvalidDOFException(f"incompatible outcar: {filepath}") from exc
@@ -492,26 +539,6 @@ class InterpolationModel(PolarizabilityModel):
             np.array(polarizabilities),
         )
 
-    def get_mask(self) -> NDArray[np.bool]:
-        """Return mask."""
-        return self._mask
-
-    def set_mask(self, mask: NDArray[np.bool]) -> None:
-        """Set mask.
-
-        ..warning:: To avoid unintentional use of masked models, we discourage masking
-                    in-place. Instead, consider using `get masked_model`.
-
-        Parameters
-        ----------
-        mask
-            1D array of size (N,) where N is the number of specified degrees
-            of freedom (DOFs). If an element is False, its corresponding DOF will be
-            "masked" and therefore excluded from polarizability calculations.
-        """
-        verify_ndarray_shape("mask", mask, self._mask.shape)
-        self._mask = mask
-
     def get_masked_model(self, dof_indexes_to_mask: list[int]) -> InterpolationModel:
         """Return new model with certain degrees of freedom deactivated.
 
@@ -519,10 +546,10 @@ class InterpolationModel(PolarizabilityModel):
         certain degrees of freedom are considered.
         """
         result = copy.deepcopy(self)
-        new_mask = result.get_mask()
+        new_mask = result.mask
         new_mask[:] = False
         new_mask[dof_indexes_to_mask] = True
-        result.set_mask(new_mask)
+        result.mask = new_mask
         return result
 
     def unmask(self) -> None:
@@ -531,7 +558,7 @@ class InterpolationModel(PolarizabilityModel):
 
     def __repr__(self) -> str:
         """Return string representation."""
-        total_dofs = 3 * len(self._ref_structure.get_fractional_positions())
+        total_dofs = 3 * len(self._ref_structure.positions)
         specified_dofs = len(self._cartesian_basis_vectors)
         core = f"{specified_dofs}/{total_dofs}"
         if specified_dofs == total_dofs:

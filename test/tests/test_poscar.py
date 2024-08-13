@@ -47,7 +47,7 @@ def test_get_symbols_str_exception(
 
 
 @pytest.mark.parametrize(
-    "lattice, atomic_numbers, fractional_positions",
+    "lattice, atomic_numbers, positions",
     [
         (
             np.array(
@@ -77,13 +77,13 @@ def test_get_symbols_str_exception(
 def test_write_read_poscar(
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
-    fractional_positions: NDArray[np.float64],
+    positions: NDArray[np.float64],
 ) -> None:
     """Test write structure as POSCAR (normal)."""
     ramannoodle.io.generic.write_structure(
         lattice,
         atomic_numbers,
-        fractional_positions,
+        positions,
         "test/data/temp",
         file_format="poscar",
         overwrite=True,
@@ -93,14 +93,11 @@ def test_write_read_poscar(
     )
     assert np.isclose(reference_structure._lattice, lattice).all()
     assert np.isclose(reference_structure._atomic_numbers, atomic_numbers).all()
-    assert np.isclose(
-        reference_structure._fractional_positions, fractional_positions
-    ).all()
+    assert np.isclose(reference_structure.positions, positions).all()
 
 
 @pytest.mark.parametrize(
-    "lattice, atomic_numbers, fractional_positions,path,exception_type,in_reason,"
-    "overwrite",
+    "lattice, atomic_numbers, positions,path,exception_type,in_reason,overwrite",
     [
         (
             np.ones((3, 3)),
@@ -143,7 +140,7 @@ def test_write_read_poscar(
 def test_write_poscar_exception(  # pylint: disable=too-many-arguments
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
-    fractional_positions: NDArray[np.float64],
+    positions: NDArray[np.float64],
     path: str,
     exception_type: Type[Exception],
     in_reason: str,
@@ -152,7 +149,7 @@ def test_write_poscar_exception(  # pylint: disable=too-many-arguments
     """Test write structure as POSCAR (exception)."""
     with pytest.raises(exception_type) as err:
         ramannoodle.io.generic.write_structure(
-            lattice, atomic_numbers, fractional_positions, path, "poscar", overwrite
+            lattice, atomic_numbers, positions, path, "poscar", overwrite
         )
     assert in_reason in str(err.value)
 

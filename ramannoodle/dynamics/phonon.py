@@ -53,6 +53,29 @@ class Phonons(Dynamics):
         self._wavenumbers: NDArray[np.float64] = wavenumbers
         self._cartesian_displacements: NDArray[np.float64] = cartesian_displacements
 
+    @property
+    def wavenumbers(self) -> NDArray[np.float64]:
+        """Get wavenumbers.
+
+        Returns
+        -------
+        :
+            1D array with length M
+        """
+        return self._wavenumbers
+
+    @property
+    def cartesian_displacements(self) -> NDArray[np.float64]:
+        """Get cartesian displacements.
+
+        Returns
+        -------
+        :
+            3D array with shape (M,N,3) where M is the number of displacements
+            and N is the number of atoms
+        """
+        return self._cartesian_displacements
+
     def get_raman_spectrum(
         self, polarizability_model: PolarizabilityModel
     ) -> PhononRamanSpectrum:
@@ -73,24 +96,3 @@ class Phonons(Dynamics):
             raman_tensors.append((plus - minus) / RAMAN_TENSOR_CENTRAL_DIFFERENCE)
 
         return PhononRamanSpectrum(self._wavenumbers, np.array(raman_tensors))
-
-    def get_wavenumbers(self) -> NDArray[np.float64]:
-        """Return wavenumbers.
-
-        Returns
-        -------
-        :
-            1D array with length M
-        """
-        return self._wavenumbers
-
-    def get_cartesian_displacements(self) -> NDArray[np.float64]:
-        """Return cartesian displacements.
-
-        Returns
-        -------
-        :
-            3D array with shape (M,N,3) where M is the number of displacements
-            and N is the number of atoms
-        """
-        return self._cartesian_displacements

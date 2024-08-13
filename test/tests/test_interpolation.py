@@ -60,7 +60,7 @@ def test_add_dof(
     """Test add_dof (normal)."""
     ref_structure = outcar_ref_structure_fixture
     model = InterpolationModel(ref_structure, np.zeros((3, 3)))
-    displacement = ref_structure._fractional_positions * 0
+    displacement = ref_structure.positions * 0
     displacement[displaced_atom_index][0] = 1.0
     polarizabilities = np.zeros((len(amplitudes), 3, 3))
     model.add_dof(displacement, amplitudes, polarizabilities, 1)
@@ -171,7 +171,7 @@ def test_add_dof_exception(
     with pytest.raises(exception_type) as error:
         for atom_indexes in displaced_atom_indexes:
             for atom_index in atom_indexes:
-                displacement = ref_structure.get_fractional_positions() * 0
+                displacement = ref_structure.positions * 0
                 displacement[atom_index] = 1
                 model.add_dof(
                     displacement, amplitudes, polarizabilities, interpolation_order

@@ -38,7 +38,7 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
             )
         )
         cartesian_displacement = model._ref_structure.get_cartesian_displacement(
-            positions - model._ref_structure.get_fractional_positions()
+            positions - model._ref_structure.positions
         )
         model_polarizability = model.get_polarizability(cartesian_displacement)
         assert np.isclose(model_polarizability, known_polarizability, atol=1e-4).all()

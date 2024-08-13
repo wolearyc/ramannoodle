@@ -11,8 +11,8 @@ from ramannoodle.exceptions import (
     verify_list_len,
 )
 from ramannoodle.structure.structure_utils import (
-    displace_fractional_positions,
-    transform_fractional_positions,
+    displace_positions,
+    transform_positions,
     apply_pbc,
 )
 from ramannoodle.globals import ATOM_SYMBOLS
@@ -23,31 +23,27 @@ import ramannoodle.structure.structure_utils
 def _compute_permutation_matrices(
     rotations: NDArray[np.float64],
     translations: NDArray[np.float64],
-    fractional_positions: NDArray[np.float64],
+    positions: NDArray[np.float64],
 ) -> NDArray[np.float64]:
     """Expresses a series of rotation/translations as permutation matrices."""
     # Ensure no atom is at unit cell boundary by shifting
     # center of mass
-    center_of_mass_shift = np.array([0.5, 0.5, 0.5]) - np.mean(
-        fractional_positions, axis=0
-    )
+    center_of_mass_shift = np.array([0.5, 0.5, 0.5]) - np.mean(positions, axis=0)
 
     permutation_matrices = []
     for rotation, translation in zip(rotations, translations):
         permutation_matrices.append(
-            _get_fractional_positions_permutation_matrix(
-                displace_fractional_positions(
-                    fractional_positions, center_of_mass_shift
-                ),
-                transform_fractional_positions(
-                    fractional_positions, rotation, translation + center_of_mass_shift
+            _get_positions_permutation_matrix(
+                displace_positions(positions, center_of_mass_shift),
+                transform_positions(
+                    positions, rotation, translation + center_of_mass_shift
                 ),
             )
         )
     return np.array(permutation_matrices)
 
 
-def _get_fractional_positions_permutation_matrix(
+def _get_positions_permutation_matrix(
     reference_positions: NDArray[np.float64], permuted_positions: NDArray[np.float64]
 ) -> NDArray[np.float64]:
     """Calculate a permutation matrix between reference and permuted positions.
@@ -98,7 +94,7 @@ class ReferenceStructure:
         1D list of length N where N is the number of atoms.
     lattice
         Lattice vectors expressed as a 2D array with shape (3,3).
-    fractional_positions
+    positions
         2D array with shape (N,3) where N is the number of atoms
     symprec
         Symmetry precision parameter for spglib.
@@ -116,21 +112,19 @@ class ReferenceStructure:
         self,
         atomic_numbers: list[int],
         lattice: NDArray[np.float64],
-        fractional_positions: NDArray[np.float64],
+        positions: NDArray[np.float64],
         symprec: float = 1e-5,
         angle_tolerance: float = -1.0,
     ) -> None:
         verify_list_len("atomic_numbers", atomic_numbers, None)
         verify_ndarray_shape("lattice", lattice, (3, 3))
-        verify_ndarray_shape(
-            "fractional_positions", fractional_positions, (len(atomic_numbers), 3)
-        )
+        verify_ndarray_shape("positions", positions, (len(atomic_numbers), 3))
 
         self._atomic_numbers = atomic_numbers
         self._lattice = lattice
-        self._fractional_positions = fractional_positions
+        self._positions = positions
 
-        cell = (list(lattice), list(fractional_positions), atomic_numbers)
+        cell = (list(lattice), list(positions), atomic_numbers)
         self._symmetry_dict: dict[str, NDArray[np.float64]] | None = (
             spglib.get_symmetry(cell, symprec=symprec, angle_tolerance=angle_tolerance)
         )
@@ -140,8 +134,23 @@ class ReferenceStructure:
         self._rotations = self._symmetry_dict["rotations"]
         self._translations = self._symmetry_dict["translations"]
         self._permutation_matrices = _compute_permutation_matrices(
-            self._rotations, self._translations, self._fractional_positions
+            self._rotations, self._translations, self._positions
         )
+
+    @property
+    def atomic_numbers(self) -> list[int]:
+        """Return atomic numbers."""
+        return self._atomic_numbers
+
+    @property
+    def lattice(self) -> NDArray[np.float64]:
+        """Return lattice."""
+        return self._lattice
+
+    @property
+    def positions(self) -> NDArray[np.float64]:
+        """Return fractional positions."""
+        return self._positions
 
     def get_num_nonequivalent_atoms(self) -> int:
         """Return number of nonequivalent atoms."""
@@ -185,10 +194,8 @@ class ReferenceStructure:
         # Scale the displacement for numerical reasons.
         displacement = displacement / (np.linalg.norm(displacement) * 10)
 
-        ref_positions = (
-            ramannoodle.structure.structure_utils.displace_fractional_positions(
-                self._fractional_positions, displacement
-            )
+        ref_positions = ramannoodle.structure.structure_utils.displace_positions(
+            self._positions, displacement
         )
 
         result = []
@@ -199,14 +206,14 @@ class ReferenceStructure:
 
             # Transform, permute, then get candidate displacement
             candidate_positions = (
-                ramannoodle.structure.structure_utils.transform_fractional_positions(
+                ramannoodle.structure.structure_utils.transform_positions(
                     ref_positions, rotation, translation
                 )
             )
             candidate_positions = permutation_matrix @ candidate_positions
             candidate_displacement = (
                 ramannoodle.structure.structure_utils.calculate_displacement(
-                    candidate_positions, self._fractional_positions
+                    candidate_positions, self._positions
                 )
             )
 
@@ -269,10 +276,6 @@ class ReferenceStructure:
         )
 
         return fractional_displacement @ self._lattice
-
-    def get_fractional_positions(self) -> NDArray[np.float64]:
-        """Return fractional positions."""
-        return self._fractional_positions
 
     def get_atom_indexes(self, atom_symbols: str | list[str]) -> list[int]:
         """Return atom indexes with matching symbols.

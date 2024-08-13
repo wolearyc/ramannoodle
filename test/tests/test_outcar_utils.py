@@ -164,17 +164,17 @@ def test_read_cartesian_positions_from_outcar_exception(
     ],
     indirect=["file_fixture"],
 )
-def test_read_fractional_positions_from_outcar(
+def test_read_positions_from_outcar(
     file_fixture: TextIO,  # pylint: disable=redefined-outer-name
     known_first_position: NDArray[np.float64],
     known_last_position: NDArray[np.float64],
 ) -> None:
-    """Test _read_fractional_positions_from_outcar (normal)."""
-    fractional_positions = vasp_outcar._read_fractional_positions(file_fixture, 135)
+    """Test _read_positions_from_outcar (normal)."""
+    positions = vasp_outcar._read_positions(file_fixture, 135)
 
-    assert len(fractional_positions) == 135
-    assert np.isclose(fractional_positions[0], known_first_position).all()
-    assert np.isclose(fractional_positions[-1], known_last_position).all()
+    assert len(positions) == 135
+    assert np.isclose(positions[0], known_first_position).all()
+    assert np.isclose(positions[-1], known_last_position).all()
 
 
 @pytest.mark.parametrize(
@@ -193,14 +193,14 @@ def test_read_fractional_positions_from_outcar(
     ],
     indirect=["file_fixture"],
 )
-def test_read_fractional_positions_from_outcar_exception(
+def test_read_positions_from_outcar_exception(
     file_fixture: TextIO,  # pylint: disable=redefined-outer-name
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
-    """Test _read_fractional_positions_from_outcar (exception)."""
+    """Test _read_positions_from_outcar (exception)."""
     with pytest.raises(exception_type) as error:
-        vasp_outcar._read_fractional_positions(file_fixture, 20)
+        vasp_outcar._read_positions(file_fixture, 20)
     assert in_reason in str(error.value)
 
 

@@ -77,7 +77,7 @@ def _read_atomic_symbols(poscar_file: TextIO) -> list[str]:
     return result
 
 
-def _read_fractional_positions(
+def _read_positions(
     poscar_file: TextIO, lattice: NDArray[np.float64], num_atoms: int
 ) -> NDArray[np.float64]:
     """Read atomic symbols from a VASP POSCAR file.
@@ -134,10 +134,8 @@ def read_positions(
     with open(filepath, "r", encoding="utf-8") as poscar_file:
         lattice = _read_lattice(poscar_file)
         atomic_symbols = _read_atomic_symbols(poscar_file)
-        fractional_positions = _read_fractional_positions(
-            poscar_file, lattice, len(atomic_symbols)
-        )
-        return fractional_positions
+        positions = _read_positions(poscar_file, lattice, len(atomic_symbols))
+        return positions
 
 
 def read_ref_structure(
@@ -161,10 +159,8 @@ def read_ref_structure(
         lattice = _read_lattice(poscar_file)
         atomic_symbols = _read_atomic_symbols(poscar_file)
         atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
-        fractional_positions = _read_fractional_positions(
-            poscar_file, lattice, len(atomic_symbols)
-        )
-        return ReferenceStructure(atomic_numbers, lattice, fractional_positions)
+        positions = _read_positions(poscar_file, lattice, len(atomic_symbols))
+        return ReferenceStructure(atomic_numbers, lattice, positions)
 
 
 def _get_symbols_str(atomic_numbers: list[int]) -> str:

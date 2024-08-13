@@ -91,6 +91,16 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
         self._phonon_wavenumbers = phonon_wavenumbers
         self._raman_tensors = raman_tensors
 
+    @property
+    def phonon_wavenumbers(self) -> NDArray[np.float64]:
+        """Get phonon_wavenumbers."""
+        return self._phonon_wavenumbers
+
+    @property
+    def raman_tensors(self) -> NDArray[np.float64]:
+        """Get raman_tensors."""
+        return self._raman_tensors
+
     def measure(  # pylint: disable=too-many-arguments
         self,
         orientation: str | NDArray[np.float64] = "polycrystalline",

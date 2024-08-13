@@ -154,7 +154,7 @@ class ARTModel(InterpolationModel):
             "polarizabilities", polarizabilities, (amplitudes.size, 3, 3)
         )
 
-        displacement = self._ref_structure.get_fractional_positions() * 0
+        displacement = self._ref_structure.positions * 0
         try:
             displacement[atom_index] = direction / np.linalg.norm(direction * 10.0)
         except TypeError as exc:

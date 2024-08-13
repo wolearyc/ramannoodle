@@ -125,9 +125,7 @@ def _read_cartesian_positions(
     return np.array(cartesian_coordinates)
 
 
-def _read_fractional_positions(
-    outcar_file: TextIO, num_atoms: int
-) -> NDArray[np.float64]:
+def _read_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64]:
     """Read atomic fractional positions from a VASP OUTCAR file.
 
     Raises
@@ -344,7 +342,7 @@ def read_positions(filepath: str | Path) -> NDArray[np.float64]:
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as outcar_file:
         num_atoms = len(_read_atomic_symbols(outcar_file))
-        positions = _read_fractional_positions(outcar_file, num_atoms)
+        positions = _read_positions(outcar_file, num_atoms)
         return positions
 
 
@@ -370,7 +368,7 @@ def read_ref_structure(
     FileNotFoundError
     """
     lattice = np.array([])
-    fractional_positions = np.array([])
+    positions = np.array([])
     atomic_numbers = []
 
     filepath = pathify(filepath)
@@ -378,7 +376,5 @@ def read_ref_structure(
         atomic_symbols = _read_atomic_symbols(outcar_file)
         atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
         lattice = _read_lattice(outcar_file)
-        fractional_positions = _read_fractional_positions(
-            outcar_file, len(atomic_symbols)
-        )
-        return ReferenceStructure(atomic_numbers, lattice, fractional_positions)
+        positions = _read_positions(outcar_file, len(atomic_symbols))
+        return ReferenceStructure(atomic_numbers, lattice, positions)

@@ -15,7 +15,7 @@ from ramannoodle.structure.symmetry_utils import (
 )
 from ramannoodle.structure.reference import (
     ReferenceStructure,
-    _get_fractional_positions_permutation_matrix,
+    _get_positions_permutation_matrix,
 )
 
 
@@ -150,9 +150,7 @@ def test_ref_structure(
     assert ref_structure.get_num_nonequivalent_atoms() == known_nonequivalent_atoms
 
     # Equivalent displacement test
-    displacement = (
-        ref_structure._fractional_positions * 0  # pylint: disable=protected-access
-    )
+    displacement = ref_structure.positions * 0  # pylint: disable=protected-access
     displacement[0, 2] += 0.1
     print(displacement.shape)
     displacements = ref_structure.get_equivalent_displacements(displacement)
@@ -174,14 +172,14 @@ def test_ref_structure(
         )
     ],
 )
-def test_get_fractional_positions_permutation_matrix(
+def test_get_positions_permutation_matrix(
     reference: NDArray[np.float64],
     permuted: NDArray[np.float64],
     known: NDArray[np.float64],
 ) -> None:
-    """Test _get_fractional_positions_permutation_matrix (normal)."""
+    """Test _get_positions_permutation_matrix (normal)."""
     assert np.isclose(
-        _get_fractional_positions_permutation_matrix(reference, permuted), known
+        _get_positions_permutation_matrix(reference, permuted), known
     ).all()
 
 
@@ -214,7 +212,7 @@ def test_apply_pbc_displacement(
 
 
 @pytest.mark.parametrize(
-    "atomic_numbers, lattice, fractional_positions, exception_type, in_reason",
+    "atomic_numbers, lattice, positions, exception_type, in_reason",
     [
         (
             (1, 2, 3, 4),
@@ -235,27 +233,27 @@ def test_apply_pbc_displacement(
             np.diag([1, 1, 1]),
             np.zeros((4, 2)),
             ValueError,
-            "fractional_positions has wrong shape: (4,2) != (4,3)",
+            "positions has wrong shape: (4,2) != (4,3)",
         ),
         (
             [1, 2, 3, 4],
             np.diag([1, 1, 1]),
             np.zeros((3, 3)),
             ValueError,
-            "fractional_positions has wrong shape: (3,3) != (4,3)",
+            "positions has wrong shape: (3,3) != (4,3)",
         ),
     ],
 )
 def test_ref_structure_exception(
     atomic_numbers: list[int],
     lattice: NDArray[np.float64],
-    fractional_positions: NDArray[np.float64],
+    positions: NDArray[np.float64],
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
     """Test StructuralSymmetry (exception)."""
     with pytest.raises(exception_type) as error:
-        ReferenceStructure(atomic_numbers, lattice, fractional_positions)
+        ReferenceStructure(atomic_numbers, lattice, positions)
     assert in_reason in str(error.value)
 
 
