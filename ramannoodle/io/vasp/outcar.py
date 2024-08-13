@@ -14,8 +14,7 @@ from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.symmetry.structural import ReferenceStructure
 
 
-# Utilities for OUTCAR
-# These functions partially read files.
+# Utilities for OUTCAR. Warning: some of these functions partially read files.
 def _get_atomic_symbol_from_potcar_line(line: str) -> str:
     """Extract atomic symbol from a POTCAR line in a VASP OUTCAR file.
 

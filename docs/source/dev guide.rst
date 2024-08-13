@@ -30,7 +30,7 @@ Ramannoodle's documentation is built with `Sphinx <https://www.sphinx-doc.org/en
 
       $ make html
 
-in the docs directory. The resulting html is available in build/html.
+from within the docs directory. The resulting html is available in docs/build/html.
 
 Guidelines
 ----------
@@ -52,3 +52,5 @@ In no particular order, here are some guidelines that are followed throughout ra
 * Unless otherwise noted, fractional coordinates are always used. Variables for cartesian coordinates always have "cartesian\_" appended.
 
 * Use classes widely. Sometimes, a regular function is all that is needed!
+
+* With IO functions, ramannoodle attempts to strike a balance between simplicity and flexibility. `import ramannoodle.io` provides access to generic file readers and writers for a variety of file formats. However, these generic routines do not offer much customization but do offer simplicity. Additional options can be accessed in the code-specific packages, such as `import ramannoodle.io.vasp.poscar`. Use of these is preferred.

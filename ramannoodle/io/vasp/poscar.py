@@ -7,7 +7,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ramannoodle.io.io_utils import verify_structure, pathify
-from ramannoodle.exceptions import InvalidOptionException, InvalidFileException
+from ramannoodle.exceptions import InvalidFileException
 from ramannoodle.globals import ATOM_SYMBOLS, ATOMIC_NUMBERS
 from ramannoodle.symmetry.structural import ReferenceStructure
 from ramannoodle.io.vasp.outcar import _get_lattice_vector_from_outcar_line
@@ -129,7 +129,6 @@ def read_ref_structure(
         If the POSCAR has an unexpected format.
     SymmetryException
         If POSCAR was read but the symmetry search failed
-    FileNotFoundError
     """
     lattice = np.array([])
     fractional_positions = np.array([])
@@ -145,23 +144,6 @@ def read_ref_structure(
         )
 
     return ReferenceStructure(atomic_numbers, lattice, fractional_positions)
-
-
-def _scrub_options(**options: str) -> dict[str, str]:
-    """Check option validity and add default values if necessary."""
-    if "label" not in options:
-        options["label"] = "POSCAR written by ramannoodle"
-    if "overwrite" not in options:
-        options["overwrite"] = "false"
-    elif "\n" in options["label"]:
-        raise InvalidOptionException("option 'label' cannot contain newline")
-
-    allowed_options = ["overwrite", "label"]
-    for key in options:
-        if key not in allowed_options:
-            raise InvalidOptionException(f"'{key}' is not a valid write option")
-
-    return options
 
 
 def _get_symbols_str(atomic_numbers: list[int]) -> str:
@@ -198,26 +180,33 @@ def _get_positions_str(positions: NDArray[np.float64]) -> str:
     return result
 
 
-def _float_formatter(value: np.float64) -> str:
-    return f"{float(value):.16f}"
-
-
-def write_structure(
+def write_structure(  # pylint: disable=too-many-arguments
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
     positions: NDArray[np.float64],
     filepath: str | Path,
-    **options: str,
+    overwrite: bool = False,
+    label: str = "POSCAR written by ramannoodle",
 ) -> None:
-    """Write structure to a VASP POSCAR file."""
+    """Write structure to a VASP POSCAR file.
+
+    Parameters
+    ----------
+    lattice
+    atomic_numbers
+    positions
+    filepath
+    overwrite
+    label
+        POSCAR label (first line).
+    """
     verify_structure(lattice, atomic_numbers, positions)
     filepath = pathify(filepath)
-    options = _scrub_options(**options)
 
-    open_mode = "w" if options["overwrite"] == "true" else "x"
+    open_mode = "w" if overwrite else "x"
     filepath = pathify(filepath)
 
-    label_str = options["label"] + "\n"
+    label_str = repr(label) + "\n"  # Raw string
     lattice_str = _get_lattice_str(lattice)
     symbols_str = _get_symbols_str(atomic_numbers)
     positions_str = _get_positions_str(positions)

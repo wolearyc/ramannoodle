@@ -298,5 +298,5 @@ class ARTModel(InterpolationModel):
         Model masking allows for the calculation of partial Raman spectra in which only
         certain degrees of freedom are considered.
         """
-        # We "cast" here, due to how typing is done to support 3.10.
+        # We "cast" here, due to how typing is done to support Python 3.10.
         return cast(ARTModel, super().get_masked_model(dof_indexes_to_mask))

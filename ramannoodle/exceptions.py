@@ -19,13 +19,6 @@ class InvalidFileException(Exception):
         pass
 
 
-class InvalidOptionException(Exception):
-    """Raised when an optional argument is not supported."""
-
-    def __init__(self, reason: str):
-        pass
-
-
 class InvalidDOFException(Exception):
     """Raised when things a degree of freedom is invalid in some way."""
 

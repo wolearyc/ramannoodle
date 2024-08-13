@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 
 import pytest
 
-import ramannoodle.io as rn_io
+import ramannoodle.io.generic as rn_io
 from ramannoodle.globals import ATOMIC_WEIGHTS
 
 

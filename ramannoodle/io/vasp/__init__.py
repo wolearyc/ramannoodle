@@ -1,4 +1,4 @@
-"""Functions for interacting with VASP input and output files."""
+"""Functions for interacting with VASP files."""
 
 # flake8: noqa: F401
 from ramannoodle.io.vasp import outcar

@@ -8,7 +8,7 @@ import pytest
 from pytest import FixtureRequest
 
 from ramannoodle.symmetry.structural import ReferenceStructure
-import ramannoodle.io as rn_io
+import ramannoodle.io.generic as rn_io
 
 
 @pytest.fixture(scope="session")
@@ -21,7 +21,7 @@ def path_fixture(request: FixtureRequest) -> Path:
 def file_fixture(
     request: FixtureRequest,
 ) -> Generator[TextIO, None, None]:
-    """Return an outcar file."""
+    """Return a file."""
     file = open(  # pylint: disable=consider-using-with
         Path(request.param), "r", encoding="utf-8"
     )

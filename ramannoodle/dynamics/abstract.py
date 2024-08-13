@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 
 from ramannoodle.spectrum.raman import PhononRamanSpectrum
-from ramannoodle.polarizability import PolarizabilityModel
+from ramannoodle.polarizability.abstract import PolarizabilityModel
 
 
 class Dynamics(ABC):  # pylint: disable=too-few-public-methods

@@ -8,8 +8,8 @@ from numpy.typing import NDArray
 
 import pytest
 
+import ramannoodle.io.generic
 from ramannoodle.io.vasp import poscar
-import ramannoodle.io as rn_io
 from ramannoodle.exceptions import InvalidFileException
 
 
@@ -80,15 +80,15 @@ def test_write_read_poscar(
     fractional_positions: NDArray[np.float64],
 ) -> None:
     """Test write structure as POSCAR (normal)."""
-    rn_io.write_structure(
+    ramannoodle.io.generic.write_structure(
         lattice,
         atomic_numbers,
         fractional_positions,
         "test/data/temp",
         file_format="poscar",
-        overwrite="true",
+        overwrite=True,
     )
-    reference_structure = rn_io.read_ref_structure(
+    reference_structure = ramannoodle.io.generic.read_ref_structure(
         "test/data/temp", file_format="poscar"
     )
     assert np.isclose(reference_structure._lattice, lattice).all()
@@ -100,7 +100,7 @@ def test_write_read_poscar(
 
 @pytest.mark.parametrize(
     "lattice, atomic_numbers, fractional_positions,path,exception_type,in_reason,"
-    "options",
+    "overwrite",
     [
         (
             np.ones((3, 3)),
@@ -109,7 +109,7 @@ def test_write_read_poscar(
             "test/data/TiO2",
             FileExistsError,
             "File exists",
-            {},
+            False,
         ),
         (
             np.ones((2, 3)),
@@ -118,7 +118,7 @@ def test_write_read_poscar(
             "test/data/temp",
             ValueError,
             "lattice has wrong shape: (2,3) != (3,3)",
-            {},
+            False,
         ),
         (
             np.ones((3, 3)),
@@ -127,7 +127,7 @@ def test_write_read_poscar(
             "test/data/temp",
             ValueError,
             "atomic number not grouped: 4",
-            {"overwrite": "true"},
+            True,
         ),
         (
             np.ones((3, 3)),
@@ -136,7 +136,7 @@ def test_write_read_poscar(
             "test/data/temp",
             ValueError,
             "positions has wrong shape: (9,3) != (8,3)",
-            {"overwrite": "true"},
+            True,
         ),
     ],
 )
@@ -147,17 +147,12 @@ def test_write_poscar_exception(  # pylint: disable=too-many-arguments
     path: str,
     exception_type: Type[Exception],
     in_reason: str,
-    options: dict[str, str],
+    overwrite: bool,
 ) -> None:
     """Test write structure as POSCAR (exception)."""
     with pytest.raises(exception_type) as err:
-        rn_io.write_structure(
-            lattice,
-            atomic_numbers,
-            fractional_positions,
-            path,
-            file_format="poscar",
-            **options,
+        ramannoodle.io.generic.write_structure(
+            lattice, atomic_numbers, fractional_positions, path, "poscar", overwrite
         )
     assert in_reason in str(err.value)
 
@@ -210,5 +205,5 @@ def test_read_poscar_exception(
 ) -> None:
     """Test poscar reading (exception)."""
     with pytest.raises(exception_type) as error:
-        rn_io.read_ref_structure(path_fixture, file_format="poscar")
+        ramannoodle.io.generic.read_ref_structure(path_fixture, file_format="poscar")
     assert in_reason in str(error.value)

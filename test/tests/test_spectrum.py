@@ -7,7 +7,7 @@ import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-import ramannoodle.io as rn_io
+import ramannoodle.io.generic
 from ramannoodle.polarizability.interpolation import InterpolationModel
 from ramannoodle.polarizability.art import ARTModel
 from ramannoodle.spectrum.raman import (
@@ -32,8 +32,10 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
     This function will use all *eps_OUTCAR's in a directory as references.
     """
     for outcar_path in _get_all_eps_outcars(data_directory):
-        positions, known_polarizability = rn_io.read_positions_and_polarizability(
-            f"{outcar_path}", file_format="outcar"
+        positions, known_polarizability = (
+            ramannoodle.io.generic.read_positions_and_polarizability(
+                f"{outcar_path}", file_format="outcar"
+            )
         )
         cartesian_displacement = model._ref_structure.get_cartesian_displacement(
             positions - model._ref_structure.get_fractional_positions()
@@ -72,7 +74,7 @@ def test_interpolation_spectrum(
     """Test a full spectrum calculation using InterpolationModel."""
     # Setup model
     ref_structure = outcar_ref_structure_fixture
-    _, polarizability = rn_io.read_positions_and_polarizability(
+    _, polarizability = ramannoodle.io.generic.read_positions_and_polarizability(
         f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
     )
     model = InterpolationModel(ref_structure, polarizability)
@@ -87,7 +89,7 @@ def test_interpolation_spectrum(
 
     # Spectrum test
     with np.load(f"{data_directory}/known_spectrum.npz") as known_spectrum:
-        phonons = rn_io.read_phonons(
+        phonons = ramannoodle.io.generic.read_phonons(
             f"{data_directory}/phonons_OUTCAR", file_format="outcar"
         )
         spectrum = phonons.get_raman_spectrum(model)
@@ -133,7 +135,7 @@ def test_art_spectrum(
     """Test a full spectrum calculation using ARTModel."""
     # Setup model
     ref_structure = outcar_ref_structure_fixture
-    _, polarizability = rn_io.read_positions_and_polarizability(
+    _, polarizability = ramannoodle.io.generic.read_positions_and_polarizability(
         f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
     )
     model = ARTModel(ref_structure, polarizability)
@@ -144,7 +146,7 @@ def test_art_spectrum(
 
     # Spectrum test
     with np.load(f"{data_directory}/known_art_spectrum.npz") as known_spectrum:
-        phonons = rn_io.read_phonons(
+        phonons = ramannoodle.io.generic.read_phonons(
             f"{data_directory}/phonons_OUTCAR", file_format="outcar"
         )
         spectrum = phonons.get_raman_spectrum(model)
@@ -211,7 +213,7 @@ def test_art_masked_spectrum(
     """Test a masked spectrum calculation using ARTModel."""
     # Setup model
     ref_structure = outcar_ref_structure_fixture
-    _, polarizability = rn_io.read_positions_and_polarizability(
+    _, polarizability = ramannoodle.io.generic.read_positions_and_polarizability(
         f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
     )
     model = ARTModel(ref_structure, polarizability)
@@ -224,7 +226,7 @@ def test_art_masked_spectrum(
 
     # Spectrum test
     with np.load(f"{data_directory}/{known_spectrum_file}") as known_spectrum:
-        phonons = rn_io.read_phonons(
+        phonons = ramannoodle.io.generic.read_phonons(
             f"{data_directory}/phonons_OUTCAR", file_format="outcar"
         )
         spectrum = phonons.get_raman_spectrum(model)
