@@ -6,16 +6,17 @@ import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.symmetry.structural_utils import (
+from ramannoodle.structure.structure_utils import apply_pbc, apply_pbc_displacement
+from ramannoodle.structure.symmetry_utils import (
     is_collinear_with_all,
     is_non_collinear_with_all,
     are_collinear,
     is_orthogonal_to_all,
-    _get_fractional_positions_permutation_matrix,
-    apply_pbc,
-    apply_pbc_displacement,
 )
-from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.structure.reference import (
+    ReferenceStructure,
+    _get_fractional_positions_permutation_matrix,
+)
 
 
 @pytest.mark.parametrize(

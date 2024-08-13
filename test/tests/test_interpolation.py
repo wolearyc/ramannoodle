@@ -9,7 +9,7 @@ import pytest
 from ramannoodle.polarizability.interpolation import find_duplicates
 from ramannoodle.polarizability.interpolation import InterpolationModel
 from ramannoodle.exceptions import InvalidDOFException
-from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.structure.reference import ReferenceStructure
 
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments

@@ -10,8 +10,83 @@ from ramannoodle.exceptions import (
     verify_ndarray_shape,
     verify_list_len,
 )
+from ramannoodle.structure.structure_utils import (
+    displace_fractional_positions,
+    transform_fractional_positions,
+    apply_pbc,
+)
 from ramannoodle.globals import ATOM_SYMBOLS
-from ramannoodle.symmetry import structural_utils
+from ramannoodle.structure import symmetry_utils
+import ramannoodle.structure.structure_utils
+
+
+def _compute_permutation_matrices(
+    rotations: NDArray[np.float64],
+    translations: NDArray[np.float64],
+    fractional_positions: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Expresses a series of rotation/translations as permutation matrices."""
+    # Ensure no atom is at unit cell boundary by shifting
+    # center of mass
+    center_of_mass_shift = np.array([0.5, 0.5, 0.5]) - np.mean(
+        fractional_positions, axis=0
+    )
+
+    permutation_matrices = []
+    for rotation, translation in zip(rotations, translations):
+        permutation_matrices.append(
+            _get_fractional_positions_permutation_matrix(
+                displace_fractional_positions(
+                    fractional_positions, center_of_mass_shift
+                ),
+                transform_fractional_positions(
+                    fractional_positions, rotation, translation + center_of_mass_shift
+                ),
+            )
+        )
+    return np.array(permutation_matrices)
+
+
+def _get_fractional_positions_permutation_matrix(
+    reference_positions: NDArray[np.float64], permuted_positions: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """Calculate a permutation matrix between reference and permuted positions.
+
+    .. warning::
+        Arguments must be true permutations of each other. This function does not
+        correct for periodic boundary conditions, so it needs to be supplied a
+        structure without atoms at the unit cell boundaries.
+
+    Parameters
+    ----------
+    reference_positions
+        A 2D array with shape (N,3)
+    permuted_positions
+        A 2D array with shape (N,3).
+
+    """
+    reference_positions = apply_pbc(reference_positions)
+    permuted_positions = apply_pbc(permuted_positions)
+
+    argsort_reference = np.lexsort(
+        (
+            reference_positions[:, 2],
+            reference_positions[:, 1],
+            reference_positions[:, 0],
+        )
+    )
+    argsort_permuted = np.lexsort(
+        (permuted_positions[:, 2], permuted_positions[:, 1], permuted_positions[:, 0])
+    )
+    sorted_reference = reference_positions[argsort_reference]
+    sorted_permuted = permuted_positions[argsort_permuted]
+    if not np.isclose(sorted_reference, sorted_permuted).all():
+        raise ValueError("permuted is not a permutation of reference")
+
+    permutation_matrix = np.zeros((len(reference_positions), len(reference_positions)))
+    permutation_matrix[tuple(argsort_reference), tuple(argsort_permuted)] = 1
+
+    return permutation_matrix
 
 
 class ReferenceStructure:
@@ -64,7 +139,7 @@ class ReferenceStructure:
 
         self._rotations = self._symmetry_dict["rotations"]
         self._translations = self._symmetry_dict["translations"]
-        self._permutation_matrices = structural_utils.compute_permutation_matrices(
+        self._permutation_matrices = _compute_permutation_matrices(
             self._rotations, self._translations, self._fractional_positions
         )
 
@@ -104,12 +179,16 @@ class ReferenceStructure:
             transform the parameter `displacements` into that degree of freedom.
 
         """
-        displacement = structural_utils.apply_pbc_displacement(displacement)
+        displacement = ramannoodle.structure.structure_utils.apply_pbc_displacement(
+            displacement
+        )
         # Scale the displacement for numerical reasons.
         displacement = displacement / (np.linalg.norm(displacement) * 10)
 
-        ref_positions = structural_utils.displace_fractional_positions(
-            self._fractional_positions, displacement
+        ref_positions = (
+            ramannoodle.structure.structure_utils.displace_fractional_positions(
+                self._fractional_positions, displacement
+            )
         )
 
         result = []
@@ -119,15 +198,19 @@ class ReferenceStructure:
         ):
 
             # Transform, permute, then get candidate displacement
-            candidate_positions = structural_utils.transform_fractional_positions(
-                ref_positions, rotation, translation
+            candidate_positions = (
+                ramannoodle.structure.structure_utils.transform_fractional_positions(
+                    ref_positions, rotation, translation
+                )
             )
             candidate_positions = permutation_matrix @ candidate_positions
-            candidate_displacement = structural_utils.calculate_displacement(
-                candidate_positions, self._fractional_positions
+            candidate_displacement = (
+                ramannoodle.structure.structure_utils.calculate_displacement(
+                    candidate_positions, self._fractional_positions
+                )
             )
 
-            orthogonal_result = structural_utils.is_orthogonal_to_all(
+            orthogonal_result = symmetry_utils.is_orthogonal_to_all(
                 candidate_displacement.flatten(),
                 [item.flatten() for item in orthogonal_displacements],
             )
@@ -143,7 +226,7 @@ class ReferenceStructure:
                 orthogonal_displacements.append(candidate_displacement)
             else:
                 # Candidate can be collinear to maximum of one orthogonal vector
-                collinear_result = structural_utils.is_non_collinear_with_all(
+                collinear_result = symmetry_utils.is_non_collinear_with_all(
                     candidate_displacement,
                     orthogonal_displacements,
                 )
@@ -179,8 +262,10 @@ class ReferenceStructure:
         fractional_displacement
             2D array with shape (N,3) where N is the number of atoms
         """
-        fractional_displacement = structural_utils.apply_pbc_displacement(
-            fractional_displacement
+        fractional_displacement = (
+            ramannoodle.structure.structure_utils.apply_pbc_displacement(
+                fractional_displacement
+            )
         )
 
         return fractional_displacement @ self._lattice

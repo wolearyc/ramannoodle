@@ -8,7 +8,7 @@ import pytest
 
 from ramannoodle.polarizability.art import ARTModel
 from ramannoodle.exceptions import InvalidDOFException
-from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.structure.reference import ReferenceStructure
 
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments

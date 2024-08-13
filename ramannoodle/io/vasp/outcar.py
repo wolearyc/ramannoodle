@@ -11,7 +11,7 @@ from ramannoodle.exceptions import InvalidFileException, NoMatchingLineFoundExce
 from ramannoodle.globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from ramannoodle.exceptions import get_type_error
 from ramannoodle.dynamics.phonon import Phonons
-from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.structure.reference import ReferenceStructure
 
 
 # Utilities for OUTCAR. Warning: some of these functions partially read files.

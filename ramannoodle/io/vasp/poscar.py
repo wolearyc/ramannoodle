@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 from ramannoodle.io.io_utils import verify_structure, pathify
 from ramannoodle.exceptions import InvalidFileException
 from ramannoodle.globals import ATOM_SYMBOLS, ATOMIC_NUMBERS
-from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.structure.reference import ReferenceStructure
 from ramannoodle.io.vasp.outcar import _get_lattice_vector_from_outcar_line
 
 

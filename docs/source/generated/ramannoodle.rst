@@ -16,7 +16,7 @@ Subpackages
    ramannoodle.io
    ramannoodle.polarizability
    ramannoodle.spectrum
-   ramannoodle.symmetry
+   ramannoodle.structure
 
 Submodules
 ----------

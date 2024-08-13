@@ -14,7 +14,7 @@ from ramannoodle.spectrum.raman import (
     get_bose_einstein_correction,
     get_laser_correction,
 )
-from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.structure.reference import ReferenceStructure
 from ramannoodle.spectrum.spectrum_utils import convolve_spectrum
 
 # pylint: disable=protected-access,too-many-locals

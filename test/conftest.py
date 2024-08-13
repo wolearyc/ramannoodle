@@ -7,7 +7,7 @@ from collections.abc import Generator
 import pytest
 from pytest import FixtureRequest
 
-from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.structure.reference import ReferenceStructure
 import ramannoodle.io.generic as generic_io
 
 

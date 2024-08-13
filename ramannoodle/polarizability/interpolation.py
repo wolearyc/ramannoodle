@@ -16,12 +16,12 @@ from scipy.interpolate import make_interp_spline, BSpline
 
 from ramannoodle.globals import AnsiColors
 from ramannoodle.polarizability.abstract import PolarizabilityModel
-from ramannoodle.symmetry.structural_utils import (
+from ramannoodle.structure.structure_utils import calculate_displacement
+from ramannoodle.structure.symmetry_utils import (
     is_orthogonal_to_all,
-    calculate_displacement,
     is_collinear_with_all,
 )
-from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.structure.reference import ReferenceStructure
 from ramannoodle.exceptions import (
     InvalidDOFException,
     get_type_error,

@@ -11,7 +11,7 @@ import numpy as np
 from numpy.typing import NDArray
 from ramannoodle.dynamics.phonon import Phonons
 
-from ramannoodle.symmetry.structural import ReferenceStructure
+from ramannoodle.structure.reference import ReferenceStructure
 import ramannoodle.io.vasp as vasp_io
 
 # These  map between file formats and appropriate IO functions.
