@@ -40,6 +40,18 @@ class SymmetryException(Exception):
         pass
 
 
+class UsageError(Exception):
+    """Raised when a user does something they shouldn't.
+
+    This exception is used sparingly, as (ideally) the structure of the API should
+    dictate what the user should and shouldn't do.
+
+    """
+
+    def __init__(self, reason: str):
+        pass
+
+
 def _shape_string(shape: Sequence[int | None]) -> str:
     """Get a string representing a shape.
 
