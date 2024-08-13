@@ -6,4 +6,5 @@ Tutorials
    :caption: Contents:
 
    notebooks/Basic tutorial
+   notebooks/Dummy models
    notebooks/Masking

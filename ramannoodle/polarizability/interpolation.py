@@ -27,6 +27,7 @@ from ramannoodle.exceptions import (
     get_type_error,
     verify_ndarray_shape,
     DOFWarning,
+    UsageError,
 )
 import ramannoodle.io.generic as generic_io
 from ramannoodle.io.io_utils import pathify_as_list
@@ -77,7 +78,9 @@ class InterpolationModel(PolarizabilityModel):
     ref_structure
     equilibrium_polarizability
         2D array with shape (3,3) giving polarizability of system at equilibrium. This
-        would usually correspond to the minimum energy structure.
+        would usually correspond to the minimum energy structure. If dummy model, the
+        value of equilibrium_polarizability is ignored.
+    is_dummy_model
 
     """
 
@@ -85,12 +88,17 @@ class InterpolationModel(PolarizabilityModel):
         self,
         ref_structure: ReferenceStructure,
         equilibrium_polarizability: NDArray[np.float64],
+        is_dummy_model: bool = False,
     ) -> None:
+        if is_dummy_model:
+            equilibrium_polarizability = np.zeros((3, 3))
         verify_ndarray_shape(
             "equilibrium_polarizability", equilibrium_polarizability, (3, 3)
         )
+
         self._ref_structure = ref_structure
         self._equilibrium_polarizability = equilibrium_polarizability
+        self._is_dummy_model = is_dummy_model
         self._cartesian_basis_vectors: list[NDArray[np.float64]] = []
         self._interpolations: list[BSpline] = []
         self._mask: NDArray[np.bool] = np.array([], dtype="bool")
@@ -110,25 +118,40 @@ class InterpolationModel(PolarizabilityModel):
         :
             2D array with shape (3,3)
 
+        Raises
+        ------
+        UsageError
+            if a dummy model
+
         """
         delta_polarizability: NDArray[np.float64] = np.zeros((3, 3))
-        for basis_vector, interpolation, mask in zip(
-            self._cartesian_basis_vectors, self._interpolations, self._mask
-        ):
-            try:
-                amplitude = np.dot(
-                    basis_vector.flatten(), cartesian_displacement.flatten()
+        try:
+            for basis_vector, interpolation, mask in zip(
+                self._cartesian_basis_vectors,
+                self._interpolations,
+                self._mask,
+                strict=True,
+            ):
+                try:
+                    amplitude = np.dot(
+                        basis_vector.flatten(), cartesian_displacement.flatten()
+                    )
+                except AttributeError as exc:
+                    raise TypeError("cartesian_displacement is not an ndarray") from exc
+                except ValueError as exc:
+                    raise ValueError(
+                        "cartesian_displacement has incompatible length "
+                        f"({len(cartesian_displacement)}!={len(basis_vector)})"
+                    ) from exc
+                delta_polarizability += (1 - mask) * np.array(
+                    interpolation(amplitude), dtype="float64"
                 )
-            except AttributeError as exc:
-                raise TypeError("cartesian_displacement is not an ndarray") from exc
-            except ValueError as exc:
-                raise ValueError(
-                    "cartesian_displacement has incompatible length "
-                    f"({len(cartesian_displacement)}!={len(basis_vector)})"
-                ) from exc
-            delta_polarizability += (1 - mask) * np.array(
-                interpolation(amplitude), dtype="float64"
-            )
+        except ValueError as err:
+            if self._is_dummy_model:
+                raise UsageError(
+                    "dummy model cannot calculate polarizabilities"
+                ) from err
+            raise err
 
         return delta_polarizability + self._equilibrium_polarizability
 
@@ -142,6 +165,11 @@ class InterpolationModel(PolarizabilityModel):
         list[NDArray[np.float64]], list[list[float]], list[list[NDArray[np.float64]]]
     ]:
         """Calculate and return basis vectors and interpolation points for DOF(s).
+
+        This method will check the displacement to make sure it's valid, but will not
+        check the amplitudes. Amplitude checking is performed in
+        ``_construct_and_add_interpolations``, as this method has access to the
+        interpolation order.
 
         Parameters
         ----------
@@ -222,7 +250,7 @@ class InterpolationModel(PolarizabilityModel):
         interpolation_ys: list[list[NDArray[np.float64]]],
         interpolation_order: int,
     ) -> None:
-        """Construct  interpolations and add them to the model.
+        """Construct interpolations and add them to the model.
 
         Raises
         ------
@@ -280,7 +308,8 @@ class InterpolationModel(PolarizabilityModel):
                 ) from exc
 
         self._cartesian_basis_vectors += basis_vectors_to_add
-        self._interpolations += interpolations_to_add
+        if not self._is_dummy_model:
+            self._interpolations += interpolations_to_add
         # FALSE -> not masking, TRUE -> masking
         self._mask = np.append(self._mask, [False] * len(basis_vectors_to_add))
 
@@ -311,7 +340,7 @@ class InterpolationModel(PolarizabilityModel):
             amplitudes.
         polarizabilities
             3D array with shape (L,3,3) containing known polarizabilities for
-            each amplitude.
+            each amplitude. If dummy model, value of polarizabilities is ignored.
         interpolation_order
             Must be less than the number of total number of amplitudes after
             symmetry considerations.
@@ -330,11 +359,13 @@ class InterpolationModel(PolarizabilityModel):
         except TypeError as exc:
             raise TypeError("displacement is not an ndarray") from exc
         verify_ndarray_shape("amplitudes", amplitudes, (None,))
+        if self._is_dummy_model:
+            polarizabilities = np.zeros((len(amplitudes), 3, 3))
         verify_ndarray_shape(
             "polarizabilities", polarizabilities, (len(amplitudes), 3, 3)
         )
 
-        # Get information needed for DOF
+        # Get information needed for DOF - checks displacement.
         basis_vectors_to_add, interpolation_xs, interpolation_ys = self._get_dof(
             parent_displacement,
             amplitudes,
@@ -342,7 +373,7 @@ class InterpolationModel(PolarizabilityModel):
             include_equilibrium_polarizability,
         )
 
-        # Then append the DOF.
+        # Then append the DOF - checks amplitudes (in form of interpolation_xs)
         self._construct_and_add_interpolations(
             basis_vectors_to_add,
             interpolation_xs,
@@ -367,6 +398,7 @@ class InterpolationModel(PolarizabilityModel):
         filepaths
         file_format
             supports: "outcar"
+            if dummy model, supports: "outcar", "poscar"
 
         Raises
         ------
@@ -376,10 +408,12 @@ class InterpolationModel(PolarizabilityModel):
             DOF assembled from supplied files was invalid (see get_dof)
 
         """
+        # Checks displacements
         displacements, amplitudes, polarizabilities = self._read_dof(
             filepaths, file_format
         )
 
+        # Checks amplitudes
         self.add_dof(
             displacements[0],
             amplitudes,
@@ -393,6 +427,12 @@ class InterpolationModel(PolarizabilityModel):
         """Read displacements, amplitudes, and polarizabilities from file(s).
 
         This function does not change the state of the model.
+
+        Parameters
+        ----------
+        filepaths:
+            supports: "outcar"
+            if dummy model, supports: "outcar", "poscar"
 
         Returns
         -------
@@ -410,9 +450,14 @@ class InterpolationModel(PolarizabilityModel):
         polarizabilities = []
         filepaths = pathify_as_list(filepaths)
         for filepath in filepaths:
-            fractional_positions, polarizability = (
-                generic_io.read_positions_and_polarizability(filepath, file_format)
-            )
+            if not self._is_dummy_model:
+                fractional_positions, polarizability = (
+                    generic_io.read_positions_and_polarizability(filepath, file_format)
+                )
+            else:
+                fractional_positions = generic_io.read_positions(filepath, file_format)
+                polarizability = np.zeros((3, 3))
+
             try:
                 displacement = calculate_displacement(
                     fractional_positions,
@@ -502,6 +547,9 @@ class InterpolationModel(PolarizabilityModel):
         if num_masked > 0:
             num_arts = len(self._cartesian_basis_vectors)
             msg = f"ATTENTION: {num_masked}/{num_arts} degrees of freedom are masked."
+            result += f"\n {AnsiColors.WARNING_YELLOW} {msg} {AnsiColors.END}"
+        if self._is_dummy_model:
+            msg = "ATTENTION: this is a dummy model."
             result += f"\n {AnsiColors.WARNING_YELLOW} {msg} {AnsiColors.END}"
 
         return result

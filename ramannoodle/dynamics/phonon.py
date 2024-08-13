@@ -66,7 +66,7 @@ class Phonons(Dynamics):
                 minus = polarizability_model.get_polarizability(
                     -cartesian_displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
                 )
-            except Exception as exc:
+            except ValueError as exc:
                 raise ValueError(
                     "polarizability_model is incompatible with phonons"
                 ) from exc

@@ -65,6 +65,7 @@ class ARTModel(InterpolationModel):
     equilibrium_polarizability
         2D array with shape (3,3) giving polarizability of system at equilibrium. This
         would usually correspond to the minimum energy structure.
+    is_dummy_model
 
     """
 
@@ -132,7 +133,7 @@ class ARTModel(InterpolationModel):
             amplitudes.
         polarizabilities
             3D array with shape (1,3,3) or (2,3,3) containing known polarizabilities for
-            each amplitude.
+            each amplitude. If dummy model, the value of polarizabilities is ignored.
 
         Raises
         ------
@@ -147,6 +148,8 @@ class ARTModel(InterpolationModel):
                 raise get_shape_error("amplitudes", amplitudes, "(1,) or (2,)")
         except AttributeError as exc:
             raise get_type_error("amplitudes", amplitudes, "ndarray") from exc
+        if self._is_dummy_model:
+            polarizabilities = np.zeros((amplitudes.size, 3, 3))
         verify_ndarray_shape(
             "polarizabilities", polarizabilities, (amplitudes.size, 3, 3)
         )
@@ -159,6 +162,7 @@ class ARTModel(InterpolationModel):
         except ValueError as exc:
             raise get_shape_error("direction", direction, "(3,)") from exc
 
+        # Checks amplitudes and displacements
         super().add_dof(
             displacement,
             amplitudes,
@@ -183,6 +187,7 @@ class ARTModel(InterpolationModel):
         filepaths
         file_format
             supports: "outcar"
+            If dummy model, supports "outcar", "poscar"
 
         Raises
         ------
@@ -202,6 +207,7 @@ class ARTModel(InterpolationModel):
         if not np.isclose(_displacement, 0.0, atol=1e-6).all():
             raise InvalidDOFException("multiple atoms displaced simultaneously")
 
+        # Checks displacement
         basis_vectors_to_add, interpolation_xs, interpolation_ys = super()._get_dof(
             displacements[0], amplitudes, polarizabilities, False
         )
@@ -212,6 +218,7 @@ class ARTModel(InterpolationModel):
                 f"wrong number of amplitudes: {num_amplitudes} != 2"
             )
 
+        # Checks amplitudes
         super()._construct_and_add_interpolations(
             basis_vectors_to_add, interpolation_xs, interpolation_ys, 1
         )
@@ -299,6 +306,9 @@ class ARTModel(InterpolationModel):
         if num_masked > 0:
             num_arts = len(self._cartesian_basis_vectors)
             msg = f"ATTENTION: {num_masked}/{num_arts} atomic Raman tensors are masked."
+            result += f"\n {AnsiColors.WARNING_YELLOW} {msg} {AnsiColors.END}"
+        if self._is_dummy_model > 0:
+            msg = "ATTENTION: this is a dummy model."
             result += f"\n {AnsiColors.WARNING_YELLOW} {msg} {AnsiColors.END}"
 
         return result
