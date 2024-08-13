@@ -15,12 +15,12 @@ from ramannoodle.symmetry import structural_utils
 
 
 class ReferenceStructure:
-    """Crystal structure symmetries.
+    """Crystal structure, typically used as a reference in polarizability models.
 
     Parameters
     ----------
     atomic_numbers
-        1D array of length N where N is the number of atoms.
+        1D list of length N where N is the number of atoms.
     lattice
         Lattice vectors expressed as a 2D array with shape (3,3).
     fractional_positions

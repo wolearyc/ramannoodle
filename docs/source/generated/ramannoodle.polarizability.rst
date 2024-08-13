@@ -1,8 +1,21 @@
 ramannoodle.polarizability package
 ==================================
 
+.. automodule:: ramannoodle.polarizability
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
+
+ramannoodle.polarizability.abstract module
+------------------------------------------
+
+.. automodule:: ramannoodle.polarizability.abstract
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 ramannoodle.polarizability.art module
 -------------------------------------
@@ -16,22 +29,6 @@ ramannoodle.polarizability.interpolation module
 -----------------------------------------------
 
 .. automodule:: ramannoodle.polarizability.interpolation
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ramannoodle.polarizability.polarizability\_utils module
--------------------------------------------------------
-
-.. automodule:: ramannoodle.polarizability.polarizability_utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: ramannoodle.polarizability
    :members:
    :undoc-members:
    :show-inheritance:

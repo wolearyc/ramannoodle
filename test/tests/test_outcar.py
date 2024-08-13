@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 
 import pytest
 
-import ramannoodle.io.generic as rn_io
+import ramannoodle.io.generic as generic_io
 from ramannoodle.globals import ATOMIC_WEIGHTS
 
 
@@ -32,7 +32,7 @@ def test_read_phonons_from_outcar(
     known_last_displacement: NDArray[np.float64],
 ) -> None:
     """Test read_phonons for outcar (normal)."""
-    phonons = rn_io.read_phonons(path_fixture, file_format="outcar")
+    phonons = generic_io.read_phonons(path_fixture, file_format="outcar")
 
     known_degrees_of_freedom = known_num_atoms * 3
     assert phonons.get_wavenumbers().shape == (known_degrees_of_freedom,)

@@ -28,7 +28,7 @@ from ramannoodle.exceptions import (
     verify_ndarray_shape,
     DOFWarning,
 )
-import ramannoodle.io.generic as rn_io
+import ramannoodle.io.generic as generic_io
 from ramannoodle.io.io_utils import pathify_as_list
 
 
@@ -392,6 +392,8 @@ class InterpolationModel(PolarizabilityModel):
     ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
         """Read displacements, amplitudes, and polarizabilities from file(s).
 
+        This function does not change the state of the model.
+
         Returns
         -------
         :
@@ -409,7 +411,7 @@ class InterpolationModel(PolarizabilityModel):
         filepaths = pathify_as_list(filepaths)
         for filepath in filepaths:
             fractional_positions, polarizability = (
-                rn_io.read_positions_and_polarizability(filepath, file_format)
+                generic_io.read_positions_and_polarizability(filepath, file_format)
             )
             try:
                 displacement = calculate_displacement(

@@ -234,7 +234,7 @@ class ARTModel(InterpolationModel):
     def get_dof_indexes(
         self, atom_indexes_or_symbols: int | str | list[int | str]
     ) -> list[int]:
-        """Return art (DOF) indexes for certain atoms.
+        """Return the DOF indexes of certain atoms.
 
         Parameters
         ----------
@@ -293,7 +293,7 @@ class ARTModel(InterpolationModel):
         return result
 
     def get_masked_model(self, dof_indexes_to_mask: list[int]) -> ARTModel:
-        """Return new model with certain degrees of freedom deactivated.
+        """Return new model with certain degrees of freedom deactivated, i.e. masked.
 
         Model masking allows for the calculation of partial Raman spectra in which only
         certain degrees of freedom are considered.

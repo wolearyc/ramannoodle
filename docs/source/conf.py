@@ -49,5 +49,10 @@ language = 'Python'
 
 html_theme = 'furo'
 html_static_path = ['_static']
+html_theme_options = {
+    "light_logo": "logo.png",
+    "dark_logo": "logo_dark.png",
+    "sidebar_hide_name": True,
+}
 
 sys.path.insert(0, os.path.abspath('../../'))

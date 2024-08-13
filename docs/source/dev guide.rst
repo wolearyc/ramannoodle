@@ -45,12 +45,12 @@ In no particular order, here are some guidelines that are followed throughout ra
 
 * All public-facing functions should raise descriptive TypeError and ValueError exceptions when invalid arguments are provided. These sorts of exceptions should not be documented in the docstring.
 
-* All array arguments should be numpy arrays. This should be enforced, when appropriate, through exceptions.
+* All array arguments containing floats should be numpy arrays. This should be enforced, when appropriate, through exceptions.
 
 * Docstring descriptions for array arguments should provide a dimension and shape. Uppercase letters can be used for cases where shape is variable. For example, "4D array with shape (M,N,3) where M is ... and N is ...".
 
-* Unless otherwise noted, fractional coordinates are always used. Variables for cartesian coordinates always have "cartesian\_" appended.
+* Unless otherwise noted, fractional coordinates are always used. Variables that are in Cartesian coordinates always have "cartesian\_" appended.
 
 * Use classes widely. Sometimes, a regular function is all that is needed!
 
-* With IO functions, ramannoodle attempts to strike a balance between simplicity and flexibility. `import ramannoodle.io` provides access to generic file readers and writers for a variety of file formats. However, these generic routines do not offer much customization but do offer simplicity. Additional options can be accessed in the code-specific packages, such as `import ramannoodle.io.vasp.poscar`. Use of these is preferred.
+* With IO functions, ramannoodle attempts to strike a balance between simplicity and flexibility. ``import ramannoodle.io.generic`` provides access to generic file readers and writers for a variety of file formats. These generic routines are rather inflexible but are necessary for certain functionality. Users are strongly encouraged to use functions contained in the code-specific IO packages, such as ``import ramannoodle.io.vasp.poscar``.

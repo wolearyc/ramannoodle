@@ -193,10 +193,16 @@ def write_structure(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
+        2D array with shape (3,3)
     atomic_numbers
+        1D list of length N where N is the number of atoms
     positions
+        2D array with shape (N,3)
     filepath
+    file_format
+        supports: "poscar"
     overwrite
+        overwrite the file if it exists
     label
         POSCAR label (first line).
     """
