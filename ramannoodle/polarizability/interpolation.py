@@ -400,9 +400,7 @@ class InterpolationModel(PolarizabilityModel):
 
         """
         try:
-            displacement = self.ref_structure.get_fractional_displacement(
-                cart_displacement
-            )
+            displacement = self.ref_structure.get_frac_displacement(cart_displacement)
 
             parent_displacement = displacement / np.linalg.norm(displacement * 10.0)
         except TypeError as exc:

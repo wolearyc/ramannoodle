@@ -141,9 +141,7 @@ class ARTModel(InterpolationModel):
             Provided ART was invalid.
 
         """
-        direction = self.ref_structure.get_fractional_displacement(
-            np.array([cart_direction])
-        )
+        direction = self.ref_structure.get_frac_displacement(np.array([cart_direction]))
         if not isinstance(atom_index, int):
             raise get_type_error("atom_index", atom_index, "int")
         try:

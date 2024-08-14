@@ -229,7 +229,7 @@ def write_structure(  # pylint: disable=too-many-arguments
     open_mode = "w" if overwrite else "x"
     filepath = pathify(filepath)
 
-    label_str = repr(label) + "\n"  # Raw string
+    label_str = repr(label)[1:-1] + "\n"  # Raw string with quotes removed
     lattice_str = _get_lattice_str(lattice)
     symbols_str = _get_symbols_str(atomic_numbers)
     positions_str = _get_positions_str(positions)

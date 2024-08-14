@@ -268,7 +268,7 @@ class ReferenceStructure:
 
         return displacement @ self._lattice
 
-    def get_fractional_displacement(
+    def get_frac_displacement(
         self, cart_displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
         """Convert a Cartesian displacement into fractional coordinates.
