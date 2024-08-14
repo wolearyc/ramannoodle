@@ -103,13 +103,13 @@ class InterpolationModel(PolarizabilityModel):
 
     @property
     def ref_structure(self) -> ReferenceStructure:
-        """Get reference structure."""
-        return self._ref_structure
+        """Get (a copy of) reference structure."""
+        return copy.deepcopy(self._ref_structure)
 
     @property
     def equilibrium_polarizability(self) -> NDArray[np.float64]:
-        """Get reference structure."""
-        return self._equilibrium_polarizability
+        """Get (a copy of) reference structure."""
+        return self._equilibrium_polarizability.copy()
 
     @property
     def is_dummy_model(self) -> bool:
@@ -118,18 +118,18 @@ class InterpolationModel(PolarizabilityModel):
 
     @property
     def cart_basis_vectors(self) -> list[NDArray[np.float64]]:
-        """Get cartesian basis vectors."""
-        return self._cart_basis_vectors
+        """Get (a copy of) cartesian basis vectors."""
+        return copy.deepcopy(self._cart_basis_vectors)
 
     @property
     def interpolations(self) -> list[BSpline]:
-        """Get interpolations."""
-        return self._interpolations
+        """Get (a copy of) interpolations."""
+        return copy.deepcopy(self._interpolations)
 
     @property
     def mask(self) -> NDArray[np.bool]:
-        """Get mask."""
-        return self._mask
+        """Get (a copy of) mask."""
+        return self._mask.copy()
 
     @mask.setter
     def mask(self, value: NDArray[np.bool]) -> None:

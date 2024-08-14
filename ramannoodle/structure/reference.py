@@ -1,5 +1,7 @@
 """Reference structure."""
 
+import copy
+
 import numpy as np
 from numpy.typing import NDArray
 import spglib
@@ -140,18 +142,18 @@ class ReferenceStructure:
 
     @property
     def atomic_numbers(self) -> list[int]:
-        """Return atomic numbers."""
-        return self._atomic_numbers
+        """Return (a copy of) atomic numbers."""
+        return copy.copy(self._atomic_numbers)
 
     @property
     def lattice(self) -> NDArray[np.float64]:
-        """Return lattice."""
-        return self._lattice
+        """Return (a copy of) lattice."""
+        return self._lattice.copy()
 
     @property
     def positions(self) -> NDArray[np.float64]:
-        """Return fractional positions."""
-        return self._positions
+        """Return (a copy of) fractional positions."""
+        return self._positions.copy()
 
     def get_num_nonequivalent_atoms(self) -> int:
         """Return number of nonequivalent atoms."""

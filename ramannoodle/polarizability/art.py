@@ -204,7 +204,7 @@ class ARTModel(InterpolationModel):
             filepaths, file_format
         )
         # Check whether only one atom is displaced.
-        _displacement = np.copy(displacements[0])
+        _displacement = displacements[0].copy()
         atom_index = int(np.argmax(np.sum(_displacement**2, axis=1)))
         _displacement[atom_index] = np.zeros(3)
         if not np.isclose(_displacement, 0.0, atol=1e-6).all():

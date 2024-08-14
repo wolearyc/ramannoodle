@@ -93,13 +93,13 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
 
     @property
     def phonon_wavenumbers(self) -> NDArray[np.float64]:
-        """Get phonon_wavenumbers."""
-        return self._phonon_wavenumbers
+        """Get (a copy of) phonon_wavenumbers."""
+        return self._phonon_wavenumbers.copy()
 
     @property
     def raman_tensors(self) -> NDArray[np.float64]:
-        """Get raman_tensors."""
-        return self._raman_tensors
+        """Get (a copy of) raman_tensors."""
+        return self._raman_tensors.copy()
 
     def measure(  # pylint: disable=too-many-arguments
         self,

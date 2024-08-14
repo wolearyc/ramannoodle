@@ -51,18 +51,18 @@ class Phonons(Dynamics):
 
     @property
     def wavenumbers(self) -> NDArray[np.float64]:
-        """Get wavenumbers.
+        """Get (a copy of) wavenumbers.
 
         Returns
         -------
         :
             1D array with length M
         """
-        return self._wavenumbers
+        return self._wavenumbers.copy()
 
     @property
     def cart_displacements(self) -> NDArray[np.float64]:
-        """Get cartesian displacements.
+        """Get (a copy of) cartesian displacements.
 
         Returns
         -------
@@ -70,7 +70,7 @@ class Phonons(Dynamics):
             3D array with shape (M,N,3) where M is the number of displacements
             and N is the number of atoms
         """
-        return self._cart_displacements
+        return self._cart_displacements.copy()
 
     def get_raman_spectrum(
         self, polarizability_model: PolarizabilityModel
