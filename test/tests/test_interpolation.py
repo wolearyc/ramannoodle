@@ -64,8 +64,8 @@ def test_add_dof(
     displacement[displaced_atom_index][0] = 1.0
     polarizabilities = np.zeros((len(amplitudes), 3, 3))
     model.add_dof(displacement, amplitudes, polarizabilities, 1)
-    assert len(model._cart_basis_vectors) == known_dof_added
-    assert np.isclose(np.linalg.norm(model._cart_basis_vectors[0]), 1)
+    assert len(model.cart_basis_vectors) == known_dof_added
+    assert np.isclose(np.linalg.norm(model.cart_basis_vectors[0]), 1)
 
 
 @pytest.mark.parametrize(
@@ -147,9 +147,18 @@ def test_add_dof(
         (
             "test/data/STO_RATTLED_OUTCAR",
             [[0]],
+            np.array([-0.1, 0.1]),
+            np.zeros((2, 3, 3)),
+            0,
+            ValueError,
+            "invalid interpolation_order: 0 < 1",
+        ),
+        (
+            "test/data/STO_RATTLED_OUTCAR",
+            [[0]],
             np.array([-0.1, 0.1, 0.1]),
             np.zeros((3, 3, 3)),
-            -1.6,
+            1,
             InvalidDOFException,
             "due to symmetry, amplitude 0.1 should not be specified",
         ),
@@ -260,3 +269,38 @@ def test_add_dof_from_files_exception(
         for outcar_files in outcar_file_groups:
             model.add_dof_from_files(outcar_files, "outcar", interpolation_order)
     assert in_reason in str(error.value)
+
+
+@pytest.mark.parametrize(
+    "outcar_ref_structure_fixture,displaced_atom_index, amplitudes",
+    [
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            0,
+            np.array([0.01]),
+        ),
+    ],
+    indirect=["outcar_ref_structure_fixture"],
+)
+def test_dummy_interpolation_model(
+    outcar_ref_structure_fixture: ReferenceStructure,
+    displaced_atom_index: int,
+    amplitudes: NDArray[np.float64],
+) -> None:
+    """Test dummy art models (normal)."""
+    ref_structure = outcar_ref_structure_fixture
+    model = InterpolationModel(ref_structure, np.zeros((3, 3)), is_dummy_model=True)
+    displacement = ref_structure.positions * 0
+    displacement[displaced_atom_index][0] = 1.0
+    polarizabilities = np.zeros((len(amplitudes), 3, 3))
+    model.add_dof(displacement, amplitudes, polarizabilities, 1)
+
+    mask = model.mask
+    mask[0] = True
+    model.mask = mask
+
+    assert "ATTENTION: this is a dummy model." in repr(model)
+    assert "degrees of freedom are masked" in repr(model)
+
+    model.unmask()
+    assert not model.mask.all()

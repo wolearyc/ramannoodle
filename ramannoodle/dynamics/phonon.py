@@ -7,6 +7,7 @@ from ramannoodle.dynamics.abstract import Dynamics
 from ramannoodle.globals import RAMAN_TENSOR_CENTRAL_DIFFERENCE
 from ramannoodle.polarizability.abstract import PolarizabilityModel
 from ramannoodle.spectrum.raman import PhononRamanSpectrum
+from ramannoodle.exceptions import verify_ndarray_shape
 
 
 class Phonons(Dynamics):
@@ -31,21 +32,10 @@ class Phonons(Dynamics):
         wavenumbers: NDArray[np.float64],
         cart_displacements: NDArray[np.float64],
     ) -> None:
-        try:
-            if wavenumbers.ndim != 1:
-                raise ValueError("wavenumbers is not a 1D array")
-        except AttributeError as exc:
-            raise TypeError("wavenumbers is not an ndarray") from exc
-        try:
-            if cart_displacements.ndim != 3 or cart_displacements.shape[2] != 3:
-                raise ValueError("cart_displacements does not have shape (_,_,3)")
-            if cart_displacements.shape[0] != wavenumbers.shape[0]:
-                raise ValueError(
-                    "wavenumbers and cart_displacements do not have the same length"
-                )
-        except AttributeError as exc:
-            raise TypeError("cart_displacements is not an ndarray") from exc
-
+        verify_ndarray_shape("wavenumbers", wavenumbers, (None,))
+        verify_ndarray_shape(
+            "cart_displacements", cart_displacements, (wavenumbers.size, None, 3)
+        )
         self._wavenumbers: NDArray[np.float64] = wavenumbers
         self._cart_displacements: NDArray[np.float64] = cart_displacements
 
@@ -87,7 +77,7 @@ class Phonons(Dynamics):
                 )
             except ValueError as exc:
                 raise ValueError(
-                    "polarizability_model is incompatible with phonons"
+                    "polarizability_model and phonons are incompatible"
                 ) from exc
             raman_tensors.append((plus - minus) / RAMAN_TENSOR_CENTRAL_DIFFERENCE)
 

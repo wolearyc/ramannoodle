@@ -8,36 +8,21 @@ from numpy.typing import NDArray
 class NoMatchingLineFoundException(Exception):
     """Raised when no line can be found in file."""
 
-    def __init__(self, pattern: str):
-        pass
-
 
 class InvalidFileException(Exception):
     """Raised when a file cannot be read due to formatting issues."""
-
-    def __init__(self, reason: str):
-        pass
 
 
 class InvalidDOFException(Exception):
     """Raised when things a degree of freedom is invalid in some way."""
 
-    def __init__(self, reason: str):
-        pass
-
 
 class DOFWarning(UserWarning):
     """Used when something may be wrong with a DOF."""
 
-    def __init__(self, reason: str):
-        pass
-
 
 class SymmetryException(Exception):
     """Raised when something goes wrong with an operation involving symmetry."""
-
-    def __init__(self, reason: str):
-        pass
 
 
 class UsageError(Exception):
@@ -47,9 +32,6 @@ class UsageError(Exception):
     dictate what the user should and shouldn't do.
 
     """
-
-    def __init__(self, reason: str):
-        pass
 
 
 def _shape_string(shape: Sequence[int | None]) -> str:

@@ -197,6 +197,27 @@ def test_apply_pbc(positions: NDArray[np.float64], known: NDArray[np.float64]) -
 
 
 @pytest.mark.parametrize(
+    "positions, exception_type, in_reason",
+    [
+        ([1, 2, 3], TypeError, "should have type ndarray, not list"),
+    ],
+)
+def test_apply_pbc_exception(
+    positions: NDArray[np.float64],
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test apply_pbc (exception)."""
+    with pytest.raises(exception_type) as err:
+        apply_pbc(positions)
+    assert in_reason in str(err.value)
+
+    with pytest.raises(exception_type) as err:
+        apply_pbc_displacement(positions)
+    assert in_reason in str(err.value)
+
+
+@pytest.mark.parametrize(
     "displacement, known",
     [
         (np.array([0.2, 0.3, 0.4]), np.array([0.2, 0.3, 0.4])),

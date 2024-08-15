@@ -25,6 +25,7 @@ from ramannoodle.structure.reference import ReferenceStructure
 from ramannoodle.exceptions import (
     InvalidDOFException,
     get_type_error,
+    get_shape_error,
     verify_ndarray_shape,
     DOFWarning,
     UsageError,
@@ -182,11 +183,14 @@ class InterpolationModel(PolarizabilityModel):
                         basis_vector.flatten(), cart_displacement.flatten()
                     )
                 except AttributeError as exc:
-                    raise TypeError("cart_displacement is not an ndarray") from exc
+                    raise get_type_error(
+                        "cart_displacement", cart_displacement, "ndarray"
+                    ) from exc
                 except ValueError as exc:
-                    raise ValueError(
-                        "cart_displacement has incompatible length "
-                        f"({len(cart_displacement)}!={len(basis_vector)})"
+                    raise get_shape_error(
+                        "cart_displacement",
+                        cart_displacement,
+                        f"({len(basis_vector)},3)",
                     ) from exc
                 delta_polarizability += (1 - mask) * np.array(
                     interpolation(amplitude), dtype="float64"
@@ -301,6 +305,12 @@ class InterpolationModel(PolarizabilityModel):
         ------
         InvalidDOFException
         """
+        # make_interp_spline accepts k=0 (useless), so check here
+        if not isinstance(interpolation_order, int):
+            raise get_type_error("interpolation_order", interpolation_order, "int")
+        if interpolation_order < 1:
+            raise ValueError(f"invalid interpolation_order: {interpolation_order} < 1")
+
         interpolations_to_add: list[BSpline] = []
         for interpolation_x, interpolation_y in zip(interpolation_xs, interpolation_ys):
 
@@ -332,25 +342,14 @@ class InterpolationModel(PolarizabilityModel):
                 )
 
             sort_indices = np.argsort(interpolation_x)
-            try:
-                interpolations_to_add.append(
-                    make_interp_spline(
-                        x=np.array(interpolation_x)[sort_indices],
-                        y=np.array(interpolation_y)[sort_indices],
-                        k=interpolation_order,
-                        bc_type=None,
-                    )
+            interpolations_to_add.append(
+                make_interp_spline(
+                    x=np.array(interpolation_x)[sort_indices],
+                    y=np.array(interpolation_y)[sort_indices],
+                    k=interpolation_order,
+                    bc_type=None,
                 )
-            except ValueError as exc:
-                if "non-negative k" in str(exc):
-                    raise ValueError(
-                        f"invalid interpolation_order: {interpolation_order} < 1"
-                    ) from exc
-                raise exc
-            except TypeError as exc:
-                raise get_type_error(
-                    "interpolation_order", interpolation_order, "int"
-                ) from exc
+            )
 
         self._cart_basis_vectors += basis_vectors_to_add
         if not self._is_dummy_model:

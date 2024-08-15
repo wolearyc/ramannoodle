@@ -9,6 +9,7 @@ from numpy.typing import NDArray
 import pytest
 
 import ramannoodle.io.generic
+import ramannoodle.io.vasp as vasp_io
 from ramannoodle.io.vasp import poscar
 from ramannoodle.exceptions import InvalidFileException
 
@@ -155,6 +156,21 @@ def test_write_poscar_exception(  # pylint: disable=too-many-arguments
 
 
 @pytest.mark.parametrize(
+    "cart_poscar_path, ref_frac_poscar_path",
+    [("test/data/TiO2/cart_POSCAR", "test/data/TiO2/POSCAR")],
+)
+def test_read_cart_poscar(  # pylint: disable=too-many-arguments
+    cart_poscar_path: str, ref_frac_poscar_path: str
+) -> None:
+    """Test write structure as POSCAR (exception)."""
+    ref_structure = vasp_io.poscar.read_ref_structure(cart_poscar_path)
+    known_ref_structure = vasp_io.poscar.read_ref_structure(ref_frac_poscar_path)
+
+    assert np.isclose(ref_structure.lattice, known_ref_structure.lattice).all()
+    assert np.isclose(ref_structure.positions, known_ref_structure.positions).all()
+
+
+@pytest.mark.parametrize(
     "path_fixture, exception_type, in_reason",
     [
         (
@@ -191,6 +207,21 @@ def test_write_poscar_exception(  # pylint: disable=too-many-arguments
             "test/data/malformed/vasp.poscar/too_many_labels",
             InvalidFileException,
             "positions could not be parsed: This shouldn't be here",
+        ),
+        (
+            "test/data/malformed/vasp.poscar/bogus_element",
+            InvalidFileException,
+            "unrecognized atom symbol: Imaginarium",
+        ),
+        (
+            "test/data/malformed/vasp.poscar/no_elements",
+            InvalidFileException,
+            "no atom symbols found",
+        ),
+        (
+            "test/data/malformed/vasp.poscar/bogus_ion_count",
+            InvalidFileException,
+            "could not parse counts:",
         ),
     ],
     indirect=["path_fixture"],

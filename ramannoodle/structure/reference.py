@@ -11,6 +11,7 @@ from ramannoodle.exceptions import (
     get_type_error,
     verify_ndarray_shape,
     verify_list_len,
+    get_shape_error,
 )
 from ramannoodle.structure.structure_utils import (
     displace_positions,
@@ -268,6 +269,20 @@ class ReferenceStructure:
 
         return displacement @ self._lattice
 
+    def get_cart_direction(self, direction: NDArray[np.float64]) -> NDArray[np.float64]:
+        """Convert a fractional direction into cartesian coordinates.
+
+        Parameters
+        ----------
+        direction
+            1D array with shape (3,)
+        """
+        direction = apply_pbc_displacement(direction)
+        try:
+            return np.array([direction]) @ self._lattice
+        except ValueError as exc:
+            raise get_shape_error("direction", direction, "(3,)") from exc
+
     def get_frac_displacement(
         self, cart_displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
@@ -278,8 +293,23 @@ class ReferenceStructure:
         displacement
             2D array with shape (N,3) where N is the number of atoms
         """
-        displacement = cart_displacement @ np.linalg.inv(self.lattice)
+        verify_ndarray_shape("cart_displacement", cart_displacement, (None, 3))
+        displacement = (cart_displacement) @ np.linalg.inv(self.lattice)
         return apply_pbc_displacement(displacement)
+
+    def get_frac_direction(
+        self, cart_direction: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
+        """Convert a Cartesian direction into fractional coordinates.
+
+        Parameters
+        ----------
+        direction
+            1D array with shape (3,) where N is the number of atoms
+        """
+        verify_ndarray_shape("direction", cart_direction, (3,))
+        displacement = np.array([cart_direction]) @ np.linalg.inv(self.lattice)
+        return apply_pbc_displacement(displacement[0])
 
     def get_atom_indexes(self, atom_symbols: str | list[str]) -> list[int]:
         """Return atom indexes with matching symbols.

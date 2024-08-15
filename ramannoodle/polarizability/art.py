@@ -141,7 +141,7 @@ class ARTModel(InterpolationModel):
             Provided ART was invalid.
 
         """
-        direction = self.ref_structure.get_frac_displacement(np.array([cart_direction]))
+        direction = self.ref_structure.get_frac_direction(cart_direction)
         if not isinstance(atom_index, int):
             raise get_type_error("atom_index", atom_index, "int")
         try:
@@ -156,12 +156,7 @@ class ARTModel(InterpolationModel):
         )
 
         displacement = self._ref_structure.positions * 0
-        try:
-            displacement[atom_index] = direction / np.linalg.norm(direction * 10.0)
-        except TypeError as exc:
-            raise get_type_error("direction", direction, "ndarray") from exc
-        except ValueError as exc:
-            raise get_shape_error("direction", direction, "(3,)") from exc
+        displacement[atom_index] = direction / np.linalg.norm(direction * 10.0)
 
         # Checks amplitudes and displacements
         super().add_dof(

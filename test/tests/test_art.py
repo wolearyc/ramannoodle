@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 import pytest
 
 from ramannoodle.polarizability.art import ARTModel
-from ramannoodle.exceptions import InvalidDOFException
+from ramannoodle.exceptions import InvalidDOFException, UsageError
 from ramannoodle.structure.reference import ReferenceStructure
 
 # pylint: disable=protected-access
@@ -42,8 +42,8 @@ def test_add_art(
     model.add_art(
         atom_index, cart_direction, amplitudes, np.zeros((amplitudes.size, 3, 3))
     )
-    assert len(model._cart_basis_vectors) == known_dof_added
-    assert np.isclose(np.linalg.norm(model._cart_basis_vectors[0]), 1)
+    assert len(model.cart_basis_vectors) == known_dof_added
+    assert np.isclose(np.linalg.norm(model.cart_basis_vectors[0]), 1)
 
 
 @pytest.mark.parametrize(
@@ -58,6 +58,24 @@ def test_add_art(
             np.zeros((1, 3, 3)),
             InvalidDOFException,
             "insufficient points",
+        ),
+        (
+            "test/data/STO_RATTLED_OUTCAR",  # This case gives a warning.
+            [0],
+            np.array([[1, 0]]),
+            np.array([-0.1, 0.1]),
+            np.zeros((2, 3, 3)),
+            ValueError,
+            "direction has wrong shape: (2,) != (3,)",
+        ),
+        (
+            "test/data/STO_RATTLED_OUTCAR",
+            [0],
+            np.array([[1, 0, 0]]),
+            np.array([]),
+            np.zeros((1, 3, 3)),
+            ValueError,
+            "amplitudes has wrong shape: (0,) != (1,) or (2,)",
         ),
         (
             "test/data/STO_RATTLED_OUTCAR",
@@ -176,6 +194,16 @@ def test_add_art_exception(
             "wrong number of amplitudes: 4 != 2",
         ),
         (
+            "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+            [
+                [
+                    "test/data/TiO2/O43_0.1x_eps_OUTCAR",
+                ]
+            ],
+            InvalidDOFException,
+            "multiple atoms displaced simultaneously",
+        ),
+        (
             "test/data/TiO2/phonons_OUTCAR",
             [
                 [
@@ -290,3 +318,52 @@ def test_get_specification_tuples(
         atol=1e-7,
     ).all()
     assert specification_tuples[0][1] == known_equivalent_atoms
+
+
+@pytest.mark.parametrize(
+    "outcar_ref_structure_fixture,atom_index, cart_direction, amplitudes,"
+    "known_dof_added",
+    [
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            0,
+            np.array([1, 0, 0]),
+            np.array([0.01]),
+            72,
+        ),
+    ],
+    indirect=["outcar_ref_structure_fixture"],
+)
+def test_dummy_art(
+    outcar_ref_structure_fixture: ReferenceStructure,
+    atom_index: int,
+    cart_direction: NDArray[np.float64],
+    amplitudes: NDArray[np.float64],
+    known_dof_added: int,
+) -> None:
+    """Test dummy art models (normal)."""
+    ref_structure = outcar_ref_structure_fixture
+    model = ARTModel(ref_structure, np.zeros((3, 3)), is_dummy_model=True)
+    model.add_art(
+        atom_index, cart_direction, amplitudes, np.zeros((amplitudes.size, 3, 3))
+    )
+    mask = model.mask
+    mask[0] = True
+    model.mask = mask
+
+    assert "ATTENTION: this is a dummy model." in repr(model)
+    assert "atomic Raman tensors are masked" in repr(model)
+    assert len(model.cart_basis_vectors) == known_dof_added
+    assert np.isclose(np.linalg.norm(model.cart_basis_vectors[0]), 1)
+    with pytest.raises(UsageError) as err:
+        model.add_dof(np.array([]), np.array([]), np.array([]), 1, False)
+    assert "add_dof should not be used; use add_art instead" in str(err.value)
+    with pytest.raises(UsageError) as err:
+        model.add_dof_from_files(["blah"], "blah", 1)
+    assert (
+        "add_dof_from_files should not be used; use add_art_from_files instead"
+        in str(err.value)
+    )
+    with pytest.raises(UsageError) as err:
+        model.get_polarizability(np.array([]))
+    assert "dummy model cannot calculate polarizabilities" in str(err.value)

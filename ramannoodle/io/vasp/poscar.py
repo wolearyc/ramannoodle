@@ -53,7 +53,7 @@ def _read_atomic_symbols(poscar_file: TextIO) -> list[str]:
     line = poscar_file.readline()
     symbols = line.split()
     if len(symbols) == 0:
-        raise InvalidFileException(f"atom symbols not found: {line}")
+        raise InvalidFileException("no atom symbols found")
     for symbol in symbols:
         if symbol not in ATOMIC_NUMBERS:
             raise InvalidFileException(f"unrecognized atom symbol: {symbol}")

@@ -28,7 +28,10 @@ def pathify(filepath: str | Path) -> Path:
 
     :meta private:
     """
-    return Path(filepath)
+    try:
+        return Path(filepath)
+    except TypeError as exc:
+        raise TypeError(f"{filepath} cannot be resolved as a filepath") from exc
 
 
 def pathify_as_list(filepaths: str | Path | list[str] | list[Path]) -> list[Path]:
@@ -39,15 +42,9 @@ def pathify_as_list(filepaths: str | Path | list[str] | list[Path]) -> list[Path
     if isinstance(filepaths, list):
         paths = []
         for item in filepaths:
-            try:
-                paths.append(Path(item))
-            except TypeError as exc:
-                raise TypeError(f"{item} cannot be resolved as a filepath") from exc
+            paths.append(pathify(item))
         return paths
-    try:
-        return [Path(filepaths)]
-    except TypeError as exc:
-        raise TypeError(f"{filepaths} cannot be resolved as a filepath") from exc
+    return [pathify(filepaths)]
 
 
 def verify_structure(
@@ -63,6 +60,6 @@ def verify_structure(
     verify_list_len("atomic_numbers", atomic_numbers, None)
     for atomic_number in atomic_numbers:
         if atomic_number not in ATOM_SYMBOLS.keys():
-            raise ValueError(f"unrecognized atomic number: {atomic_number}")
+            raise ValueError(f"invalid atomic number: {atomic_number}")
     verify_ndarray_shape("positions", positions, (len(atomic_numbers), 3))
     verify_positions("positions", positions)
