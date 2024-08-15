@@ -1,10 +1,10 @@
 <div align="center">
   <img width="200" src="docs/source/_static/logo_dark.png#gh-dark-mode-only">
-  <img width="300" src="docs/source/_static/logo.png#gh-light-mode-only">
+  <img width="200" src="docs/source/_static/logo.png#gh-light-mode-only">
 </div>
 
 -------
-[![python](https://img.shields.io/badge/Python-3.10|3.11|3.12-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/) ![Tests](docs/tests-badge.svg) ![Coverage](docs/coverage-badge.svg) [![Documentation Status](https://readthedocs.org/projects/ramannoodle/badge/?version=latest)](https://ramannoodle.readthedocs.io/en/latest/?badge=latest) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit)
+[![python](https://img.shields.io/badge/Python-3.10|3.11|3.12-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org) ![Tests](docs/tests-badge.svg) ![Coverage](docs/coverage-badge.svg) [![Documentation Status](https://readthedocs.org/projects/ramannoodle/badge/?version=latest)](https://ramannoodle.readthedocs.io/en/latest/?badge=latest) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit)
 
 ## About
 
@@ -54,17 +54,16 @@ coming soon...
 
 ## Roadmap
 
-Current release: v0.1.1-alpha
+Current release: 0.2.0
 
 Future releases:
 
-
-**v.0.1.2-alpha**
-* Utilities to help set up calculations for `InterpolationModel`, including displaced structure writing functionality.
-* Additional tests, ideally achieving >95 % coverage
-* Add read/write support for other VASP files, namely POSCAR and vasprun.xml
-* Minor bugfixes and documentation updates
-
-**v.0.2.0-alpha**
+**0.3.0**
 * Add support for molecular dynamics
 * Add IO support for Phonopy
+
+**1.0.0**
+* Official release
+
+**1.1.0**
+* ML polarizability models

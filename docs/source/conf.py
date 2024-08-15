@@ -14,9 +14,9 @@ import sys
 import os
 
 project = 'ramannoodle'
-copyright = "2024, Willis O'Leary"
+copyright = "2023-, Willis O'Leary"
 author = "Willis O'Leary"
-release = 'v0.1.1-alpha'
+release = '0.2.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

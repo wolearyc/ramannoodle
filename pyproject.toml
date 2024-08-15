@@ -1,3 +1,36 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ramannoodle"
+version = "0.2.0"
+authors = [
+    {name = "Willis O'Leary", email = "wolearyc@gmail.com"},
+]
+description = "Calculate Raman spectra from first-principles calculations."
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["raman", "spectrum", "vasp", "dft", "phonons", "molecular", "dynamics", "polarizability" ]
+license = {text = "MIT"}
+dependencies = [
+    "numpy >= 2.0.1",
+    "scipy >= 1.14.0",
+    "spglib >= 2.5.0",
+]
+
+[project.optional-dependencies]
+
+[project.urls]
+Documentation = "https://ramannoodle.readthedocs.io/en/latest/"
+Repository = "https://github.com/wolearyc/ramannoodle"
+Issues = "https://github.com/wolearyc/ramannoodle/issues"
+
+[tool.setuptools.packages.find]
+include = ["ramannoodle*"]  # ["*"] by default
+exclude = ["reports"]  # empty by default
+
+
 [tool.pylint.MASTER]
 ignore-paths = [ "^docs/.*$",
                  "setup.py" ]
