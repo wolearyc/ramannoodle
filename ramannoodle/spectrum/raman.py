@@ -1,4 +1,4 @@
-"""Classes for Raman spectra."""
+"""Raman spectrum classes and utilities."""
 
 import numpy as np
 from numpy.typing import NDArray
@@ -73,9 +73,9 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
     Parameters
     ----------
     phonon_wavenumbers
-        an ndarray with shape (M,N,3)
+        1D array with shape (M,) where M is the number of phonons.
     raman_tensors
-        an ndarray with shape (M,3,3)
+        3D array with shape (M,3,3).
 
     """
 
@@ -114,21 +114,22 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
         Parameters
         ----------
         orientation
-            Currently only "polycrystalline" is supported.
+            Currently only "polycrystalline" is supported. Future versions will support
+            arbitrary orientations.
         laser_correction
             Applies laser-wavelength-dependent intensity correction. If True,
-            `laser_wavelength` must be specified.
+            ``laser_wavelength`` must be specified.
         laser_wavelength
         bose_einstein_correction
             Applies temperature-dependent Bose Einstein correction. If True,
-            `temperature` must be specified.
+            ``temperature`` must be specified.
 
         Returns
         -------
         :
-            2-tuple, whose first element is wavenumbers, a 1D array with length M
-            where M is the number of normal modes. The second element is intensities,
-            a 1D array with length M.
+            2-tuple. First element is wavenumbers, a 1D array with shape (M,)
+            where M is the number of phonons. The second element is intensities,
+            a 1D array with shape (M,).
 
         Raises
         ------

@@ -248,8 +248,11 @@ RAMAN_TENSOR_CENTRAL_DIFFERENCE = 0.001
 BOLTZMANN_CONSTANT = 8.617333262e-5  # Units: eV/K
 
 
-class AnsiColors:  # pylint: disable=too-few-public-methods
-    """Holds AnsiColors."""
+class ANSICOLORS:  # pylint: disable=too-few-public-methods
+    """ANSI color codes.
+
+    :meta private:
+    """
 
     OK_GREEN = "\x1b[1;32;49m"
     WARNING_YELLOW = "\x1b[1;33;49m"

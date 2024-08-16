@@ -14,7 +14,7 @@ import numpy as np
 from numpy.typing import NDArray, ArrayLike
 from scipy.interpolate import make_interp_spline, BSpline
 
-from ramannoodle.globals import AnsiColors
+from ramannoodle.globals import ANSICOLORS
 from ramannoodle.polarizability.abstract import PolarizabilityModel
 from ramannoodle.structure.structure_utils import calculate_displacement
 from ramannoodle.structure.symmetry_utils import (
@@ -443,8 +443,8 @@ class InterpolationModel(PolarizabilityModel):
         ----------
         filepaths
         file_format
-            supports: "outcar"
-            if dummy model, supports: "outcar", "poscar"
+            Supports: "outcar". If dummy model, supports: "outcar", "poscar" (see
+            :ref:`Supported formats`).
 
         Raises
         ------
@@ -477,8 +477,8 @@ class InterpolationModel(PolarizabilityModel):
         Parameters
         ----------
         filepaths:
-            supports: "outcar"
-            if dummy model, supports: "outcar", "poscar"
+            Supports: "outcar". If dummy model, supports: "outcar", "poscar" (see
+            :ref:`Supported formats`).
 
         Returns
         -------
@@ -555,11 +555,11 @@ class InterpolationModel(PolarizabilityModel):
         specified_dofs = len(self._cart_basis_vectors)
         core = f"{specified_dofs}/{total_dofs}"
         if specified_dofs == total_dofs:
-            core = AnsiColors.OK_GREEN + core + AnsiColors.END
+            core = ANSICOLORS.OK_GREEN + core + ANSICOLORS.END
         elif 1 <= specified_dofs < total_dofs:
-            core = AnsiColors.WARNING_YELLOW + core + AnsiColors.END
+            core = ANSICOLORS.WARNING_YELLOW + core + ANSICOLORS.END
         else:
-            core = AnsiColors.ERROR_RED + core + AnsiColors.END
+            core = ANSICOLORS.ERROR_RED + core + ANSICOLORS.END
 
         result = f"InterpolationModel with {core} degrees of freedom specified."
 
@@ -567,9 +567,9 @@ class InterpolationModel(PolarizabilityModel):
         if num_masked > 0:
             num_arts = len(self._cart_basis_vectors)
             msg = f"ATTENTION: {num_masked}/{num_arts} degrees of freedom are masked."
-            result += f"\n {AnsiColors.WARNING_YELLOW} {msg} {AnsiColors.END}"
+            result += f"\n {ANSICOLORS.WARNING_YELLOW} {msg} {ANSICOLORS.END}"
         if self._is_dummy_model:
             msg = "ATTENTION: this is a dummy model."
-            result += f"\n {AnsiColors.WARNING_YELLOW} {msg} {AnsiColors.END}"
+            result += f"\n {ANSICOLORS.WARNING_YELLOW} {msg} {ANSICOLORS.END}"
 
         return result

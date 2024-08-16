@@ -52,10 +52,7 @@ def verify_structure(
     atomic_numbers: list[int],
     positions: NDArray[np.float64],
 ) -> None:
-    """Verify a structure.
-
-    :meta private:
-    """
+    """Verify a structure."""
     verify_ndarray_shape("lattice", lattice, (3, 3))
     verify_list_len("atomic_numbers", atomic_numbers, None)
     for atomic_number in atomic_numbers:

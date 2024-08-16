@@ -1,5 +1,5 @@
-Tutorials
-=========
+Guides
+======
 
 .. toctree::
    :maxdepth: 2
@@ -8,3 +8,4 @@ Tutorials
    notebooks/Basic tutorial
    notebooks/Dummy models
    notebooks/Masking
+   io

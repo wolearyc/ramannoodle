@@ -126,9 +126,7 @@ def read_positions(
     Raises
     ------
     InvalidFileException
-        If the POSCAR has an unexpected format.
-    SymmetryException
-        If POSCAR was read but the symmetry search failed
+        File has an unexpected format.
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as poscar_file:
@@ -150,9 +148,9 @@ def read_ref_structure(
     Raises
     ------
     InvalidFileException
-        If the POSCAR has an unexpected format.
+        File has an unexpected format.
     SymmetryException
-        If POSCAR was read but the symmetry search failed
+        File was read successfully but symmetry search failed.
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as poscar_file:
@@ -210,16 +208,16 @@ def write_structure(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        2D array with shape (3,3)
+        2D array with shape (3,3).
     atomic_numbers
-        1D list of length N where N is the number of atoms
+        1D list of length N where N is the number of atoms.
     positions
-        2D array with shape (N,3)
+        2D array with shape (N,3).
     filepath
     file_format
-        supports: "poscar"
+        Supports: "poscar" (see :ref:`Supported formats`).
     overwrite
-        overwrite the file if it exists
+        Overwrite the file if it exists.
     label
         POSCAR label (first line).
     """

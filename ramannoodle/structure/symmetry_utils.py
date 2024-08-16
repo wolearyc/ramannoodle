@@ -16,9 +16,9 @@ def are_collinear(vector_1: NDArray[np.float64], vector_2: NDArray[np.float64]) 
     Parameters
     ----------
     vector_1
-        ndarray with shape (M,)
+        1D array with shape (M,).
     vector_2
-        ndarray with shape (M,)
+        1D array with shape (M,).
 
     """
     try:
@@ -44,10 +44,17 @@ def is_orthogonal_to_all(
 ) -> int:
     """Check whether a given vector is orthogonal to a list of others.
 
+    Parameters
+    ----------
+    vector_1
+        1D array with shape (M,).
+    vectors
+        Iterable containing 1D arrays with shape (M,).
+
     Returns
     -------
     int
-        first index of non-orthogonal vector, otherwise -1
+        First index of non-orthogonal vector, otherwise -1.
 
     """
     # This implementation could be made more efficient.
@@ -73,10 +80,17 @@ def is_collinear_with_all(
 ) -> int:
     """Check if a given vector is collinear to a list of others.
 
+    Parameters
+    ----------
+    vector_1
+        1D array with shape (M,).
+    vectors
+        Iterable containing 1D arrays with shape (M,).
+
     Returns
     -------
     int
-        first index of non-collinear vector, otherwise -1
+        First index of non-collinear vector, otherwise -1.
 
     """
     # This implementation could be made more efficient.
@@ -88,14 +102,21 @@ def is_collinear_with_all(
 
 
 def is_non_collinear_with_all(
-    vector_1: NDArray[np.float64], vectors: list[NDArray[np.float64]]
+    vector_1: NDArray[np.float64], vectors: Iterable[NDArray[np.float64]]
 ) -> int:
     """Check if a given vector is non-collinear to a list of others.
+
+    Parameters
+    ----------
+    vector_1
+        1D array with shape (M,).
+    vectors
+        Iterable containing 1D arrays with shape (M,).
 
     Returns
     -------
     int
-        first index of collinear vector, otherwise -1
+        First index of collinear vector, otherwise -1.
 
     """
     # This implementation could be made more efficient.

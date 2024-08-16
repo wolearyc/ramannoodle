@@ -90,16 +90,16 @@ def _get_positions_permutation_matrix(
 
 
 class ReferenceStructure:
-    """Crystal structure, typically used as a reference in polarizability models.
+    """Reference crystal structure, typically used by polarizability models.
 
     Parameters
     ----------
     atomic_numbers
-        1D list of length N where N is the number of atoms.
+        List of length N where N is the number of atoms.
     lattice
         Lattice vectors expressed as a 2D array with shape (3,3).
     positions
-        2D array with shape (N,3) where N is the number of atoms
+        2D array with shape (N,3) where N is the number of atoms.
     symprec
         Symmetry precision parameter for spglib.
     angle_tolerance
@@ -162,7 +162,7 @@ class ReferenceStructure:
         return len(set(self._symmetry_dict["equivalent_atoms"]))
 
     def get_equivalent_atom_dict(self) -> dict[int, list[int]]:
-        """Get dictionary of equivalent atoms."""
+        """Get dictionary of equivalent atoms indexes."""
         assert self._symmetry_dict is not None
         result: dict[int, list[int]] = {}
         for index, equiv_index in enumerate(self._symmetry_dict["equivalent_atoms"]):
@@ -189,7 +189,7 @@ class ReferenceStructure:
             accessed using the 'displacements' and 'transformations' keys. Displacements
             within each dictionary will be collinear, corresponding to
             the same degree of freedom. The provided transformations are those that
-            transform the parameter `displacements` into that degree of freedom.
+            transform ``displacement`` into that degree of freedom.
 
         """
         displacement = apply_pbc_displacement(displacement)
@@ -258,24 +258,24 @@ class ReferenceStructure:
     def get_cart_displacement(
         self, displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Convert a fractional displacement into cartesian coordinates.
+        """Convert a (fractional) displacement into cartesian coordinates.
 
         Parameters
         ----------
         displacement
-            2D array with shape (N,3) where N is the number of atoms
+            2D array with shape (N,3) where N is the number of atoms.
         """
         displacement = apply_pbc_displacement(displacement)
 
         return displacement @ self._lattice
 
     def get_cart_direction(self, direction: NDArray[np.float64]) -> NDArray[np.float64]:
-        """Convert a fractional direction into cartesian coordinates.
+        """Convert a (fractional) direction into cartesian coordinates.
 
         Parameters
         ----------
         direction
-            1D array with shape (3,)
+            1D array with shape (3,).
         """
         direction = apply_pbc_displacement(direction)
         try:
@@ -291,7 +291,7 @@ class ReferenceStructure:
         Parameters
         ----------
         displacement
-            2D array with shape (N,3) where N is the number of atoms
+            2D array with shape (N,3) where N is the number of atoms.
         """
         verify_ndarray_shape("cart_displacement", cart_displacement, (None, 3))
         displacement = (cart_displacement) @ np.linalg.inv(self.lattice)
@@ -305,7 +305,7 @@ class ReferenceStructure:
         Parameters
         ----------
         direction
-            1D array with shape (3,) where N is the number of atoms
+            1D array with shape (3,).
         """
         verify_ndarray_shape("direction", cart_direction, (3,))
         displacement = np.array([cart_direction]) @ np.linalg.inv(self.lattice)

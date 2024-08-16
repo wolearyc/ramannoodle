@@ -1,1 +1,1 @@
-"""Classes concerning symmetries, including reference structures, vibrations, etc."""
+"""Classes and routines for atomic structures and structural symmetries."""

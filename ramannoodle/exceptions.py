@@ -14,15 +14,15 @@ class InvalidFileException(Exception):
 
 
 class InvalidDOFException(Exception):
-    """Raised when things a degree of freedom is invalid in some way."""
+    """Raised when a degree of freedom is invalid."""
 
 
 class DOFWarning(UserWarning):
-    """Used when something may be wrong with a DOF."""
+    """Raised when a degree of freedom may not have been specified as intended."""
 
 
 class SymmetryException(Exception):
-    """Raised when something goes wrong with an operation involving symmetry."""
+    """Raised when symmetry operation fails."""
 
 
 class UsageError(Exception):

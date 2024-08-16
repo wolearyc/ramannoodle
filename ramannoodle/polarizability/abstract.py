@@ -1,4 +1,4 @@
-"""Abstract class for polarizability models."""
+"""Abstract polarizability models."""
 
 from abc import ABC, abstractmethod
 
@@ -18,10 +18,10 @@ class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
         Parameters
         ----------
         cart_displacement
-            2D array with shape (N,3) where N is the number of atoms
+            2D array with shape (N,3) where N is the number of atoms.
 
         Returns
         -------
         :
-            2D array with shape (3,3)
+            2D array with shape (3,3).
         """

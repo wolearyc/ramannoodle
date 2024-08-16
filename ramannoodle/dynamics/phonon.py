@@ -1,4 +1,4 @@
-"""Class for phonons."""
+"""Phonons aka. harmonic lattice vibrations."""
 
 import numpy as np
 from numpy.typing import NDArray
@@ -46,7 +46,7 @@ class Phonons(Dynamics):
         Returns
         -------
         :
-            1D array with length M
+            1D array with shape (M,) where M is the number of phonons.
         """
         return self._wavenumbers.copy()
 
@@ -57,7 +57,7 @@ class Phonons(Dynamics):
         Returns
         -------
         :
-            3D array with shape (M,N,3) where M is the number of displacements
+            3D array with shape (M,N,3) where M is the number of phonons
             and N is the number of atoms
         """
         return self._cart_displacements.copy()
@@ -65,7 +65,13 @@ class Phonons(Dynamics):
     def get_raman_spectrum(
         self, polarizability_model: PolarizabilityModel
     ) -> PhononRamanSpectrum:
-        """Calculate a raman spectrum using a polarizability model."""
+        """Calculate a raman spectrum using a polarizability model.
+
+        Parameters
+        ----------
+        polarizability_model
+            must be compatible with phonons
+        """
         raman_tensors = []
         for cart_displacement in self._cart_displacements:
             try:

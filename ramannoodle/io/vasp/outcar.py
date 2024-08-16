@@ -304,13 +304,14 @@ def read_positions_and_polarizability(
     -------
     :
         2-tuple, whose first element is the fractional positions, a 2D array with shape
-        (N,3). The second element is the polarizability, a 2D array with shape (3,3).
+        (N,3) where N is the number of atoms. The second element is the polarizability,
+        a 2D array with shape (3,3).
 
     Raises
     ------
     FileNotFoundError
     InvalidFileException
-        If the OUTCAR has an unexpected format.
+        File has an unexpected format.
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as outcar_file:
@@ -335,7 +336,7 @@ def read_positions(filepath: str | Path) -> NDArray[np.float64]:
     ------
     FileNotFoundError
     InvalidFileException
-        If the OUTCAR has an unexpected format.
+        File has an unexpected format.
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as outcar_file:
@@ -360,9 +361,9 @@ def read_ref_structure(
     Raises
     ------
     InvalidFileException
-        If the OUTCAR has an unexpected format.
+        File has an unexpected format.
     SymmetryException
-        If OUTCAR was read but the symmetry search failed
+        File was read successfully but symmetry search failed.
     FileNotFoundError
     """
     lattice = np.array([])

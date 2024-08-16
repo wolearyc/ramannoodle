@@ -1,7 +1,10 @@
-"""Generic, rather inflexible IO routines.
+"""Generic IO routines.
 
-If more flexibility is needed, the IO routines contained in the code-specific
-subpackages should be used.
+Generic IO routines are somewhat inflexible but are necessary for certain
+functionality. Users are strongly encouraged to use IO routines contained in the
+code-specific subpackages. For example, IO for VASP POSCAR and OUTCAR files can be
+accomplished using `ramannoodle.io.vasp.poscar` or :mod:`ramannoodle.io.vasp.outcar`
+respectively.
 
 """
 
@@ -37,7 +40,7 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
     ----------
     filepath
     file_format
-        supports: "outcar"
+        Supports: "outcar" (see :ref:`Supported formats`)
 
     Returns
     -------
@@ -66,13 +69,14 @@ def read_positions_and_polarizability(
     ----------
     filepath
     file_format
-        supports: "outcar"
+        Supports: "outcar" (see :ref:`Supported formats`)
 
     Returns
     -------
     :
         2-tuple, whose first element is the fractional positions, a 2D array with shape
-        (N,3). The second element is the polarizability, a 2D array with shape (3,3).
+        (N,3) where N is the number of atoms. The second element is the polarizability,
+        a 2D array with shape (3,3).
 
     Raises
     ------
@@ -97,7 +101,7 @@ def read_positions(
     ----------
     filepath
     file_format
-        supports: "outcar", "poscar"
+        Supports: "outcar", "poscar" (see :ref:`Supported formats`).
 
     Returns
     -------
@@ -124,7 +128,7 @@ def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStruc
     ----------
     filepath
     file_format
-        supports: "outcar", "poscar"
+        Supports: "outcar", "poscar" (see :ref:`Supported formats`).
 
     Returns
     -------
@@ -156,20 +160,20 @@ def write_structure(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        2D array with shape (3,3)
+        2D array with shape (3,3).
     atomic_numbers
-        1D list of length N where N is the number of atoms
+        1D list of length N where N is the number of atoms.
     positions
-        2D array with shape (N,3)
+        2D array with shape (N,3).
     filepath
     file_format
-        supports: "poscar"
+        Supports: "poscar" (see :ref:`Supported formats`).
     overwrite
-        overwrite the file if it exists
+        overwrite the file if it exists.
 
     Raises
     ------
-    FileExistsError
+    FileExistsError - File exists and ``overwrite = False``.
     """
     try:
         _STRUCTURE_WRITERS[file_format](

@@ -8,6 +8,7 @@
     "words": [
         "__repr__",
         "anharmonic",
+        "ANSICOLORS",
         "argmax",
         "automodule",
         "AVOGADROS",

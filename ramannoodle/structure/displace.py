@@ -1,9 +1,14 @@
-"""Routines for generating and writing displaced structure."""
+"""Routines for generating and writing displaced structures.
+
+These functions are useful for preparing polarizability calculations needed for
+:class:`~.InterpolationModel` and :class:`~.ARTModel`.
+
+"""
 
 # Design note:
 # These routines are not implemented in ReferenceStructure to give
 # greater modularity. For example, when different displacement methods are added (such
-# as Monte Carlo rattling or random displacements), we'd rather not add to code to
+# as Monte Carlo rattling or random displacements), we'd rather not add code to
 # Reference Structure. These functions stand alone, just like the IO functions.
 
 from pathlib import Path
@@ -28,21 +33,22 @@ def get_displaced_positions(
     cart_displacement: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
 ) -> list[NDArray[np.float64]]:
-    """Return list of displaced positions given a displacement and amplitudes.
+    """Return positions displaced along a certain displacement.
 
     Parameters
     ----------
     ref_structure
-        reference structure of N atoms
+        Reference structure containing N atoms.
     cart_displacement
-        2D array with shape (N,3)
+        2D array with shape (N,3).
     amplitudes
-        1D array with shape (M,)
+        1D array with shape (M,).
 
     Returns
     -------
     :
-        1D list of length M
+        List of length M containing arrays with shape (N,3).
+
     """
     try:
         cart_displacement = cart_displacement / float(np.linalg.norm(cart_displacement))
@@ -80,14 +86,14 @@ def write_displaced_structures(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     ref_structure
-        reference structure of N atoms
+        Reference structure of N atoms
     cart_displacement
         2D array with shape (N,3)
     amplitudes
         1D array with shape (M,)
     file_paths
     file_format
-        supports: "poscar"
+        Supports: "poscar" (see :ref:`Supported formats`).
     overwrite
     """
     file_paths = pathify_as_list(file_paths)
@@ -113,22 +119,22 @@ def get_ast_displaced_positions(
     cart_direction: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
 ) -> list[NDArray[np.float64]]:
-    """Return list of displaced positions with an atom displaced along a direction.
+    """Return displaced positions with a single atom displaced along a direction.
 
     Parameters
     ----------
     ref_structure
-        reference structure of N atoms
+        Reference structure containing N atoms.
     atom_index
     cart_direction
-        1D array with shape (3,)
+        1D array with shape (3,).
     amplitudes
-        1D array with shape (M,)
+        1D array with shape (M,).
 
     Returns
     -------
     :
-        1D list of length M
+        List of length M containing arrays with shape (N,3).
     """
     try:
         cart_direction = cart_direction / float(np.linalg.norm(cart_direction))
@@ -154,26 +160,22 @@ def write_ast_displaced_structures(  # pylint: disable=too-many-arguments
     file_format: str,
     overwrite: bool = False,
 ) -> None:
-    """Return displaced structures with an atom displaced along a direction.
+    """Write displaced structures with a single atom displaced along a direction.
 
     Parameters
     ----------
     ref_structure
-        reference structure of N atoms
+        Reference structure containing N atoms.
     atom_index
     cart_direction
-        1D array with shape (3,)
+        1D array with shape (3,).
     amplitudes
-        1D array with shape (M,)
+        1D array with shape (M,).
     file_paths
     file_format
-        supports: "poscar"
+        Supports: "poscar" (see :ref:`Supported formats`).
     overwrite
-
-    Returns
-    -------
-    :
-        1D list of length M
+        Whether or overwrite the file if it exists.
     """
     file_paths = pathify_as_list(file_paths)
     position_list = get_ast_displaced_positions(

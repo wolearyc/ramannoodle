@@ -14,7 +14,7 @@ import sys
 import os
 
 project = 'ramannoodle'
-copyright = "2023-, Willis O'Leary"
+copyright = "2023-present, Willis O'Leary"
 author = "Willis O'Leary"
 release = '0.2.0'
 
@@ -43,6 +43,8 @@ templates_path = ['_templates']
 exclude_patterns = []
 
 language = 'Python'
+
+autodoc_member_order = 'groupwise'
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
