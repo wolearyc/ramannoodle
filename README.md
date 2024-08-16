@@ -20,7 +20,7 @@
 
 3. **TRANSPARENT**
 
-    Ramannoodle is designed according to the philosophy that the user should understand *exactly* what is being calculated, without hidden corrections or assumptions.
+    Ramannoodle is designed to give the user a good understanding of what is being calculated at varying levels of abstraction.
 
 **Ramannoodle interfaces with...**
 
