@@ -1,35 +1,30 @@
 <div align="center">
-  <img width="300" src="docs/logo_dark.png#gh-dark-mode-only">
-  <img width="300" src="docs/logo.png#gh-light-mode-only">
+  <img width="200" src="docs/source/_static/logo_dark.png#gh-dark-mode-only">
+  <img width="200" src="docs/source/_static/logo.png#gh-light-mode-only">
 </div>
 
 -------
-[![python](https://img.shields.io/badge/Python-3.12-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/) ![Tests](docs/tests-badge.svg) ![Coverage](docs/coverage-badge.svg) [![Documentation Status](https://readthedocs.org/projects/ramannoodle/badge/?version=latest)](https://ramannoodle.readthedocs.io/en/latest/?badge=latest) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit)
+![PyPI - Version](https://img.shields.io/pypi/v/ramannoodle?color=dark%20green) [![python](https://img.shields.io/badge/python-3.10|3.11|3.12-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org) ![Tests](docs/tests-badge.svg) ![Coverage](docs/coverage-badge.svg) [![Documentation Status](https://readthedocs.org/projects/ramannoodle/badge/?version=latest)](https://ramannoodle.readthedocs.io/en/latest/?badge=latest) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/mit)
 
 ## About
 
-**ramannoodle** is a Python API that helps you calculate Raman spectra from first-principles calculations.
-
-> [!NOTE]
->  **ramannoodle is currently in alpha.**
-
-ramannoodle is built from the ground up with the goals of being:
+**ramannoodle** is a Python API for calculating Raman spectra from first-principles calculations. Ramannoodle is built from the ground up with the goals of being:
 
 1. **EFFICIENT**
 
-   ramannoodle provides `PolarizabilityModel`'s to reduce the required number of first-principles polarizability calculations.
+   Ramannoodle provides `PolarizabilityModel`'s to reduce the required number of first-principles polarizability calculations.
 
 2. **FLEXIBLE**
 
-    ramannoodle provides a simple, object-oriented API that makes calculations a breeze while offering plenty of flexibility to carry out advanced analyses and add new functionality.
+    Ramannoodle provides a simple, object-oriented API that makes calculations a breeze while offering plenty of flexibility to carry out advanced analyses and add new functionality.
 
 3. **TRANSPARENT**
 
-    ramannoodle is designed according to the philosophy that the user should understand *exactly* what is being calculated, without hidden corrections or assumptions.
+    Ramannoodle is designed according to the philosophy that the user should understand *exactly* what is being calculated, without hidden corrections or assumptions.
 
-**ramannoodle interfaces with...**
+**Ramannoodle interfaces with...**
 
-* VASP (currently under development)
+* VASP
 * phonopy (planned)
 
 ## Installation
@@ -37,7 +32,7 @@ ramannoodle is built from the ground up with the goals of being:
 ramannoodle can be installed via pip:
 
 `
-pip install ramannoodle
+$ pip install ramannoodle
 `
 
 ## Documentation
@@ -46,25 +41,20 @@ pip install ramannoodle
 
 ## Contributing
 
-Contributions in the form of bug reports, feature suggestions, and pull requests are always welcome!
+Contributions in the form of bug reports, feature suggestions, and pull requests are always welcome! Those contributing code should check out the [dev guide](https://ramannoodle.readthedocs.io/en/latest/dev%20guide.html).
 
 ## Citing
 
 coming soon...
 
-## Roadmap
+## Future releases
 
-Current release: v0.1.1-alpha
+**0.3.0**
+* Support for molecular dynamics
+* IO support for Phonopy
 
-Future releases:
+**1.0.0**
+* Official release and fixed public API
 
-
-**v.0.1.2-alpha**
-* Utilities to help set up calculations for `InterpolationPolarizabilityModel`, including displaced structure writing functionality.
-* Additional tests, ideally achieving >95 % coverage
-* Add read/write support for other VASP files, namely POSCAR and vasprun.xml
-* Minor bugfixes and documentation updates
-
-**v.0.2.0-alpha**
-* Add support for molecular dynamics
-* Add IO support for Phonopy
+**1.1.0**
+* ML polarizability models

@@ -38,7 +38,7 @@ repos:
         args: [--strict]
         additional_dependencies:
           [
-            pytest,
+            pytest,types-tabulate
           ]
         exclude: "conf.py"
 -   repo: https://github.com/pycqa/flake8
@@ -48,5 +48,5 @@ repos:
         args: [--max-line-length=88, --docstring-convention=numpy]
         additional_dependencies:
           [
-            flake8-bugbear, flake8-docstrings
+            flake8-bugbear, flake8-docstrings, flake8-absolute-import
           ]

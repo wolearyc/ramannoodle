@@ -5,19 +5,19 @@ from typing import Type
 
 import numpy as np
 from numpy.typing import NDArray
-
 import pytest
 
+import ramannoodle.io.generic
 from ramannoodle.polarizability.interpolation import InterpolationModel
-from ramannoodle.symmetry import StructuralSymmetry
-from ramannoodle import io
-from ramannoodle.spectrum.spectrum_utils import (
-    convolve_intensities,
+from ramannoodle.polarizability.art import ARTModel
+from ramannoodle.spectrum.raman import (
     get_bose_einstein_correction,
     get_laser_correction,
 )
+from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.spectrum.spectrum_utils import convolve_spectrum
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access,too-many-locals
 
 
 def _get_all_eps_outcars(directory: str) -> list[str]:
@@ -32,22 +32,24 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
     This function will use all *eps_OUTCAR's in a directory as references.
     """
     for outcar_path in _get_all_eps_outcars(data_directory):
-        positions, known_polarizability = io.read_positions_and_polarizability(
-            f"{outcar_path}", file_format="outcar"
+        positions, known_polarizability = (
+            ramannoodle.io.generic.read_positions_and_polarizability(
+                f"{outcar_path}", file_format="outcar"
+            )
         )
-        cartesian_displacement = model._structural_symmetry.get_cartesian_displacement(
-            positions - model._structural_symmetry.get_fractional_positions()
+        cart_displacement = model._ref_structure.get_cart_displacement(
+            positions - model._ref_structure.positions
         )
-        model_polarizability = model.get_polarizability(cartesian_displacement)
+        model_polarizability = model.get_polarizability(cart_displacement)
         assert np.isclose(model_polarizability, known_polarizability, atol=1e-4).all()
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,data_directory,dof_eps_outcars",
+    "outcar_ref_structure_fixture,data_directory,dof_eps_outcars",
     [
         (
             "test/data/TiO2/phonons_OUTCAR",
-            "test/data/TiO2/",
+            "test/data/TiO2",
             [
                 ["Ti5_0.1z_eps_OUTCAR", "Ti5_0.2z_eps_OUTCAR"],
                 ["Ti5_0.1x_eps_OUTCAR", "Ti5_0.2x_eps_OUTCAR"],
@@ -62,20 +64,20 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
             ],
         ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
-def test_spectrum(
-    outcar_symmetry_fixture: StructuralSymmetry,
+def test_interpolation_spectrum(
+    outcar_ref_structure_fixture: ReferenceStructure,
     data_directory: str,
     dof_eps_outcars: list[str],
 ) -> None:
-    """Test a full spectrum calculation."""
+    """Test a full spectrum calculation using InterpolationModel."""
     # Setup model
-    symmetry = outcar_symmetry_fixture
-    _, polarizability = io.read_positions_and_polarizability(
+    ref_structure = outcar_ref_structure_fixture
+    _, polarizability = ramannoodle.io.generic.read_positions_and_polarizability(
         f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
     )
-    model = InterpolationModel(symmetry, polarizability)
+    model = InterpolationModel(ref_structure, polarizability)
     for outcar_names in dof_eps_outcars:
         model.add_dof_from_files(
             [f"{data_directory}/{name}" for name in outcar_names],
@@ -87,7 +89,7 @@ def test_spectrum(
 
     # Spectrum test
     with np.load(f"{data_directory}/known_spectrum.npz") as known_spectrum:
-        phonons = io.read_phonons(
+        phonons = ramannoodle.io.generic.read_phonons(
             f"{data_directory}/phonons_OUTCAR", file_format="outcar"
         )
         spectrum = phonons.get_raman_spectrum(model)
@@ -97,6 +99,138 @@ def test_spectrum(
             bose_einstein_correction=True,
             temperature=300,
         )
+
+        known_wavenumbers = known_spectrum["wavenumbers"]
+        known_intensities = known_spectrum["intensities"]
+
+        assert np.isclose(wavenumbers, known_wavenumbers).all()
+        assert np.isclose(intensities, known_intensities, atol=1e-4).all()
+
+
+@pytest.mark.parametrize(
+    "outcar_ref_structure_fixture,data_directory,dof_eps_outcars",
+    [
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            "test/data/TiO2/",
+            [
+                ["Ti5_0.1z_eps_OUTCAR"],
+                ["Ti5_0.1x_eps_OUTCAR"],
+                [
+                    "O43_0.1z_eps_OUTCAR",
+                    "O43_m0.1z_eps_OUTCAR",
+                ],
+                ["O43_0.1x_eps_OUTCAR"],
+                ["O43_0.1y_eps_OUTCAR"],
+            ],
+        ),
+    ],
+    indirect=["outcar_ref_structure_fixture"],
+)
+def test_art_spectrum(
+    outcar_ref_structure_fixture: ReferenceStructure,
+    data_directory: str,
+    dof_eps_outcars: list[str],
+) -> None:
+    """Test a full spectrum calculation using ARTModel."""
+    # Setup model
+    ref_structure = outcar_ref_structure_fixture
+    _, polarizability = ramannoodle.io.generic.read_positions_and_polarizability(
+        f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
+    )
+    model = ARTModel(ref_structure, polarizability)
+    for outcar_names in dof_eps_outcars:
+        model.add_art_from_files(
+            [f"{data_directory}/{name}" for name in outcar_names], file_format="outcar"
+        )
+
+    # Spectrum test
+    with np.load(f"{data_directory}/known_art_spectrum.npz") as known_spectrum:
+        phonons = ramannoodle.io.generic.read_phonons(
+            f"{data_directory}/phonons_OUTCAR", file_format="outcar"
+        )
+        spectrum = phonons.get_raman_spectrum(model)
+        wavenumbers, intensities = spectrum.measure(
+            laser_correction=True,
+            laser_wavelength=532,
+            bose_einstein_correction=True,
+            temperature=300,
+        )
+
+        known_wavenumbers = known_spectrum["wavenumbers"]
+        known_intensities = known_spectrum["intensities"]
+
+        assert np.isclose(wavenumbers, known_wavenumbers).all()
+        assert np.isclose(intensities, known_intensities, atol=1e-4).all()
+
+
+@pytest.mark.parametrize(
+    "outcar_ref_structure_fixture,data_directory,dof_eps_outcars,atoms_to_mask,"
+    "known_spectrum_file",
+    [
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            "test/data/TiO2/",
+            [
+                ["Ti5_0.1z_eps_OUTCAR"],
+                ["Ti5_0.1x_eps_OUTCAR"],
+                [
+                    "O43_0.1z_eps_OUTCAR",
+                    "O43_m0.1z_eps_OUTCAR",
+                ],
+                ["O43_0.1x_eps_OUTCAR"],
+                ["O43_0.1y_eps_OUTCAR"],
+            ],
+            "Ti",
+            "known_art_O_spectrum.npz",
+        ),
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            "test/data/TiO2/",
+            [
+                ["Ti5_0.1z_eps_OUTCAR"],
+                ["Ti5_0.1x_eps_OUTCAR"],
+                [
+                    "O43_0.1z_eps_OUTCAR",
+                    "O43_m0.1z_eps_OUTCAR",
+                ],
+                ["O43_0.1x_eps_OUTCAR"],
+                ["O43_0.1y_eps_OUTCAR"],
+            ],
+            "O",
+            "known_art_Ti_spectrum.npz",
+        ),
+    ],
+    indirect=["outcar_ref_structure_fixture"],
+)
+def test_art_masked_spectrum(
+    outcar_ref_structure_fixture: ReferenceStructure,
+    data_directory: str,
+    dof_eps_outcars: list[str],
+    atoms_to_mask: str,
+    known_spectrum_file: str,
+) -> None:
+    """Test a masked spectrum calculation using ARTModel."""
+    # Setup model
+    ref_structure = outcar_ref_structure_fixture
+    _, polarizability = ramannoodle.io.generic.read_positions_and_polarizability(
+        f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
+    )
+    model = ARTModel(ref_structure, polarizability)
+    for outcar_names in dof_eps_outcars:
+        model.add_art_from_files(
+            [f"{data_directory}/{name}" for name in outcar_names], file_format="outcar"
+        )
+    masked_dofs = model.get_dof_indexes(atoms_to_mask)
+    model = model.get_masked_model(masked_dofs)
+
+    # Spectrum test
+    with np.load(f"{data_directory}/{known_spectrum_file}") as known_spectrum:
+        phonons = ramannoodle.io.generic.read_phonons(
+            f"{data_directory}/phonons_OUTCAR", file_format="outcar"
+        )
+        spectrum = phonons.get_raman_spectrum(model)
+        wavenumbers, intensities = spectrum.measure()
 
         known_wavenumbers = known_spectrum["wavenumbers"]
         known_intensities = known_spectrum["intensities"]
@@ -125,7 +259,7 @@ def test_convolve_intensities(
         wavenumbers = spectrum["wavenumbers"]
         intensities = spectrum["intensities"]
 
-        gaussian_wavenumbers, gaussian_intensities = convolve_intensities(
+        gaussian_wavenumbers, gaussian_intensities = convolve_spectrum(
             wavenumbers, intensities, "gaussian"
         )
         with np.load(known_gaussian_spectrum_path) as known_spectrum:
@@ -134,7 +268,7 @@ def test_convolve_intensities(
             assert np.isclose(gaussian_wavenumbers, known_wavenumbers).all()
             assert np.isclose(gaussian_intensities, known_intensities).all()
 
-        lorentzian_wavenumbers, lorentzian_intensities = convolve_intensities(
+        lorentzian_wavenumbers, lorentzian_intensities = convolve_spectrum(
             wavenumbers, intensities, "lorentzian"
         )
         with np.load(known_lorentzian_spectrum_path) as known_spectrum:
@@ -232,7 +366,7 @@ def test_convolve_intensities_exception(  # pylint: disable=too-many-arguments
 ) -> None:
     """Test convolve_intensities (exception)."""
     with pytest.raises(exception_type) as error:
-        convolve_intensities(wavenumbers, intensities, function, width, out_wavenumbers)
+        convolve_spectrum(wavenumbers, intensities, function, width, out_wavenumbers)
     assert in_reason in str(error.value)
 
 

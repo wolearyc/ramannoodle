@@ -1,16 +1,15 @@
-"""Testing for the polarizability."""
+"""Testing for InterpolationModel."""
 
 from typing import Type
 
 import numpy as np
 from numpy.typing import NDArray
-
 import pytest
 
-from ramannoodle.polarizability.polarizability_utils import find_duplicates
+from ramannoodle.polarizability.interpolation import find_duplicates
 from ramannoodle.polarizability.interpolation import InterpolationModel
 from ramannoodle.exceptions import InvalidDOFException
-from ramannoodle.symmetry import StructuralSymmetry
+from ramannoodle.structure.reference import ReferenceStructure
 
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments
@@ -45,47 +44,47 @@ def test_find_duplicates_exception(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,displaced_atom_index, amplitudes, known_dof_added",
+    "outcar_ref_structure_fixture,displaced_atom_index, amplitudes, known_dof_added",
     [
         ("test/data/STO_RATTLED_OUTCAR", 0, np.array([-0.05, 0.05, 0.01, -0.01]), 1),
         ("test/data/TiO2/phonons_OUTCAR", 0, np.array([0.01]), 72),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_add_dof(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     displaced_atom_index: int,
     amplitudes: NDArray[np.float64],
     known_dof_added: int,
 ) -> None:
     """Test add_dof (normal)."""
-    symmetry = outcar_symmetry_fixture
-    model = InterpolationModel(symmetry, np.zeros((3, 3)))
-    displacement = symmetry._fractional_positions * 0
+    ref_structure = outcar_ref_structure_fixture
+    model = InterpolationModel(ref_structure, np.zeros((3, 3)))
+    displacement = ref_structure.positions * 0
     displacement[displaced_atom_index][0] = 1.0
     polarizabilities = np.zeros((len(amplitudes), 3, 3))
     model.add_dof(displacement, amplitudes, polarizabilities, 1)
-    assert len(model._cartesian_basis_vectors) == known_dof_added
-    assert np.isclose(np.linalg.norm(model._cartesian_basis_vectors[0]), 1)
+    assert len(model.cart_basis_vectors) == known_dof_added
+    assert np.isclose(np.linalg.norm(model.cart_basis_vectors[0]), 1)
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,displaced_atom_indexes, amplitudes,polarizabilities,"
+    "outcar_ref_structure_fixture,displaced_atom_indexes, amplitudes,polarizabilities,"
     "interpolation_order,exception_type,in_reason",
     [
         (
             "test/data/STO_RATTLED_OUTCAR",
             [[0]],
-            np.array([0.1]),
-            np.zeros((1, 3, 3)),
-            4,
+            np.array([-0.1, 0.1]),
+            np.zeros((2, 3, 3)),
+            5,
             InvalidDOFException,
             "insufficient points",
         ),
         (
             "test/data/STO_RATTLED_OUTCAR",
             [[0]],
-            np.array([0.1, 0.1]),
+            np.array([-0.1, 0.1]),
             np.zeros((1, 3, 3)),
             1,
             ValueError,
@@ -94,17 +93,8 @@ def test_add_dof(
         (
             "test/data/STO_RATTLED_OUTCAR",
             [[0]],
-            np.array([0.1]),
-            np.zeros((2, 3, 3)),
-            1,
-            ValueError,
-            "polarizabilities has wrong shape",
-        ),
-        (
-            "test/data/STO_RATTLED_OUTCAR",
-            [[0]],
-            np.array([0.1]),
-            np.zeros((2, 3, 3)),
+            np.array([-0.1, 0.1]),
+            np.zeros((2, 5, 3)),
             1,
             ValueError,
             "polarizabilities has wrong shape",
@@ -112,8 +102,8 @@ def test_add_dof(
         (
             "test/data/STO_RATTLED_OUTCAR",
             [[0], [0, 1]],
-            np.array([0.1]),
-            np.zeros((1, 3, 3)),
+            np.array([-0.1, 0.1]),
+            np.zeros((2, 3, 3)),
             1,
             InvalidDOFException,
             "not orthogonal",
@@ -148,8 +138,8 @@ def test_add_dof(
         (
             "test/data/STO_RATTLED_OUTCAR",
             [[0]],
-            np.array([0.1]),
-            np.zeros((1, 3, 3)),
+            np.array([-0.1, 0.1]),
+            np.zeros((2, 3, 3)),
             -1.6,
             TypeError,
             "interpolation_order should have type int, not float",
@@ -157,17 +147,26 @@ def test_add_dof(
         (
             "test/data/STO_RATTLED_OUTCAR",
             [[0]],
-            np.array([0.1, 0.1]),
+            np.array([-0.1, 0.1]),
             np.zeros((2, 3, 3)),
-            -1.6,
+            0,
+            ValueError,
+            "invalid interpolation_order: 0 < 1",
+        ),
+        (
+            "test/data/STO_RATTLED_OUTCAR",
+            [[0]],
+            np.array([-0.1, 0.1, 0.1]),
+            np.zeros((3, 3, 3)),
+            1,
             InvalidDOFException,
             "due to symmetry, amplitude 0.1 should not be specified",
         ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_add_dof_exception(
-    outcar_symmetry_fixture: StructuralSymmetry,
+    outcar_ref_structure_fixture: ReferenceStructure,
     displaced_atom_indexes: list[list[int]],
     amplitudes: NDArray[np.float64],
     polarizabilities: NDArray[np.float64],
@@ -176,12 +175,12 @@ def test_add_dof_exception(
     in_reason: str,
 ) -> None:
     """Test add_dof (exception)."""
-    symmetry = outcar_symmetry_fixture
-    model = InterpolationModel(symmetry, np.zeros((3, 3)))
+    ref_structure = outcar_ref_structure_fixture
+    model = InterpolationModel(ref_structure, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
         for atom_indexes in displaced_atom_indexes:
             for atom_index in atom_indexes:
-                displacement = symmetry.get_fractional_positions() * 0
+                displacement = ref_structure.positions * 0
                 displacement[atom_index] = 1
                 model.add_dof(
                     displacement, amplitudes, polarizabilities, interpolation_order
@@ -191,18 +190,19 @@ def test_add_dof_exception(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture,outcar_files,interpolation_order,exception_type,in_reason",
+    "outcar_ref_structure_fixture,outcar_file_groups,interpolation_order,"
+    "exception_type,in_reason",
     [
         (
             "test/data/STO_RATTLED_OUTCAR",
-            ["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"],
+            [["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"]],
             1,
             InvalidDOFException,
             "incompatible outcar",
         ),
         (
             "test/data/TiO2/phonons_OUTCAR",
-            ["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"],
+            [["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"]],
             3,
             InvalidDOFException,
             "insufficient points (3)",
@@ -210,8 +210,10 @@ def test_add_dof_exception(
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
-                "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                [
+                    "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                    "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                ]
             ],
             1,
             InvalidDOFException,
@@ -220,7 +222,9 @@ def test_add_dof_exception(
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "this_outcar_does_not_exist",
+                [
+                    "this_outcar_does_not_exist",
+                ]
             ],
             1,
             FileNotFoundError,
@@ -229,26 +233,74 @@ def test_add_dof_exception(
         (
             "test/data/TiO2/phonons_OUTCAR",
             [
-                "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
-                "test/data/TiO2/Ti5_0.1y_eps_OUTCAR",
+                [
+                    "test/data/TiO2/Ti5_0.1x_eps_OUTCAR",
+                    "test/data/TiO2/Ti5_0.1y_eps_OUTCAR",
+                ]
             ],
             1,
             InvalidDOFException,
             "is not collinear",
         ),
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            [
+                ["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"],
+                ["test/data/TiO2/Ti5_0.1x_eps_OUTCAR"],
+            ],
+            1,
+            InvalidDOFException,
+            "new dof is not orthogonal with existing dof (index=0)",
+        ),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
 def test_add_dof_from_files_exception(
-    outcar_symmetry_fixture: StructuralSymmetry,
-    outcar_files: list[str],
+    outcar_ref_structure_fixture: ReferenceStructure,
+    outcar_file_groups: list[str],
     interpolation_order: int,
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
     """Test add_dof_from_files (exception)."""
-    symmetry = outcar_symmetry_fixture
-    model = InterpolationModel(symmetry, np.zeros((3, 3)))
+    ref_structure = outcar_ref_structure_fixture
+    model = InterpolationModel(ref_structure, np.zeros((3, 3)))
     with pytest.raises(exception_type) as error:
-        model.add_dof_from_files(outcar_files, "outcar", interpolation_order)
+        for outcar_files in outcar_file_groups:
+            model.add_dof_from_files(outcar_files, "outcar", interpolation_order)
     assert in_reason in str(error.value)
+
+
+@pytest.mark.parametrize(
+    "outcar_ref_structure_fixture,displaced_atom_index, amplitudes",
+    [
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            0,
+            np.array([0.01]),
+        ),
+    ],
+    indirect=["outcar_ref_structure_fixture"],
+)
+def test_dummy_interpolation_model(
+    outcar_ref_structure_fixture: ReferenceStructure,
+    displaced_atom_index: int,
+    amplitudes: NDArray[np.float64],
+) -> None:
+    """Test dummy art models (normal)."""
+    ref_structure = outcar_ref_structure_fixture
+    model = InterpolationModel(ref_structure, np.zeros((3, 3)), is_dummy_model=True)
+    displacement = ref_structure.positions * 0
+    displacement[displaced_atom_index][0] = 1.0
+    polarizabilities = np.zeros((len(amplitudes), 3, 3))
+    model.add_dof(displacement, amplitudes, polarizabilities, 1)
+
+    mask = model.mask
+    mask[0] = True
+    model.mask = mask
+
+    assert "ATTENTION: this is a dummy model." in repr(model)
+    assert "degrees of freedom are masked" in repr(model)
+
+    model.unmask()
+    assert not model.mask.all()

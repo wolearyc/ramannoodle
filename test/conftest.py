@@ -7,21 +7,21 @@ from collections.abc import Generator
 import pytest
 from pytest import FixtureRequest
 
-from ramannoodle.symmetry import StructuralSymmetry
-from ramannoodle import io
+from ramannoodle.structure.reference import ReferenceStructure
+import ramannoodle.io.generic as generic_io
 
 
 @pytest.fixture(scope="session")
-def outcar_path_fixture(request: FixtureRequest) -> Path:
+def path_fixture(request: FixtureRequest) -> Path:
     """Return an outcar path."""
     return Path(request.param)
 
 
 @pytest.fixture(scope="session")
-def outcar_file_fixture(
+def file_fixture(
     request: FixtureRequest,
 ) -> Generator[TextIO, None, None]:
-    """Return an outcar file."""
+    """Return a file."""
     file = open(  # pylint: disable=consider-using-with
         Path(request.param), "r", encoding="utf-8"
     )
@@ -30,14 +30,14 @@ def outcar_file_fixture(
 
 
 # HACK: indirect fixtures are unable to be scoped, so manually cache.
-symmetry_cache = {}
+ref_structure_cache = {}
 
 
 @pytest.fixture(scope="session")
-def outcar_symmetry_fixture(request: FixtureRequest) -> StructuralSymmetry:
-    """Return a structural symmetry."""
-    if request.param not in symmetry_cache:
-        symmetry_cache[request.param] = io.read_structural_symmetry(
+def outcar_ref_structure_fixture(request: FixtureRequest) -> ReferenceStructure:
+    """Return a reference structure."""
+    if request.param not in ref_structure_cache:
+        ref_structure_cache[request.param] = generic_io.read_ref_structure(
             request.param, file_format="outcar"
         )
-    return symmetry_cache[request.param]
+    return ref_structure_cache[request.param]

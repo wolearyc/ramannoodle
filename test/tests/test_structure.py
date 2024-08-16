@@ -4,19 +4,19 @@ from typing import Type
 
 import numpy as np
 from numpy.typing import NDArray
-
 import pytest
 
-from ramannoodle.symmetry.symmetry_utils import (
+from ramannoodle.structure.structure_utils import apply_pbc, apply_pbc_displacement
+from ramannoodle.structure.symmetry_utils import (
     is_collinear_with_all,
     is_non_collinear_with_all,
     are_collinear,
     is_orthogonal_to_all,
-    _get_fractional_positions_permutation_matrix,
-    apply_pbc,
-    apply_pbc_displacement,
 )
-from ramannoodle.symmetry import StructuralSymmetry
+from ramannoodle.structure.reference import (
+    ReferenceStructure,
+    _get_positions_permutation_matrix,
+)
 
 
 @pytest.mark.parametrize(
@@ -129,33 +129,31 @@ def test_is_non_collinear_with_all(
 
 
 @pytest.mark.parametrize(
-    "outcar_symmetry_fixture, known_nonequivalent_atoms,"
+    "outcar_ref_structure_fixture, known_nonequivalent_atoms,"
     "known_orthogonal_displacements, known_displacements_shape",
     [
         ("test/data/TiO2/phonons_OUTCAR", 2, 36, [2] * 36),
         ("test/data/STO_RATTLED_OUTCAR", 135, 1, [1]),
         ("test/data/LLZO/LLZO_OUTCAR", 9, 32, [1] * 32),
     ],
-    indirect=["outcar_symmetry_fixture"],
+    indirect=["outcar_ref_structure_fixture"],
 )
-def test_structural_symmetry(
-    outcar_symmetry_fixture: StructuralSymmetry,
+def test_ref_structure(
+    outcar_ref_structure_fixture: ReferenceStructure,
     known_nonequivalent_atoms: int,
     known_orthogonal_displacements: int,
     known_displacements_shape: list[int],
 ) -> None:
     """Test StructuralSymmetry (normal)."""
     # Equivalent atoms test
-    symmetry = outcar_symmetry_fixture
-    assert symmetry.get_num_nonequivalent_atoms() == known_nonequivalent_atoms
+    ref_structure = outcar_ref_structure_fixture
+    assert ref_structure.get_num_nonequivalent_atoms() == known_nonequivalent_atoms
 
     # Equivalent displacement test
-    displacement = (
-        symmetry._fractional_positions * 0  # pylint: disable=protected-access
-    )
+    displacement = ref_structure.positions * 0  # pylint: disable=protected-access
     displacement[0, 2] += 0.1
     print(displacement.shape)
-    displacements = symmetry.get_equivalent_displacements(displacement)
+    displacements = ref_structure.get_equivalent_displacements(displacement)
     assert len(displacements) == known_orthogonal_displacements
     assert [len(d["displacements"]) for d in displacements] == known_displacements_shape
 
@@ -174,14 +172,14 @@ def test_structural_symmetry(
         )
     ],
 )
-def test_get_fractional_positions_permutation_matrix(
+def test_get_positions_permutation_matrix(
     reference: NDArray[np.float64],
     permuted: NDArray[np.float64],
     known: NDArray[np.float64],
 ) -> None:
-    """Test _get_fractional_positions_permutation_matrix (normal)."""
+    """Test _get_positions_permutation_matrix (normal)."""
     assert np.isclose(
-        _get_fractional_positions_permutation_matrix(reference, permuted), known
+        _get_positions_permutation_matrix(reference, permuted), known
     ).all()
 
 
@@ -196,6 +194,27 @@ def test_get_fractional_positions_permutation_matrix(
 def test_apply_pbc(positions: NDArray[np.float64], known: NDArray[np.float64]) -> None:
     """Test apply_pbc (normal)."""
     assert np.isclose(apply_pbc(positions), known).all()
+
+
+@pytest.mark.parametrize(
+    "positions, exception_type, in_reason",
+    [
+        ([1, 2, 3], TypeError, "should have type ndarray, not list"),
+    ],
+)
+def test_apply_pbc_exception(
+    positions: NDArray[np.float64],
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test apply_pbc (exception)."""
+    with pytest.raises(exception_type) as err:
+        apply_pbc(positions)
+    assert in_reason in str(err.value)
+
+    with pytest.raises(exception_type) as err:
+        apply_pbc_displacement(positions)
+    assert in_reason in str(err.value)
 
 
 @pytest.mark.parametrize(
@@ -214,46 +233,65 @@ def test_apply_pbc_displacement(
 
 
 @pytest.mark.parametrize(
-    "atomic_numbers, lattice, fractional_positions, exception_type, in_reason",
+    "atomic_numbers, lattice, positions, exception_type, in_reason",
     [
         (
             (1, 2, 3, 4),
             np.diag([1, 1, 1]),
             np.zeros((4, 3)),
             TypeError,
-            "atomic_numbers should have type ndarray, not tuple",
+            "atomic_numbers should have type list, not tuple",
         ),
         (
-            np.array((1, 2, 3, 4)),
+            [1, 2, 3, 4],
             np.diag([1, 1]),
             np.zeros((4, 3)),
             ValueError,
             "lattice has wrong shape: (2,2) != (3,3)",
         ),
         (
-            np.array((1, 2, 3, 4)),
+            [1, 2, 3, 4],
             np.diag([1, 1, 1]),
             np.zeros((4, 2)),
             ValueError,
-            "fractional_positions has wrong shape: (4,2) != (4,3)",
+            "positions has wrong shape: (4,2) != (4,3)",
         ),
         (
-            np.array((1, 2, 3, 4)),
+            [1, 2, 3, 4],
             np.diag([1, 1, 1]),
             np.zeros((3, 3)),
             ValueError,
-            "fractional_positions has wrong shape: (3,3) != (4,3)",
+            "positions has wrong shape: (3,3) != (4,3)",
         ),
     ],
 )
-def test_structural_symmetry_exception(
-    atomic_numbers: NDArray[np.int32],
+def test_ref_structure_exception(
+    atomic_numbers: list[int],
     lattice: NDArray[np.float64],
-    fractional_positions: NDArray[np.float64],
+    positions: NDArray[np.float64],
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
     """Test StructuralSymmetry (exception)."""
     with pytest.raises(exception_type) as error:
-        StructuralSymmetry(atomic_numbers, lattice, fractional_positions)
+        ReferenceStructure(atomic_numbers, lattice, positions)
     assert in_reason in str(error.value)
+
+
+@pytest.mark.parametrize(
+    "outcar_ref_structure_fixture, atom_symbols, known_atom_indexes",
+    [
+        ("test/data/TiO2/phonons_OUTCAR", "Ti", list(range(0, 36))),
+        ("test/data/STO_RATTLED_OUTCAR", "O", list(range(54, 135))),
+        ("test/data/LLZO/LLZO_OUTCAR", "La", list(range(56, 80))),
+    ],
+    indirect=["outcar_ref_structure_fixture"],
+)
+def test_get_atom_indexes(
+    outcar_ref_structure_fixture: ReferenceStructure,
+    atom_symbols: str | list[str],
+    known_atom_indexes: list[int],
+) -> None:
+    """Test get_atom_indexes."""
+    ref_structure = outcar_ref_structure_fixture
+    assert ref_structure.get_atom_indexes(atom_symbols) == known_atom_indexes

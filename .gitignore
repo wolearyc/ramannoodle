@@ -266,3 +266,6 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,python,visualstudiocode
 session
 test/Testing.ipynb
+test/data/temp
+test/data/temp.vasp
+docs/source/notebooks/*POSCAR

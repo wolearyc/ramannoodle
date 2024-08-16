@@ -1,6 +1,11 @@
 ramannoodle package
 ===================
 
+.. automodule:: ramannoodle
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -11,7 +16,7 @@ Subpackages
    ramannoodle.io
    ramannoodle.polarizability
    ramannoodle.spectrum
-   ramannoodle.symmetry
+   ramannoodle.structure
 
 Submodules
 ----------
@@ -28,14 +33,6 @@ ramannoodle.globals module
 --------------------------
 
 .. automodule:: ramannoodle.globals
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: ramannoodle
    :members:
    :undoc-members:
    :show-inheritance:

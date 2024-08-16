@@ -1,6 +1,11 @@
 ramannoodle.io package
 ======================
 
+.. automodule:: ramannoodle.io
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -12,18 +17,18 @@ Subpackages
 Submodules
 ----------
 
-ramannoodle.io.io\_utils module
--------------------------------
+ramannoodle.io.generic module
+-----------------------------
 
-.. automodule:: ramannoodle.io.io_utils
+.. automodule:: ramannoodle.io.generic
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+ramannoodle.io.io\_utils module
+-------------------------------
 
-.. automodule:: ramannoodle.io
+.. automodule:: ramannoodle.io.io_utils
    :members:
    :undoc-members:
    :show-inheritance:

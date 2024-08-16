@@ -14,9 +14,9 @@ import sys
 import os
 
 project = 'ramannoodle'
-copyright = "2024, Willis O'Leary"
+copyright = "2023-present, Willis O'Leary"
 author = "Willis O'Leary"
-release = 'v0.1.1-alpha'
+release = '0.2.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -44,10 +44,17 @@ exclude_patterns = []
 
 language = 'Python'
 
+autodoc_member_order = 'groupwise'
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'furo'
 html_static_path = ['_static']
+html_theme_options = {
+    "light_logo": "logo.png",
+    "dark_logo": "logo_dark.png",
+    "sidebar_hide_name": True,
+}
 
 sys.path.insert(0, os.path.abspath('../../'))
