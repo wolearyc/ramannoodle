@@ -9,3 +9,4 @@ Guides
    notebooks/Full tutorial
    notebooks/Masking
    io
+   units

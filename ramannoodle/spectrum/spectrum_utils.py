@@ -13,25 +13,27 @@ def convolve_spectrum(
     width: float = 5,
     out_wavenumbers: NDArray[np.float64] | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Convolve a spectrum, producing a smoothing effect.
+    r"""Convolve a spectrum, producing a smoothing effect.
 
     Parameters
     ----------
     wavenumbers
-        input wavenumbers
+        cm\ :sup:`-1` | 1D array with shape (M,).
     intensities
-        input intensities
+        Arbitrary units | 1D array with shape (M,).
     function
-        convolution function. must be either "gaussian" or "lorentzian"
+        Convolution function. Must be either "gaussian" or "lorentzian".
     width
+        In cm\ :sup:`-1`.
     out_wavenumbers
-        Optional parameter the output wavenumbers. If None, wavenumbers are
-        determined automatically.
+        cm\ :sup:`-1` | Optional parameter the output wavenumbers. If None,
+        wavenumbers are determined automatically.
 
     Returns
     -------
     :
-        2-tuple containing wavenumbers and corresponding intensities
+        2-tuple containing wavenumbers (cm\ :sup:`-1`) and corresponding intensities
+        (arbitrary units).
 
     """
     if out_wavenumbers is None:

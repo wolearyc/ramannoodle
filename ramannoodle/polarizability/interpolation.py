@@ -38,7 +38,7 @@ def get_amplitude(
     cart_basis_vector: NDArray[np.float64],
     cart_displacement: NDArray[np.float64],
 ) -> float:
-    """Get amplitude of a displacement in angstroms."""
+    """Get amplitude of a displacement (Å)."""
     return float(np.dot(cart_basis_vector.flatten(), cart_displacement.flatten()))
 
 
@@ -76,9 +76,9 @@ class InterpolationModel(PolarizabilityModel):
     ----------
     ref_structure
     equilibrium_polarizability
-        2D array with shape (3,3) giving polarizability of system at equilibrium. This
-        would usually correspond to the minimum energy structure. If dummy model, the
-        value of equilibrium_polarizability is ignored.
+        Unitless | 2D array with shape (3,3) giving polarizability of system at
+        equilibrium. This would usually correspond to the minimum energy structure. If
+        dummy model, the value of equilibrium_polarizability is ignored.
     is_dummy_model
 
     """
@@ -109,7 +109,13 @@ class InterpolationModel(PolarizabilityModel):
 
     @property
     def equilibrium_polarizability(self) -> NDArray[np.float64]:
-        """Get (a copy of) reference structure."""
+        """Get (a copy of) equilibrium polarizability.
+
+        Returns
+        -------
+        :
+            Unitless | 2D array with shape (3,3).
+        """
         return self._equilibrium_polarizability.copy()
 
     @property
@@ -119,17 +125,38 @@ class InterpolationModel(PolarizabilityModel):
 
     @property
     def cart_basis_vectors(self) -> list[NDArray[np.float64]]:
-        """Get (a copy of) cartesian basis vectors."""
+        """Get (a copy of) cartesian basis vectors.
+
+        Returns
+        -------
+        :
+            Å | List of length J containing 2D arrays with shape (N,3) where J is the
+            number of specified degrees of freedom and N is the number of atoms.
+
+        """
         return copy.deepcopy(self._cart_basis_vectors)
 
     @property
     def interpolations(self) -> list[BSpline]:
-        """Get (a copy of) interpolations."""
+        """Get (a copy of) interpolations.
+
+        Returns
+        -------
+        :
+            List of length J where J is the number of specified degrees of freedom.
+        """
         return copy.deepcopy(self._interpolations)
 
     @property
     def mask(self) -> NDArray[np.bool]:
-        """Get (a copy of) mask."""
+        """Get (a copy of) mask.
+
+        Returns
+        -------
+        :
+            1D array with shape (J,) where J is the number of specified degrees of
+            freedom.
+        """
         return self._mask.copy()
 
     @mask.setter
@@ -157,17 +184,17 @@ class InterpolationModel(PolarizabilityModel):
         Parameters
         ----------
         cart_displacement
-            2D array with shape (N,3) where N is the number of atoms
+            Å | 2D array with shape (N,3) where N is the number of atoms.
 
         Returns
         -------
         :
-            2D array with shape (3,3)
+            Unitless | 2D array with shape (3,3).
 
         Raises
         ------
         UsageError
-            if a dummy model
+            If model is a dummy model.
 
         """
         delta_polarizability: NDArray[np.float64] = np.zeros((3, 3))
@@ -376,14 +403,14 @@ class InterpolationModel(PolarizabilityModel):
         Parameters
         ----------
         cart_displacement
-            2D array with shape (N,3) where N is the number of atoms. Units
-            are arbitrary. Must be orthogonal to all previously added DOFs.
+            Å | 2D array with shape (N,3) where N is the number of atoms. Magnitude is
+            arbitrary. Must be orthogonal to all previously added DOFs.
         amplitudes
-            1D array of length L containing amplitudes in angstroms. Duplicate
+            Å | 1D array of length L containing amplitudes in angstroms. Duplicate
             amplitudes are not allowed, including symmetrically equivalent
             amplitudes.
         polarizabilities
-            3D array with shape (L,3,3) containing known polarizabilities for
+            Unitless | 3D array with shape (L,3,3) containing known polarizabilities for
             each amplitude. If dummy model, value of polarizabilities is ignored.
         interpolation_order
             Must be less than the number of total number of amplitudes after

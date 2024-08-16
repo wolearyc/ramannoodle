@@ -10,13 +10,14 @@ from ramannoodle.globals import BOLTZMANN_CONSTANT
 def get_bose_einstein_correction(
     wavenumbers: NDArray[np.float64], temperature: float
 ) -> NDArray[np.float64]:
-    """Calculate Bose-Einstein spectral correction.
+    r"""Calculate Bose-Einstein spectral correction.
 
     Parameters
     ----------
     wavenumbers
+        cm\ :sup:`-1` | 1D array with shape (M,).
     temperature
-        in kelvin
+        In Kelvin.
 
     Returns
     -------
@@ -43,12 +44,14 @@ def get_bose_einstein_correction(
 def get_laser_correction(
     wavenumbers: NDArray[np.float64], laser_wavenumber: float
 ) -> NDArray[np.float64]:
-    """Calculate conventional laser-wavenumber-dependent spectral correction.
+    r"""Calculate conventional laser-wavenumber-dependent spectral correction.
 
     Parameters
     ----------
     wavenumbers
+        cm\ :sup:`-1` | 1D array with shape (M,).
     laser_wavenumber
+        In cm\ :sup:`-1`.
 
     Returns
     -------
@@ -68,14 +71,14 @@ def get_laser_correction(
 
 
 class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
-    """Phonon-based first-order Raman spectrum.
+    r"""Phonon-based first-order Raman spectrum.
 
     Parameters
     ----------
     phonon_wavenumbers
-        1D array with shape (M,) where M is the number of phonons.
+        cm\ :sup:`-1` | 1D array with shape (M,) where M is the number of phonons.
     raman_tensors
-        3D array with shape (M,3,3).
+        Unitless | 3D array with shape (M,3,3).
 
     """
 
@@ -93,12 +96,24 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
 
     @property
     def phonon_wavenumbers(self) -> NDArray[np.float64]:
-        """Get (a copy of) phonon_wavenumbers."""
+        r"""Get (a copy of) phonon_wavenumbers.
+
+        Returns
+        -------
+        :
+            cm\ :sup:`-1` | 1D array with shape (M,) where M is the number of phonons.
+        """
         return self._phonon_wavenumbers.copy()
 
     @property
     def raman_tensors(self) -> NDArray[np.float64]:
-        """Get (a copy of) raman_tensors."""
+        """Get (a copy of) raman_tensors.
+
+        Returns
+        -------
+        :
+            Unitless | 3D array with shape (M,3,3) where M is the number of phonons.
+        """
         return self._raman_tensors.copy()
 
     def measure(  # pylint: disable=too-many-arguments
@@ -109,7 +124,7 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
         bose_einstein_correction: bool = False,
         temperature: float = 300,
     ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-        """Calculate and return a raw Raman spectrum.
+        r"""Calculate and return a raw Raman spectrum.
 
         Parameters
         ----------
@@ -120,16 +135,19 @@ class PhononRamanSpectrum:  # pylint: disable=too-few-public-methods
             Applies laser-wavelength-dependent intensity correction. If True,
             ``laser_wavelength`` must be specified.
         laser_wavelength
+            In nm.
         bose_einstein_correction
             Applies temperature-dependent Bose Einstein correction. If True,
             ``temperature`` must be specified.
+        temperature
+            In Kelvin.
 
         Returns
         -------
         :
-            2-tuple. First element is wavenumbers, a 1D array with shape (M,)
-            where M is the number of phonons. The second element is intensities,
-            a 1D array with shape (M,).
+            2-tuple. First element is wavenumbers (cm\ :sup:`-1`), a 1D array with
+            shape (M,) where M is the number of phonons. The second element is
+            intensities (arbitrary units), a 1D array with shape (M,).
 
         Raises
         ------

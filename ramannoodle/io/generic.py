@@ -75,8 +75,8 @@ def read_positions_and_polarizability(
     -------
     :
         2-tuple, whose first element is the fractional positions, a 2D array with shape
-        (N,3) where N is the number of atoms. The second element is the polarizability,
-        a 2D array with shape (3,3).
+        (N,3) where N is the number of atoms. The second element is the polarizability
+        (unitless), a 2D array with shape (3,3).
 
     Raises
     ------
@@ -106,7 +106,7 @@ def read_positions(
     Returns
     -------
     :
-        2D array with shape (N,3) where N is the number of atoms.
+        Unitless | 2D array with shape (N,3) where N is the number of atoms.
 
     Raises
     ------
@@ -160,11 +160,11 @@ def write_structure(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        2D array with shape (3,3).
+        Å | 2D array with shape (3,3).
     atomic_numbers
         1D list of length N where N is the number of atoms.
     positions
-        2D array with shape (N,3).
+        Unitless | 2D array with shape (N,3).
     filepath
     file_format
         Supports: "poscar" (see :ref:`Supported formats`).

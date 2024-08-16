@@ -1,5 +1,6 @@
 """Useful globals."""
 
+# Units: Daltons
 ATOMIC_WEIGHTS = {
     "H": 1.008,
     "He": 4.002602,

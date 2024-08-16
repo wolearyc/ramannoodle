@@ -1,4 +1,4 @@
-"""Phonons aka. harmonic lattice vibrations."""
+"""Harmonic lattice vibrations aka phonons."""
 
 import numpy as np
 from numpy.typing import NDArray
@@ -11,7 +11,7 @@ from ramannoodle.exceptions import verify_ndarray_shape
 
 
 class Phonons(Dynamics):
-    """Harmonic lattice vibrations.
+    r"""Harmonic lattice vibrations.
 
     A phonon can be represented by a wavenumber and corresponding atomic displacement.
     The wavenumbers are the eigenvalues of the system's dynamical matrix, while the
@@ -21,9 +21,9 @@ class Phonons(Dynamics):
     Parameters
     ----------
     wavenumbers
-        1D array with length M
+        cm\ :sup:`-1` | 1D array with length M.
     cart_displacements
-        3D array with shape (M,N,3) where N is the number of atoms
+        Å | 3D array with shape (M,N,3) where N is the number of atoms.
 
     """
 
@@ -41,12 +41,12 @@ class Phonons(Dynamics):
 
     @property
     def wavenumbers(self) -> NDArray[np.float64]:
-        """Get (a copy of) wavenumbers.
+        r"""Get (a copy of) wavenumbers.
 
         Returns
         -------
         :
-            1D array with shape (M,) where M is the number of phonons.
+            cm\ :sup:`-1` | 1D array with shape (M,) where M is the number of phonons.
         """
         return self._wavenumbers.copy()
 
@@ -57,8 +57,8 @@ class Phonons(Dynamics):
         Returns
         -------
         :
-            3D array with shape (M,N,3) where M is the number of phonons
-            and N is the number of atoms
+            Å | 3D array with shape (M,N,3) where M is the number of phonons
+            and N is the number of atoms.
         """
         return self._cart_displacements.copy()
 

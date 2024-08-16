@@ -18,10 +18,10 @@ class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
         Parameters
         ----------
         cart_displacement
-            2D array with shape (N,3) where N is the number of atoms.
+            Å | 2D array with shape (N,3) where N is the number of atoms.
 
         Returns
         -------
         :
-            2D array with shape (3,3).
+            Unitless | 2D array with shape (3,3).
         """

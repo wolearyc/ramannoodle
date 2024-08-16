@@ -16,7 +16,12 @@ def apply_pbc(positions: NDArray[np.float64]) -> NDArray[np.float64]:
     Parameters
     ----------
     positions
-        2D array with shape (N,3) where N is the number of atoms.
+        Unitless | 2D array with shape (N,3) where N is the number of atoms.
+
+    Returns
+    -------
+    :
+        Unitless | 2D array with shape (N,3).
     """
     try:
         return positions - positions // 1
@@ -29,8 +34,13 @@ def apply_pbc_displacement(displacement: NDArray[np.float64]) -> NDArray[np.floa
 
     Parameters
     ----------
-    positions
-        2D array with shape (N,3) where N is the number of atoms.
+    displacement
+        Unitless: 2D array with shape (N,3) where N is the number of atoms.
+
+    Returns
+    -------
+    :
+        Unitless: 2D array with shape (N,3).
     """
     try:
         return np.where(displacement % 1 > 0.5, displacement % 1 - 1, displacement % 1)
@@ -47,9 +57,14 @@ def displace_positions(
     Parameters
     ----------
     positions
-        2D array with shape (N,3) where N is the number of atoms.
+        Unitless | 2D array with shape (N,3) where N is the number of atoms.
     displacement
-        2D array with shape (N,3).
+        Unitless | 2D array with shape (N,3).
+
+    Returns
+    -------
+    :
+        Unitless | 2D array with shape (N,3).
     """
     positions = apply_pbc(positions)
     displacement = apply_pbc_displacement(displacement)
@@ -67,11 +82,16 @@ def transform_positions(
     Parameters
     ----------
     positions
-        2D array with shape (N,3) where N is the number of atoms
+        Unitless | 2D array with shape (N,3) where N is the number of atoms
     rotation
-        2D array with shape (3,3).
+        Unitless | 2D array with shape (3,3).
     translation
-        1D array with shape (3,).
+        Unitless | 1D array with shape (3,).
+
+    Returns
+    -------
+    :
+        Unitless | 2D array with shape (N,3).
     """
     verify_positions("positions", positions)
     positions = apply_pbc(positions)
@@ -96,9 +116,14 @@ def calculate_displacement(
     Parameters
     ----------
     positions_1
-        2D array with shape (N,3) where N is the number of atoms.
+        Unitless | 2D array with shape (N,3) where N is the number of atoms.
     positions_2
-        2D array with shape (N,3).
+        Unitless | 2D array with shape (N,3).
+
+    Returns
+    -------
+    :
+        Unitless | 2D array with shape (N,3).
     """
     positions_1 = apply_pbc(positions_1)
     positions_2 = apply_pbc(positions_2)

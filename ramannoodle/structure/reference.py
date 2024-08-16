@@ -97,13 +97,13 @@ class ReferenceStructure:
     atomic_numbers
         List of length N where N is the number of atoms.
     lattice
-        Lattice vectors expressed as a 2D array with shape (3,3).
+        Å | Lattice vectors expressed as a 2D array with shape (3,3).
     positions
-        2D array with shape (N,3) where N is the number of atoms.
+        Unitless | 2D array with shape (N,3) where N is the number of atoms.
     symprec
-        Symmetry precision parameter for spglib.
+        Å | Distance tolerance for symmetry search (spglib).
     angle_tolerance
-        Symmetry precision parameter for spglib.
+        Degrees | Angle tolerance for symmetry search (spglib).
 
     Raises
     ------
@@ -143,21 +143,33 @@ class ReferenceStructure:
 
     @property
     def atomic_numbers(self) -> list[int]:
-        """Return (a copy of) atomic numbers."""
+        """Get (a copy of) atomic numbers."""
         return copy.copy(self._atomic_numbers)
 
     @property
     def lattice(self) -> NDArray[np.float64]:
-        """Return (a copy of) lattice."""
+        """Get (a copy of) lattice.
+
+        Returns
+        -------
+        :
+            Å | 2D array with shape (3,3).
+        """
         return self._lattice.copy()
 
     @property
     def positions(self) -> NDArray[np.float64]:
-        """Return (a copy of) fractional positions."""
+        """Get (a copy of) fractional positions.
+
+        Returns
+        -------
+        :
+            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+        """
         return self._positions.copy()
 
     def get_num_nonequivalent_atoms(self) -> int:
-        """Return number of nonequivalent atoms."""
+        """Get number of nonequivalent atoms."""
         assert self._symmetry_dict is not None
         return len(set(self._symmetry_dict["equivalent_atoms"]))
 
@@ -180,7 +192,7 @@ class ReferenceStructure:
         Parameters
         ----------
         displacement
-            2D array with shape (N,3) where N is the number of atoms.
+            Unitless | 2D array with shape (N,3) where N is the number of atoms.
 
         Returns
         -------
@@ -189,7 +201,8 @@ class ReferenceStructure:
             accessed using the 'displacements' and 'transformations' keys. Displacements
             within each dictionary will be collinear, corresponding to
             the same degree of freedom. The provided transformations are those that
-            transform ``displacement`` into that degree of freedom.
+            transform ``displacement`` into that degree of freedom. Displacements are
+            in fractional coordinates (unitless).
 
         """
         displacement = apply_pbc_displacement(displacement)
@@ -263,7 +276,12 @@ class ReferenceStructure:
         Parameters
         ----------
         displacement
-            2D array with shape (N,3) where N is the number of atoms.
+            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+
+        Returns
+        -------
+        :
+            Å | 2D array with shape (N,3).
         """
         displacement = apply_pbc_displacement(displacement)
 
@@ -275,7 +293,12 @@ class ReferenceStructure:
         Parameters
         ----------
         direction
-            1D array with shape (3,).
+            Unitless | 1D array with shape (3,).
+
+        Returns
+        -------
+        :
+            Å | 1D array with shape (3,).
         """
         direction = apply_pbc_displacement(direction)
         try:
@@ -290,8 +313,13 @@ class ReferenceStructure:
 
         Parameters
         ----------
-        displacement
-            2D array with shape (N,3) where N is the number of atoms.
+        cart_displacement
+            Å | 2D array with shape (N,3) where N is the number of atoms.
+
+        Returns
+        -------
+        :
+            Unitless | 2D array with shape (N,3) where N is the number of atoms.
         """
         verify_ndarray_shape("cart_displacement", cart_displacement, (None, 3))
         displacement = (cart_displacement) @ np.linalg.inv(self.lattice)
@@ -304,8 +332,13 @@ class ReferenceStructure:
 
         Parameters
         ----------
-        direction
-            1D array with shape (3,).
+        cart_direction
+            Å | 1D array with shape (3,).
+
+        Returns
+        -------
+        :
+            Unitless | 1D array with shape (3,).
         """
         verify_ndarray_shape("direction", cart_direction, (3,))
         displacement = np.array([cart_direction]) @ np.linalg.inv(self.lattice)
