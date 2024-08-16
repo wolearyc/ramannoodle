@@ -268,3 +268,4 @@ session
 test/Testing.ipynb
 test/data/temp
 test/data/temp.vasp
+docs/source/notebooks/*POSCAR

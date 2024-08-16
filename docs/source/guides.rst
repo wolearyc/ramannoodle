@@ -6,6 +6,6 @@ Guides
    :caption: Contents:
 
    notebooks/Basic tutorial
-   notebooks/Dummy models
+   notebooks/Full tutorial
    notebooks/Masking
    io
