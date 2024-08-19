@@ -7,6 +7,7 @@
     "dictionaries": [],
     "words": [
         "__repr__",
+        "allclose",
         "anharmonic",
         "ANSICOLORS",
         "argmax",
@@ -57,6 +58,7 @@
         "quickstart",
         "Raman",
         "ramannoodle",
+        "randn",
         "repr",
         "schnet",
         "Softplus",
