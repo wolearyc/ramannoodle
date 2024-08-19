@@ -21,7 +21,7 @@ def test_get_rotations() -> None:
 
 def test_radius_graph_pbc() -> None:
     """Test _radius_graph_pbc (normal)."""
-    for batch_size in range(1, 3):
+    for batch_size in range(1, 4):
         # Generate random data.
         num_atoms = 40
         lattice = torch.eye(3) * 10
@@ -41,10 +41,43 @@ def test_radius_graph_pbc() -> None:
             ei, uv, d = _radius_graph_pbc(
                 lattice[i : i + 1], positions[i : i + 1], cutoff=3
             )
-            edge_index.append(ei + num_atoms * i)
+            ei[0] = i
+            ei[[1, 2]] += num_atoms * i
+            edge_index.append(ei)
             unit_vector.append(uv)
             distance.append(d)
 
         assert torch.allclose(batch_edge_index, torch.concat(edge_index, dim=1))
         assert torch.allclose(batch_unit_vector, torch.concat(unit_vector, dim=0))
         assert torch.allclose(batch_distance, torch.concat(distance, dim=0))
+
+
+def test_batch_polarizability() -> None:
+    """Test of batch functions for forward pass (normal)."""
+    for batch_size in range(1, 4):
+        model = PotGNN(5, 5, 5, 5)
+        model.eval()
+
+        # Generate random data.
+        num_atoms = 40
+        lattice = torch.eye(3) * 10
+        atomic_numbers = torch.randint(1, 10, (num_atoms,))
+
+        batch_lattices = lattice.expand(batch_size, 3, 3)
+        batch_atomic_numbers = atomic_numbers.expand(batch_size, num_atoms)
+        batch_positions = torch.randn(batch_size, num_atoms, 3)
+        batch_polarizability = model.forward(
+            batch_lattices, batch_atomic_numbers, batch_positions
+        )
+
+        # Individual calls
+        polarizabilities = torch.zeros((batch_size, 6))
+        for i in range(batch_size):
+            polarizability = model.forward(
+                batch_lattices[i : i + 1],
+                batch_atomic_numbers[i : i + 1],
+                batch_positions[i : i + 1],
+            )
+            polarizabilities[i] = polarizability[0]
+
+        assert torch.allclose(batch_polarizability, polarizabilities)
