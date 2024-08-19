@@ -32,6 +32,9 @@ _POSITION_AND_POLARIZABILITY_READERS = {
     "outcar": vasp_io.outcar.read_positions_and_polarizability,
     "vasprun.xml": vasp_io.vasprun.read_positions_and_polarizability,
 }
+_STRUCTURE_AND_POLARIZABILITY_READERS = {
+    "outcar": vasp_io.outcar.read_structure_and_polarizability
+}
 _POSITION_READERS = {
     "poscar": vasp_io.poscar.read_positions,
     "outcar": vasp_io.outcar.read_positions,
@@ -139,6 +142,40 @@ def read_positions_and_polarizability(
     """
     try:
         return _POSITION_AND_POLARIZABILITY_READERS[file_format](filepath)
+    except KeyError as exc:
+        raise ValueError(f"unsupported format: {file_format}") from exc
+
+
+def read_structure_and_polarizability(
+    filepath: str | Path,
+    file_format: str,
+) -> tuple[NDArray[np.float64], list[int], NDArray[np.float64], NDArray[np.float64]]:
+    """Read lattice, atomic numbers, fractional positions, polarizability from a file.
+
+    Parameters
+    ----------
+    filepath
+    file_format
+        Supports: "outcar" (see :ref:`Supported formats`)
+
+    Returns
+    -------
+    :
+        4-tuple, whose first element is the lattice (Å), a 2D array with shape (3,3).
+        The second element is the atomic numbers, a list of length N where N is the
+        number of atoms. The third element is positions, a 2D array with shape (N,3).
+        The fourth element is the polarizability (unitless), a 2D array with shape
+        (3,3).
+
+    Raises
+    ------
+    InvalidFileException
+        File has unexpected format.
+    FileNotFoundError
+        File could not be found.
+    """
+    try:
+        return _STRUCTURE_AND_POLARIZABILITY_READERS[file_format](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
