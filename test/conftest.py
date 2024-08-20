@@ -41,3 +41,13 @@ def outcar_ref_structure_fixture(request: FixtureRequest) -> ReferenceStructure:
             request.param, file_format="outcar"
         )
     return ref_structure_cache[request.param]
+
+
+@pytest.fixture(scope="session")
+def poscar_ref_structure_fixture(request: FixtureRequest) -> ReferenceStructure:
+    """Return a reference structure."""
+    if request.param not in ref_structure_cache:
+        ref_structure_cache[request.param] = generic_io.read_ref_structure(
+            request.param, file_format="poscar"
+        )
+    return ref_structure_cache[request.param]

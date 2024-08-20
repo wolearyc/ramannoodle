@@ -143,7 +143,10 @@ class NodeBlock(torch.nn.Module):
     def forward(
         self, node_embedding: Tensor, edge_embedding: Tensor, i: Tensor
     ) -> Tensor:
-        """Forward pass."""
+        """Forward pass.
+
+        (Node embedding, edge embedding) -> node embedding.
+        """
         c1 = torch.cat([node_embedding[i], edge_embedding], dim=1)
         c1 = self.bn_c1(self.lin_c1(c1))
         c1_filter, c1_core = c1.chunk(2, dim=1)
@@ -303,7 +306,15 @@ class PotGNN(Module):
             ShiftedSoftplus(),
             Linear(hidden_edge_channels, hidden_edge_channels),
             ShiftedSoftplus(),
-            Linear(hidden_edge_channels, 6),
+            Linear(hidden_edge_channels, 2),
+        )
+
+        self.node_polarizability_predictor = Sequential(
+            Linear(hidden_node_channels, hidden_node_channels),
+            ShiftedSoftplus(),
+            Linear(hidden_node_channels, hidden_node_channels),
+            ShiftedSoftplus(),
+            Linear(hidden_node_channels, 3),
         )
 
     def reset_parameters(self) -> None:
@@ -315,6 +326,7 @@ class PotGNN(Module):
         for edge_block in self.edge_blocks:
             edge_block.reset_parameters()
         reset(self.polarizability_predictor)
+        reset(self.node_polarizability_predictor)
 
     def _get_polarizability_tensors(self, x: Tensor) -> Tensor:
         """X should have size (_,6)."""
@@ -327,6 +339,14 @@ class PotGNN(Module):
         )
         return x[:, indices]
 
+    def _get_edge_polarizability_tensor(self, x: Tensor) -> Tensor:
+        """X should have size (_,2)."""
+        result = torch.zeros((x.size(0), 3, 3))
+        result[:, 0, 0] = x[:, 0]
+        result[:, 1, 1] = x[:, 1]
+        result[:, 2, 2] = x[:, 1]
+        return result
+
     def _get_polarizability_vectors(self, x: Tensor) -> Tensor:
         """X should have size (_,3,3)."""
         indices = torch.tensor([[0, 0], [1, 1], [2, 2], [0, 1], [0, 2], [1, 2]]).T
@@ -335,15 +355,13 @@ class PotGNN(Module):
     def _get_rotations(self, destination: Tensor) -> Tensor:
         """Get rotation matrices.
 
-        The source vector is set to (1,0,0).
-
         Parameters
         ----------
         destination
             Destination vector. Expected to be list of unit vectors.
         """
-        source = torch.zeros(destination.size())  # source vector
-        source[:, 0] = 1
+        source = torch.zeros(destination.size())
+        source[:, 0] = 1  # Source vector is (1,0,0)
 
         # Normalize all vectors
         a = source / torch.linalg.norm(source, dim=1).view(-1, 1)
@@ -368,6 +386,9 @@ class PotGNN(Module):
         a1 = kmat.matmul(kmat)
         b1 = (1 - c) / (s**2)
         rotation_matrix += a1 * b1[:, None, None]
+
+        # If source == destination
+        rotation_matrix[s == 0] = torch.eye(3)
         return rotation_matrix
 
     def forward(  # pylint: disable=too-many-locals
@@ -407,24 +428,37 @@ class PotGNN(Module):
             )
 
         # Polarizability prediction block:
-        edge_polarizability = self.polarizability_predictor(edge_emb)
-        edge_polarizability = self._get_polarizability_tensors(edge_polarizability)
-        rotation = self._get_rotations(unit_vec)
-
-        edge_polarizability = torch.matmul(rotation, edge_polarizability)
-        edge_polarizability = torch.matmul(
-            edge_polarizability, torch.linalg.inv(rotation)
+        component_polarizability = self.polarizability_predictor(edge_emb)
+        component_polarizability = self._get_edge_polarizability_tensor(
+            component_polarizability
         )
-
-        edge_polarizability = self._get_polarizability_vectors(edge_polarizability)
+        rotation = self._get_rotations(unit_vec)
+        component_polarizability = torch.matmul(rotation, component_polarizability)
+        component_polarizability = torch.matmul(
+            component_polarizability, torch.linalg.inv(rotation)
+        )
+        component_polarizability = self._get_polarizability_vectors(
+            component_polarizability
+        )
 
         polarizability = torch.zeros((positions.size(0), 6))
         for i in range(positions.size(0)):
             mask = (edge_index[0:1] == i).T
             count = torch.sum(mask)
-            polarizability[i] = torch.sum(edge_polarizability * mask, dim=0)
+            polarizability[i] = torch.sum(component_polarizability * mask, dim=0)
             polarizability[i] /= count
         return polarizability
+
+        # component_polarizability = self.node_polarizability_predictor(node_emb)
+        # colarizability = torch.zeros((positions.size(0), 6))
+        # num_atoms = positions.size(1)
+        # for i in range(positions.size(0)):
+        #   mask = torch.zeros(1, atomic_numbers.size(0))
+        #   mask[:, i * num_atoms : (i + 1) * num_atoms] = 1
+        #   count = torch.sum(mask)
+        #   polarizability[i] = torch.sum(component_polarizability * mask.T, dim=0)
+        #   polarizability[i] /= count
+        # return polarizability
 
 
 def _radius_graph_pbc(
