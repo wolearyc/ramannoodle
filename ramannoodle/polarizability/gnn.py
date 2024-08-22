@@ -11,7 +11,15 @@ from numpy.typing import NDArray
 
 import torch
 from torch import Tensor
-from torch.nn import BatchNorm1d, Embedding, Linear, ModuleList, Sequential, Module
+from torch.nn import (
+    BatchNorm1d,
+    Embedding,
+    Linear,
+    ModuleList,
+    Sequential,
+    Module,
+    Dropout,
+)
 from torch.utils.data import Dataset
 
 from torch_geometric.nn.inits import reset
@@ -19,13 +27,17 @@ from torch_geometric.nn.models.dimenet import triplets
 from torch_geometric.nn.models.schnet import ShiftedSoftplus
 from torch_geometric.utils import scatter
 
+from ramannoodle.structure.reference import ReferenceStructure
+
 
 def _get_scaled_polarizabilities(
     polarizabilities: Tensor,
 ) -> tuple[Tensor, Tensor, Tensor]:
     """Compute scaled, flattened (6 member) polarizabilities."""
     mean = polarizabilities.mean(0, keepdim=True)
-    stddev = polarizabilities.std(0, unbiased=False, keepdim=True)
+    stddev = torch.max(polarizabilities.std(0, unbiased=False, keepdim=True))
+    # mean = 0
+    stddev = 1
     polarizabilities = (polarizabilities - mean) / stddev
 
     scaled_polarizabilities = torch.zeros((polarizabilities.size(0), 6))
@@ -37,6 +49,46 @@ def _get_scaled_polarizabilities(
     scaled_polarizabilities[:, 5] = polarizabilities[:, 1, 2]
 
     return mean, stddev, scaled_polarizabilities
+
+
+def _get_rotations(destination: Tensor) -> Tensor:
+    """Get rotation matrices.
+
+    Parameters
+    ----------
+    destination
+        Destination vector. Expected to be list of unit vectors.
+    """
+    source = torch.zeros(destination.size())
+    source[:, 0] = 1  # Source vector is (1,0,0)
+
+    # Normalize all vectors
+    a = source / torch.linalg.norm(source, dim=1).view(-1, 1)
+    b = destination / torch.linalg.norm(destination, dim=1).view(-1, 1)
+
+    v = torch.linalg.cross(a, b)
+    c = torch.linalg.vecdot(a, b)
+    s = torch.linalg.norm(v, dim=1)
+
+    kmat = torch.zeros((len(v), 3, 3))
+    kmat[:, 0, 1] = -v[:, 2]
+    kmat[:, 0, 2] = v[:, 1]
+    kmat[:, 1, 0] = v[:, 2]
+    kmat[:, 1, 2] = -v[:, 0]
+    kmat[:, 2, 0] = -v[:, 1]
+    kmat[:, 2, 1] = v[:, 0]
+
+    eye_matrix = torch.zeros((len(v), 3, 3))
+    eye_matrix[:] = torch.eye(3)
+    rotation_matrix = eye_matrix
+    rotation_matrix += kmat
+    a1 = kmat.matmul(kmat)
+    b1 = (1 - c) / (s**2)
+    rotation_matrix += a1 * b1[:, None, None]
+
+    # If source == destination
+    rotation_matrix[s == 0] = torch.eye(3)
+    return rotation_matrix
 
 
 class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
@@ -62,7 +114,7 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         atomic_numbers: list[list[int]],
         positions: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
-    ):
+    ):  #
         self._lattices = torch.from_numpy(lattices).float()
         self._atomic_numbers = torch.tensor(atomic_numbers)
         self._positions = torch.from_numpy(positions).float()
@@ -248,7 +300,7 @@ class EdgeBlock(torch.nn.Module):
         return typing.cast(Tensor, (edge_embedding + c2_emb + c3_emb).tanh())
 
 
-class PotGNN(Module):
+class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
     r"""POlarizability Tensor Graph Neural Network (PotGNN).
 
     GNN architecture was inspired by the "direct force architecture" developed in Park
@@ -258,26 +310,36 @@ class PotGNN(Module):
 
     Parameters
     ----------
+    ref_structure
+        Reference structure from which nodes/edges are determined.
+    cutoff
+        Cutoff distance for interatomic interactions.
     hidden_node_channels
         Hidden node embedding size.
     hidden_edge_channels
         Hidden edge embedding size.
     num_layers
         Number of message passing blocks.
-    cutoff
-        Cutoff distance for interatomic interactions.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
+        ref_structure: ReferenceStructure,
+        cutoff: float,
         hidden_node_channels: int,
         hidden_edge_channels: int,
         num_layers: int,
-        cutoff: float = 5.0,
     ):
         super().__init__()
 
         self.cutoff = cutoff
+        self.ref_structure = ref_structure
+
+        self.ref_edge_indexes, _, self.ref_distances = _radius_graph_pbc(
+            torch.from_numpy(ref_structure.lattice).unsqueeze(0).float(),
+            torch.from_numpy(ref_structure.positions).unsqueeze(0).float(),
+            cutoff,
+        )
 
         self.node_embedding = Sequential(
             Embedding(95, hidden_node_channels),
@@ -306,7 +368,7 @@ class PotGNN(Module):
             ShiftedSoftplus(),
             Linear(hidden_edge_channels, hidden_edge_channels),
             ShiftedSoftplus(),
-            Linear(hidden_edge_channels, 2),
+            Linear(hidden_edge_channels, 4),
         )
 
         self.node_polarizability_predictor = Sequential(
@@ -339,57 +401,81 @@ class PotGNN(Module):
         )
         return x[:, indices]
 
-    def _get_edge_polarizability_tensor(self, x: Tensor) -> Tensor:
+    def _get_edge_polarizability_tensor(self, x: Tensor) -> tuple[Tensor, Tensor]:
         """X should have size (_,2)."""
-        result = torch.zeros((x.size(0), 3, 3))
-        result[:, 0, 0] = x[:, 0]
-        result[:, 1, 1] = x[:, 1]
-        result[:, 2, 2] = x[:, 1]
-        return result
+        diag_polarizability = torch.zeros((x.size(0), 3, 3))
+        diag_polarizability[:, 0, 0] = x[:, 0]
+        diag_polarizability[:, 1, 1] = x[:, 1]
+        diag_polarizability[:, 2, 2] = x[:, 1]
+        off_diag_polarizability = torch.zeros((x.size(0), 3, 3))
+        off_diag_polarizability[:, 0, 0] = x[:, 2]
+        off_diag_polarizability[:, 1, 1] = x[:, 3]
+        off_diag_polarizability[:, 2, 2] = x[:, 3]
+        return diag_polarizability, off_diag_polarizability
 
     def _get_polarizability_vectors(self, x: Tensor) -> Tensor:
         """X should have size (_,3,3)."""
         indices = torch.tensor([[0, 0], [1, 1], [2, 2], [0, 1], [0, 2], [1, 2]]).T
         return x[:, indices[0], indices[1]]
 
-    def _get_rotations(self, destination: Tensor) -> Tensor:
-        """Get rotation matrices.
+    def _batch_graph(
+        self, lattice: Tensor, positions: Tensor
+    ) -> tuple[Tensor, Tensor, Tensor]:
+        """Generate edge indexes, unit vectors, and changes in distance.
 
         Parameters
         ----------
-        destination
-            Destination vector. Expected to be list of unit vectors.
+        lattice
+            Å | Tensor with size [S,3,3] where S is the number of samples.
+        positions
+            Unitless | Tensor with size [S,N,3] where N is the number of atoms.
+        cutoff
+            Å | Edge cutoff distance.
+
+        Returns
+        -------
+        :
+            3-tuple.
+            First element is edge indexes, a tensor of size [3,X] where X is the number of
+            edges. This tensor defines S non-interconnected graphs making up a batch. The
+            first row defines the graph index. The second and third rows define the actual
+            edge indexes used by ``triplet``.
+            Second element is cartesian unit vectors, a tensor of size [X,3].
+            Third element is distances, a tensor of size [X,1].
+
         """
-        source = torch.zeros(destination.size())
-        source[:, 0] = 1  # Source vector is (1,0,0)
+        num_samples = lattice.size(0)
+        num_atoms = positions.size(1)
 
-        # Normalize all vectors
-        a = source / torch.linalg.norm(source, dim=1).view(-1, 1)
-        b = destination / torch.linalg.norm(destination, dim=1).view(-1, 1)
+        # Get edge indexes
+        graph_indexes = torch.tensor([range(num_samples)]).repeat_interleave(
+            self.ref_edge_indexes.size(1), dim=1
+        )
+        edge_indexes = self.ref_edge_indexes.repeat((1, num_samples))
+        edge_indexes[0] = graph_indexes
 
-        v = torch.linalg.cross(a, b)
-        c = torch.linalg.vecdot(a, b)
-        s = torch.linalg.norm(v, dim=1)
+        # Compute pairwise distance matrix.
+        displacement = positions.unsqueeze(1) - positions.unsqueeze(2)
+        displacement = torch.where(
+            displacement % 1 > 0.5, displacement % 1 - 1, displacement % 1
+        )
+        expanded_lattice = lattice[:, None, :, :].expand(
+            -1, displacement.size(1), -1, -1
+        )
+        cart_displacement = displacement.matmul(expanded_lattice)
+        cart_distance_matrix = torch.sqrt(torch.sum(cart_displacement**2, dim=-1))
 
-        kmat = torch.zeros((len(v), 3, 3))
-        kmat[:, 0, 1] = -v[:, 2]
-        kmat[:, 0, 2] = v[:, 1]
-        kmat[:, 1, 0] = v[:, 2]
-        kmat[:, 1, 2] = -v[:, 0]
-        kmat[:, 2, 0] = -v[:, 1]
-        kmat[:, 2, 1] = v[:, 0]
+        cart_unit_vectors = cart_displacement[*edge_indexes]
+        cart_unit_vectors /= torch.linalg.norm(cart_unit_vectors, dim=-1)[:, None]
+        distances = cart_distance_matrix[*edge_indexes].view(-1, 1)
+        ref_distances = self.ref_distances.repeat((num_samples, 1))
+        distances -= ref_distances
 
-        eye_matrix = torch.zeros((len(v), 3, 3))
-        eye_matrix[:] = torch.eye(3)
-        rotation_matrix = eye_matrix
-        rotation_matrix += kmat
-        a1 = kmat.matmul(kmat)
-        b1 = (1 - c) / (s**2)
-        rotation_matrix += a1 * b1[:, None, None]
+        # Disconnect all S graphs
+        edge_indexes[1] += edge_indexes[0] * num_atoms
+        edge_indexes[2] += edge_indexes[0] * num_atoms
 
-        # If source == destination
-        rotation_matrix[s == 0] = torch.eye(3)
-        return rotation_matrix
+        return edge_indexes, cart_unit_vectors, distances
 
     def forward(  # pylint: disable=too-many-locals
         self,
@@ -409,7 +495,7 @@ class PotGNN(Module):
             Unitless | Tensor with size [S,N,3].
 
         """
-        edge_index, unit_vec, dist = _radius_graph_pbc(lattice, positions, self.cutoff)
+        edge_index, unit_vec, dist = self._batch_graph(lattice, positions)
         atomic_numbers = atomic_numbers.flatten()
 
         i, j, idx_i, idx_j, idx_k, idx_kj, idx_ji = triplets(
@@ -428,24 +514,20 @@ class PotGNN(Module):
             )
 
         # Polarizability prediction block:
-        component_polarizability = self.polarizability_predictor(edge_emb)
-        component_polarizability = self._get_edge_polarizability_tensor(
-            component_polarizability
-        )
-        rotation = self._get_rotations(unit_vec)
-        component_polarizability = torch.matmul(rotation, component_polarizability)
-        component_polarizability = torch.matmul(
-            component_polarizability, torch.linalg.inv(rotation)
-        )
-        component_polarizability = self._get_polarizability_vectors(
-            component_polarizability
-        )
+        edge_polarizability = self.polarizability_predictor(edge_emb)
+        diag, off_diag = self._get_edge_polarizability_tensor(edge_polarizability)
+        rotation = _get_rotations(unit_vec)
+
+        diag = rotation @ diag @ torch.linalg.inv(rotation)
+        off_diag = rotation @ off_diag @ torch.linalg.inv(rotation)
+        edge_polarizability = diag * torch.eye(3) + off_diag * -(torch.eye(3) - 1)
+        edge_polarizability = self._get_polarizability_vectors(edge_polarizability)
 
         polarizability = torch.zeros((positions.size(0), 6))
         for i in range(positions.size(0)):
             mask = (edge_index[0:1] == i).T
             count = torch.sum(mask)
-            polarizability[i] = torch.sum(component_polarizability * mask, dim=0)
+            polarizability[i] = torch.sum(edge_polarizability * mask, dim=0)
             polarizability[i] /= count
         return polarizability
 

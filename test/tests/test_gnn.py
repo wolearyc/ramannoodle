@@ -5,7 +5,7 @@ import pytest
 import numpy as np
 import torch
 
-from ramannoodle.polarizability.gnn import PotGNN, _radius_graph_pbc
+from ramannoodle.polarizability.gnn import PotGNN, _radius_graph_pbc, _get_rotations
 import ramannoodle.io.vasp as vasp_io
 from ramannoodle.structure.structure_utils import apply_pbc
 from ramannoodle.structure.reference import ReferenceStructure
@@ -15,10 +15,9 @@ from ramannoodle.structure.reference import ReferenceStructure
 
 def test_get_rotations() -> None:
     """Test _get_rotations (normal)."""
-    model = PotGNN(5, 5, 5, 5)
     unit_vector = torch.randn((40, 3))
 
-    rotation = model._get_rotations(unit_vector)
+    rotation = _get_rotations(unit_vector)
 
     rotated = torch.matmul(rotation, torch.tensor([1.0, 0.0, 0.0]))
     known = unit_vector / torch.linalg.norm(unit_vector, dim=1).view(-1, 1)
@@ -59,16 +58,25 @@ def test_radius_graph_pbc() -> None:
         assert torch.allclose(batch_distance, torch.concat(distance, dim=0))
 
 
-def test_batch_polarizability() -> None:
+@pytest.mark.parametrize(
+    "poscar_ref_structure_fixture",
+    [
+        ("test/data/TiO2/POSCAR"),
+    ],
+    indirect=["poscar_ref_structure_fixture"],
+)
+def test_batch_polarizability(poscar_ref_structure_fixture: ReferenceStructure) -> None:
     """Test of batch functions for forward pass (normal)."""
+    ref_structure = poscar_ref_structure_fixture
+    model = PotGNN(ref_structure, 5, 5, 5, 5)
+    model.eval()
+
     for batch_size in range(1, 4):
-        model = PotGNN(5, 5, 5, 5)
-        model.eval()
 
         # Generate random data.
-        num_atoms = 40
-        lattice = torch.eye(3) * 10
-        atomic_numbers = torch.randint(1, 10, (num_atoms,))
+        num_atoms = len(ref_structure.atomic_numbers)
+        lattice = torch.from_numpy(ref_structure.lattice).float()
+        atomic_numbers = torch.tensor(ref_structure.atomic_numbers)
 
         batch_lattices = lattice.expand(batch_size, 3, 3)
         batch_atomic_numbers = atomic_numbers.expand(batch_size, num_atoms)
@@ -90,49 +98,19 @@ def test_batch_polarizability() -> None:
         assert torch.allclose(batch_polarizability, polarizabilities)
 
 
-def test_permutations() -> None:
-    """Test of that model is permutation invariant."""
-    model = PotGNN(5, 5, 6, 5)
-    model.eval()
-
-    # Generate random data.
-    num_atoms = 40
-    lattice = torch.eye(3) * 10
-    batch_size = 1
-    atomic_numbers = torch.randint(1, 5, (num_atoms,))
-
-    batch_lattices = lattice.expand(batch_size, 3, 3)
-    batch_atomic_numbers = atomic_numbers.expand(batch_size, num_atoms)
-    batch_positions = torch.randn(batch_size, num_atoms, 3)
-
-    polarizability = model.forward(
-        batch_lattices, batch_atomic_numbers, batch_positions
-    )
-    for _ in range(5):
-        permuted_indexes = torch.randperm(batch_atomic_numbers.size(1))
-
-        batch_atomic_numbers[0] = batch_atomic_numbers[0][permuted_indexes]
-        batch_positions[0] = batch_positions[0][permuted_indexes]
-
-        permuted_polarizability = model.forward(
-            batch_lattices, batch_atomic_numbers, batch_positions
-        )
-
-        assert torch.allclose(polarizability, permuted_polarizability)
-
-
 @pytest.mark.parametrize(
     "poscar_ref_structure_fixture",
     [
         ("test/data/TiO2/POSCAR"),
         ("test/data/Ag2Mo2O7.poscar"),
+        ("test/data/STO/SrTiO3.poscar"),
     ],
     indirect=["poscar_ref_structure_fixture"],
 )
 def test_symmetry(poscar_ref_structure_fixture: ReferenceStructure) -> None:
     """Test that model obeys symmetries."""
     ref_structure = poscar_ref_structure_fixture
-    model = PotGNN(5, 5, 6, 2.3)
+    model = PotGNN(ref_structure, 2.3, 5, 5, 6)
     model.eval()
 
     lattice = torch.tensor([ref_structure.lattice]).float()
@@ -156,7 +134,7 @@ def test_symmetry_displaced() -> None:
     displaced_positions = vasp_io.outcar.read_positions(
         "test/data/TiO2/Ti5_0.1x_eps_OUTCAR"
     )
-    model = PotGNN(5, 5, 6, 4)
+    model = PotGNN(ref_structure, 5, 5, 6, 4)
     model.eval()
     parent_displacement = (displaced_positions - ref_structure.positions) / (
         (np.linalg.norm(displaced_positions - ref_structure.positions) * 10)

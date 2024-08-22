@@ -7,3 +7,5 @@ scipy
 setuptools
 spglib
 tabulate
+torch
+torch_geometric
