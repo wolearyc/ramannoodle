@@ -109,6 +109,7 @@ def test_batch_polarizability(poscar_ref_structure_fixture: ReferenceStructure) 
         ("test/data/TiO2/POSCAR"),
         ("test/data/Ag2Mo2O7.poscar"),
         ("test/data/STO/SrTiO3.poscar"),
+        ("test/data/SbPC3S3N3Cl3O.poscar"),
     ],
     indirect=["poscar_ref_structure_fixture"],
 )
