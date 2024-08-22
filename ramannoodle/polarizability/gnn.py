@@ -5,21 +5,14 @@
 from __future__ import annotations
 
 import typing
+from typing import Sequence
 
 import numpy as np
 from numpy.typing import NDArray
 
 import torch
 from torch import Tensor
-from torch.nn import (
-    BatchNorm1d,
-    Embedding,
-    Linear,
-    ModuleList,
-    Sequential,
-    Module,
-    Dropout,
-)
+from torch.nn import BatchNorm1d, Embedding, Linear, ModuleList, Sequential, Module
 from torch.utils.data import Dataset
 
 from torch_geometric.nn.inits import reset
@@ -28,16 +21,53 @@ from torch_geometric.nn.models.schnet import ShiftedSoftplus
 from torch_geometric.utils import scatter
 
 from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.exceptions import get_type_error
+
+
+def _size_string_tensor(size: Sequence[int | None]) -> str:
+    """Get a string representing a tensor size.
+
+    Maps None --> "_", indicating that this element can
+    be anything.
+    """
+    result = "["
+    for i in size:
+        if i is None:
+            result += "_,"
+        else:
+            result += f"{i},"
+    if len(size) == 1:
+        return result + "]"
+    return result[:-1] + "]"
+
+
+def _get_size_error_tensor(name: str, tensor: Tensor, desired_size: str) -> ValueError:
+    """Return ValueError for an pytorch tensor with the wrong size."""
+    shape_spec = f"{_size_string_tensor(tensor.size())} != {desired_size}"
+    return ValueError(f"{name} has wrong size: {shape_spec}")
 
 
 def _get_scaled_polarizabilities(
     polarizabilities: Tensor,
 ) -> tuple[Tensor, Tensor, Tensor]:
-    """Compute scaled, flattened (6 member) polarizabilities."""
+    """Compute standard-scaled and flattened (6 member) polarizabilities.
+
+    Parameters
+    ----------
+    polarizabilities
+        Tensor with size [S,3,3] where S is the number of samples.
+
+    Returns
+    -------
+    :
+        3-tuple. The first element is the element-wise mean of polarizabilities, a
+        tensor with size [1,3,3], The second element is the maximum standard deviation,
+        a tensor with size [1,]. The third element is the scaled and flattened
+        polarizabilities, a tensor with size [S,6].
+
+    """
     mean = polarizabilities.mean(0, keepdim=True)
     stddev = torch.max(polarizabilities.std(0, unbiased=False, keepdim=True))
-    # mean = 0
-    stddev = 1
     polarizabilities = (polarizabilities - mean) / stddev
 
     scaled_polarizabilities = torch.zeros((polarizabilities.size(0), 6))
@@ -51,58 +81,63 @@ def _get_scaled_polarizabilities(
     return mean, stddev, scaled_polarizabilities
 
 
-def _get_rotations(destination: Tensor) -> Tensor:
-    """Get rotation matrices.
+def _get_rotations(targets: Tensor) -> Tensor:
+    """Get rotation matrices to target vectors from a reference vector (1,0,0).
 
     Parameters
     ----------
-    destination
-        Destination vector. Expected to be list of unit vectors.
+    targets
+        Tensor with size [S,3]. Vector components do not need to be normalized.
+
+    Returns
+    -------
+    :
+        Tensor with size [S,3,3].
     """
-    source = torch.zeros(destination.size())
-    source[:, 0] = 1  # Source vector is (1,0,0)
+    reference = torch.zeros(targets.size())
+    reference[:, 0] = 1
 
-    # Normalize all vectors
-    a = source / torch.linalg.norm(source, dim=1).view(-1, 1)
-    b = destination / torch.linalg.norm(destination, dim=1).view(-1, 1)
+    a = reference / torch.linalg.norm(reference, dim=1).view(-1, 1)
+    b = targets / torch.linalg.norm(targets, dim=1).view(-1, 1)
 
-    v = torch.linalg.cross(a, b)
+    v = torch.linalg.cross(a, b)  # This will be (0,0,0) if a == b
     c = torch.linalg.vecdot(a, b)
-    s = torch.linalg.norm(v, dim=1)
+    s = torch.linalg.norm(v, dim=1)  # This will be zero if a == b
 
-    kmat = torch.zeros((len(v), 3, 3))
-    kmat[:, 0, 1] = -v[:, 2]
-    kmat[:, 0, 2] = v[:, 1]
-    kmat[:, 1, 0] = v[:, 2]
-    kmat[:, 1, 2] = -v[:, 0]
-    kmat[:, 2, 0] = -v[:, 1]
-    kmat[:, 2, 1] = v[:, 0]
+    k_matrix = torch.zeros((len(v), 3, 3))
+    k_matrix[:, 0, 1] = -v[:, 2]
+    k_matrix[:, 0, 2] = v[:, 1]
+    k_matrix[:, 1, 0] = v[:, 2]
+    k_matrix[:, 1, 2] = -v[:, 0]
+    k_matrix[:, 2, 0] = -v[:, 1]
+    k_matrix[:, 2, 1] = v[:, 0]
 
-    eye_matrix = torch.zeros((len(v), 3, 3))
-    eye_matrix[:] = torch.eye(3)
-    rotation_matrix = eye_matrix
-    rotation_matrix += kmat
-    a1 = kmat.matmul(kmat)
+    rotations = torch.zeros((len(v), 3, 3))
+    rotations[:] = torch.eye(3)  # Rotation starts as identity
+    rotations += k_matrix
+    a1 = k_matrix.matmul(k_matrix)
     b1 = (1 - c) / (s**2)
-    rotation_matrix += a1 * b1[:, None, None]
+    rotations += a1 * b1[:, None, None]
 
-    # If source == destination
-    rotation_matrix[s == 0] = torch.eye(3)
-    return rotation_matrix
+    # a==b implies s==0 implies rotation should be identity
+    rotations[s == 0] = torch.eye(3)
+    return rotations
 
 
 class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
-    """Pytorch dataset containing atom positions mapped to polarizabilities.
+    """PyTorch dataset of atomic structures and polarizabilities.
 
-    Polarizabilities are scaled and reshaped into tensors with size [6,].
+    Polarizabilities are internally scaled and flattened, leaving polarizability
+    vectors containing the six independent tensor components.
 
     Parameters
     ----------
-    positions
-        Unitless | 3D array with shape (S,N,3) where N is the number of atoms and S is
-        the number of samples.
     lattices
         Å | 3D array with shape (S,3,3)
+    atomic_numbers
+        List of lists of length N, where N is the number of atoms.
+    positions
+        Unitless | 3D array with shape (S,N,3) where S is the number of samples.
     polarizabilities
         Unitless | 3D array with shape (S,3,3).
 
@@ -114,22 +149,23 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         atomic_numbers: list[list[int]],
         positions: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
-    ):  #
-        self._lattices = torch.from_numpy(lattices).float()
+    ):
+        default_type = torch.get_default_dtype()
+        self._lattices = torch.from_numpy(lattices).type(default_type)
         self._atomic_numbers = torch.tensor(atomic_numbers)
-        self._positions = torch.from_numpy(positions).float()
-        self._polarizabilities = torch.from_numpy(polarizabilities).float()
+        self._positions = torch.from_numpy(positions).type(default_type)
+        self._polarizabilities = torch.from_numpy(polarizabilities).type(default_type)
         mean, stddev, scaled = _get_scaled_polarizabilities(self._polarizabilities)
-        self._mean_polarizability = mean
-        self._stddev_polarizability = stddev
-        self._scaled_polarizabilities = scaled
+        self._mean_polarizability = mean.type(default_type)
+        self._stddev_polarizability = stddev.type(default_type)
+        self._scaled_polarizabilities = scaled.type(default_type)
 
     def __len__(self) -> int:
         """Get length."""
         return len(self._positions)
 
     def __getitem__(self, i: int) -> tuple[Tensor, Tensor, Tensor, Tensor]:
-        """Get positions, atomic numbers, lattices, and scaled polarizabilities."""
+        """Get lattice, atomic numbers, positions, and scaled polarizabilities."""
         return (
             self._lattices[i],
             self._atomic_numbers[i],
@@ -139,7 +175,20 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
 
 
 class GaussianFilter(torch.nn.Module):
-    """Gaussian filter."""
+    """Gaussian filter.
+
+    Parameters should be chosen such that all expected inputs are between start and
+    stop.
+
+    Parameters
+    ----------
+    start
+        Lower bound for filter input.
+    stop
+        Upper bound for filter input.
+    steps
+        Number of steps between start and stop.
+    """
 
     def __init__(self, start: float, stop: float, steps: int):
         super().__init__()
@@ -153,7 +202,7 @@ class GaussianFilter(torch.nn.Module):
         Parameters
         ----------
         X
-            Tensor with size []. Typically contains interatomic distances.
+            Typically contains interatomic distances.
 
         """
         x = x.view(-1, 1) - self.offset.view(1, -1)
@@ -165,26 +214,21 @@ class NodeBlock(torch.nn.Module):
 
     Architecture and notation is based on equation (5) in https://doi.org/10.1038/
     s41524-021-00543-3. The architecture has been modified to use batch normalization.
-
-    Parameters
-    ----------
-    hidden_node_channels
-    hidden_edge_channels
     """
 
-    def __init__(self, hidden_node_channels: int, hidden_edge_channels: int):
+    def __init__(self, size_node_embedding: int, size_edge_embedding: int):
         super().__init__()
 
         # Combination of two linear layers, dubbed "core" and "filter":
         #   "filter" : c1ij W1 + b1
         #   "core"   : c1ij W2 + b2
         self.lin_c1 = Linear(
-            hidden_node_channels + hidden_edge_channels,
-            2 * hidden_node_channels,
+            size_node_embedding + size_edge_embedding,
+            2 * size_node_embedding,
         )
 
-        self.bn_c1 = BatchNorm1d(2 * hidden_node_channels)
-        self.bn = BatchNorm1d(hidden_node_channels)
+        self.bn_c1 = BatchNorm1d(2 * size_node_embedding)
+        self.bn = BatchNorm1d(size_node_embedding)
 
     def reset_parameters(self) -> None:
         """Reset model parameters."""
@@ -217,33 +261,28 @@ class EdgeBlock(torch.nn.Module):
 
     Architecture and notation is based on equation (6) in https://doi.org/10.1038/
     s41524-021-00543-3. The architecture has been modified to use batch normalization.
-
-    Parameters
-    ----------
-    hidden_node_channels
-    hidden_edge_channels
     """
 
-    def __init__(self, hidden_node_channels: int, hidden_edge_channels: int):
+    def __init__(self, size_node_embedding: int, size_edge_embedding: int):
         super().__init__()
 
         # Combination of two linear layers, dubbed "core" and "filter":
         #   "filter" : c2ij W3 + b3
         #   "core"   : c2ij W4 + b4
-        self.lin_c2 = Linear(hidden_node_channels, 2 * hidden_edge_channels)
+        self.lin_c2 = Linear(size_node_embedding, 2 * size_edge_embedding)
 
         # Combination of two linear layers, dubbed "core" and "filter":
         #   "filter" : c3ij W5 + b5
         #   "core"   : c3ij W6 + b6
         self.lin_c3 = Linear(
-            3 * hidden_node_channels + 2 * hidden_edge_channels,
-            2 * hidden_edge_channels,
+            3 * size_node_embedding + 2 * size_edge_embedding,
+            2 * size_edge_embedding,
         )
 
-        self.bn_c2 = BatchNorm1d(2 * hidden_edge_channels)
-        self.bn_c3 = BatchNorm1d(2 * hidden_edge_channels)
-        self.bn_c2_2 = BatchNorm1d(hidden_edge_channels)
-        self.bn_c3_2 = BatchNorm1d(hidden_edge_channels)
+        self.bn_c2 = BatchNorm1d(2 * size_edge_embedding)
+        self.bn_c3 = BatchNorm1d(2 * size_edge_embedding)
+        self.bn_c2_2 = BatchNorm1d(size_edge_embedding)
+        self.bn_c3_2 = BatchNorm1d(size_edge_embedding)
 
     def reset_parameters(self) -> None:
         """Reset model parameters."""
@@ -254,33 +293,38 @@ class EdgeBlock(torch.nn.Module):
         self.bn_c2_2.reset_parameters()
         self.bn_c3_2.reset_parameters()
 
-    def forward(  # pylint: disable=too-many-arguments, too-many-locals
+    def _get_c2_embedding(
         self,
         node_embedding: Tensor,
-        edge_embedding: Tensor,
         i: Tensor,
         j: Tensor,
-        idx_i: Tensor,
-        idx_j: Tensor,
-        idx_k: Tensor,
-        idx_ji: Tensor,
-        idx_kj: Tensor,
     ) -> Tensor:
-        """Forward pass."""
+        """Get c2 embedding."""
         c2 = node_embedding[i] * node_embedding[j]
         c2 = self.bn_c2(self.lin_c2(c2))
         c2_filter, c2_core = c2.chunk(2, dim=1)
         c2_filter = c2_filter.sigmoid()
         c2_core = c2_core.tanh()
-        c2_emb = self.bn_c2_2(c2_filter * c2_core)
+        return typing.cast(Tensor, self.bn_c2_2(c2_filter * c2_core))
 
+    def _get_c3_embedding(  # pylint: disable=too-many-arguments
+        self,
+        node_embedding: Tensor,
+        edge_embedding: Tensor,
+        index_i: Tensor,
+        index_j: Tensor,
+        index_k: Tensor,
+        index_ji: Tensor,
+        index_kj: Tensor,
+    ) -> Tensor:
+        """Get c3 embedding."""
         c3 = torch.cat(
             [
-                node_embedding[idx_i],
-                node_embedding[idx_j],
-                node_embedding[idx_k],
-                edge_embedding[idx_ji],
-                edge_embedding[idx_kj],
+                node_embedding[index_i],
+                node_embedding[index_j],
+                node_embedding[index_k],
+                edge_embedding[index_ji],
+                edge_embedding[index_kj],
             ],
             dim=1,
         )
@@ -290,14 +334,99 @@ class EdgeBlock(torch.nn.Module):
         c3_core = c3_core.tanh()
         c3_emb = scatter(
             c3_filter * c3_core,
-            idx_ji,
+            index_ji,
             dim=0,
             dim_size=edge_embedding.size(0),
             reduce="sum",
         )
-        c3_emb = self.bn_c3_2(c3_emb)
+        return typing.cast(Tensor, self.bn_c3_2(c3_emb))
 
-        return typing.cast(Tensor, (edge_embedding + c2_emb + c3_emb).tanh())
+    def forward(  # pylint: disable=too-many-arguments
+        self,
+        node_embedding: Tensor,
+        edge_embedding: Tensor,
+        i: Tensor,
+        j: Tensor,
+        index_i: Tensor,
+        index_j: Tensor,
+        index_k: Tensor,
+        index_ji: Tensor,
+        index_kj: Tensor,
+    ) -> Tensor:
+        """Forward pass."""
+        c2_embedding = self._get_c2_embedding(node_embedding, i, j)
+        c3_embedding = self._get_c3_embedding(
+            node_embedding,
+            edge_embedding,
+            index_i,
+            index_j,
+            index_k,
+            index_ji,
+            index_kj,
+        )
+        return (edge_embedding + c2_embedding + c3_embedding).tanh()
+
+
+def _polarizability_tensors_to_vectors(polarizability_tensors: Tensor) -> Tensor:
+    """Convert polarizability vectors to tensors.
+
+    Parameters
+    ----------
+    polarizability_vectors
+        Tensor with size [S,6].
+
+    Returns
+    -------
+    :
+        Symmetric tensor with size [S,3,3].
+    """
+    indices = torch.tensor([[0, 0], [1, 1], [2, 2], [0, 1], [0, 2], [1, 2]]).T
+    return polarizability_tensors[:, indices[0], indices[1]]
+
+
+def polarizability_vectors_to_tensors(polarizability_vectors: Tensor) -> Tensor:
+    """Convert polarizability vectors to tensors.
+
+    Parameters
+    ----------
+    polarizability_vectors
+        Tensor with size [S,6].
+
+    Returns
+    -------
+    :
+        Symmetric tensor with size [S,3,3].
+    """
+    indices = torch.tensor(
+        [
+            [0, 3, 4],
+            [3, 1, 5],
+            [4, 5, 2],
+        ]
+    )
+    try:
+        return polarizability_vectors[:, indices]
+    except IndexError as exc:
+        raise _get_size_error_tensor(
+            "polarizability_vectors", polarizability_vectors, "[_,6]"
+        ) from exc
+    except TypeError as exc:
+        raise get_type_error(
+            "polarizability_vectors", polarizability_vectors, "Tensor"
+        ) from exc
+
+
+def _get_edge_polarizability_tensor(x: Tensor) -> tuple[Tensor, Tensor]:
+    """X should have size (_,2)."""
+    diag_polarizability = torch.zeros((x.size(0), 3, 3))
+    diag_polarizability[:, 0, 0] = x[:, 0]
+    diag_polarizability[:, 1, 1] = x[:, 1]
+    diag_polarizability[:, 2, 2] = x[:, 1]
+    off_diag_polarizability = torch.zeros((x.size(0), 3, 3))
+    off_diag_polarizability[:, 0, 0] = x[:, 2]
+    off_diag_polarizability[:, 1, 1] = x[:, 3]
+    off_diag_polarizability[:, 2, 2] = x[:, 3]
+    return diag_polarizability, off_diag_polarizability
 
 
 class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
@@ -313,11 +442,9 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
     ref_structure
         Reference structure from which nodes/edges are determined.
     cutoff
-        Cutoff distance for interatomic interactions.
-    hidden_node_channels
-        Hidden node embedding size.
-    hidden_edge_channels
-        Hidden edge embedding size.
+        Å | Cutoff distance for interatomic interactions.
+    size_node_embedding
+    size_edge_embedding
     num_layers
         Number of message passing blocks.
     """
@@ -326,99 +453,71 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
         self,
         ref_structure: ReferenceStructure,
         cutoff: float,
-        hidden_node_channels: int,
-        hidden_edge_channels: int,
-        num_layers: int,
+        size_node_embedding: int,
+        size_edge_embedding: int,
+        num_message_passing_layers: int,
     ):
         super().__init__()
+        default_type = torch.get_default_dtype()
 
-        self.cutoff = cutoff
-        self.ref_structure = ref_structure
-
-        self.ref_edge_indexes, _, self.ref_distances = _radius_graph_pbc(
-            torch.from_numpy(ref_structure.lattice).unsqueeze(0).float(),
-            torch.from_numpy(ref_structure.positions).unsqueeze(0).float(),
+        self._ref_structure = ref_structure
+        self._ref_edge_indexes, _, self._ref_distances = _radius_graph_pbc(
+            torch.from_numpy(ref_structure.lattice).unsqueeze(0).type(default_type),
+            torch.from_numpy(ref_structure.positions).unsqueeze(0).type(default_type),
             cutoff,
         )
+        self._cutoff = cutoff
 
-        self.node_embedding = Sequential(
-            Embedding(95, hidden_node_channels),
+        self._node_embedding = Sequential(
+            Embedding(95, size_node_embedding),
             ShiftedSoftplus(),  # nonlinear activation layer
-            Linear(hidden_node_channels, hidden_node_channels),
+            Linear(size_node_embedding, size_node_embedding),
             ShiftedSoftplus(),  # nonlinear activation layer
-            Linear(hidden_node_channels, hidden_node_channels),
+            Linear(size_node_embedding, size_node_embedding),
         )
-        self.edge_embedding = GaussianFilter(0.0, 5.0, hidden_edge_channels)
+        self._edge_embedding = GaussianFilter(0.0, 5.0, size_edge_embedding)
 
-        self.node_blocks = ModuleList(
+        self._node_blocks = ModuleList(
             [
-                NodeBlock(hidden_node_channels, hidden_edge_channels)
-                for _ in range(num_layers)
+                NodeBlock(size_node_embedding, size_edge_embedding)
+                for _ in range(num_message_passing_layers)
             ]
         )
-        self.edge_blocks = ModuleList(
+        self._edge_blocks = ModuleList(
             [
-                EdgeBlock(hidden_node_channels, hidden_edge_channels)
-                for _ in range(num_layers)
+                EdgeBlock(size_node_embedding, size_edge_embedding)
+                for _ in range(num_message_passing_layers)
             ]
         )
 
-        self.polarizability_predictor = Sequential(
-            Linear(hidden_edge_channels, hidden_edge_channels),
+        self._polarizability_predictor = Sequential(
+            Linear(size_edge_embedding, size_edge_embedding),
             ShiftedSoftplus(),
-            Linear(hidden_edge_channels, hidden_edge_channels),
+            Linear(size_edge_embedding, size_edge_embedding),
             ShiftedSoftplus(),
-            Linear(hidden_edge_channels, 4),
+            Linear(size_edge_embedding, 4),
         )
 
-        self.node_polarizability_predictor = Sequential(
-            Linear(hidden_node_channels, hidden_node_channels),
-            ShiftedSoftplus(),
-            Linear(hidden_node_channels, hidden_node_channels),
-            ShiftedSoftplus(),
-            Linear(hidden_node_channels, 3),
-        )
+        # self._node_polarizability_predictor = Sequential(
+        #    Linear(size_node_embedding, size_node_embedding),
+        #    ShiftedSoftplus(),
+        #    Linear(size_node_embedding, size_node_embedding),
+        #    ShiftedSoftplus(),
+        #    Linear(size_node_embedding, 3),
+        # )
 
     def reset_parameters(self) -> None:
         """Reset model parameters."""
-        reset(self.node_embedding)
-        self.edge_embedding.reset_parameters()
-        for node_block in self.node_blocks:
+        reset(self._node_embedding)
+        self._edge_embedding.reset_parameters()
+        for node_block in self._node_blocks:
             node_block.reset_parameters()
-        for edge_block in self.edge_blocks:
+        for edge_block in self._edge_blocks:
             edge_block.reset_parameters()
-        reset(self.polarizability_predictor)
+        reset(self._polarizability_predictor)
         reset(self.node_polarizability_predictor)
 
-    def _get_polarizability_tensors(self, x: Tensor) -> Tensor:
-        """X should have size (_,6)."""
-        indices = torch.tensor(
-            [
-                [0, 3, 4],
-                [3, 1, 5],
-                [4, 5, 2],
-            ]
-        )
-        return x[:, indices]
-
-    def _get_edge_polarizability_tensor(self, x: Tensor) -> tuple[Tensor, Tensor]:
-        """X should have size (_,2)."""
-        diag_polarizability = torch.zeros((x.size(0), 3, 3))
-        diag_polarizability[:, 0, 0] = x[:, 0]
-        diag_polarizability[:, 1, 1] = x[:, 1]
-        diag_polarizability[:, 2, 2] = x[:, 1]
-        off_diag_polarizability = torch.zeros((x.size(0), 3, 3))
-        off_diag_polarizability[:, 0, 0] = x[:, 2]
-        off_diag_polarizability[:, 1, 1] = x[:, 3]
-        off_diag_polarizability[:, 2, 2] = x[:, 3]
-        return diag_polarizability, off_diag_polarizability
-
-    def _get_polarizability_vectors(self, x: Tensor) -> Tensor:
-        """X should have size (_,3,3)."""
-        indices = torch.tensor([[0, 0], [1, 1], [2, 2], [0, 1], [0, 2], [1, 2]]).T
-        return x[:, indices[0], indices[1]]
-
-    def _batch_graph(
+    def _get_batch_graph(
         self, lattice: Tensor, positions: Tensor
     ) -> tuple[Tensor, Tensor, Tensor]:
         """Generate edge indexes, unit vectors, and changes in distance.
@@ -436,12 +535,12 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
         -------
         :
             3-tuple.
-            First element is edge indexes, a tensor of size [3,X] where X is the number of
-            edges. This tensor defines S non-interconnected graphs making up a batch. The
-            first row defines the graph index. The second and third rows define the actual
-            edge indexes used by ``triplet``.
-            Second element is cartesian unit vectors, a tensor of size [X,3].
-            Third element is distances, a tensor of size [X,1].
+            First element is edge indexes, a tensor of size [3,X] where X is the number
+            of edges. This tensor defines S non-interconnected graphs making up a
+            batch. The first row defines the graph index. The second and third rows
+            define the actual edge indexes used by ``triplet``. Second element is
+            cartesian unit vectors, a tensor of size [X,3]. Third element is distances,
+            a tensor of size [X,1].
 
         """
         num_samples = lattice.size(0)
@@ -449,9 +548,9 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
 
         # Get edge indexes
         graph_indexes = torch.tensor([range(num_samples)]).repeat_interleave(
-            self.ref_edge_indexes.size(1), dim=1
+            self._ref_edge_indexes.size(1), dim=1
         )
-        edge_indexes = self.ref_edge_indexes.repeat((1, num_samples))
+        edge_indexes = self._ref_edge_indexes.repeat((1, num_samples))
         edge_indexes[0] = graph_indexes
 
         # Compute pairwise distance matrix.
@@ -468,7 +567,7 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
         cart_unit_vectors = cart_displacement[*edge_indexes]
         cart_unit_vectors /= torch.linalg.norm(cart_unit_vectors, dim=-1)[:, None]
         distances = cart_distance_matrix[*edge_indexes].view(-1, 1)
-        ref_distances = self.ref_distances.repeat((num_samples, 1))
+        ref_distances = self._ref_distances.repeat((num_samples, 1))
         distances -= ref_distances
 
         # Disconnect all S graphs
@@ -494,8 +593,15 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
         positions
             Unitless | Tensor with size [S,N,3].
 
+        Returns
+        -------
+        :
+            Polarizability tensors with size [S,6]. Polarizability is expressed in
+            vector form. To convert into tensor form, see
+            :func:`polarizability_vectors_to_tensors`.
+
         """
-        edge_index, unit_vec, dist = self._batch_graph(lattice, positions)
+        edge_index, unit_vec, dist = self._get_batch_graph(lattice, positions)
         atomic_numbers = atomic_numbers.flatten()
 
         i, j, idx_i, idx_j, idx_k, idx_kj, idx_ji = triplets(
@@ -503,26 +609,27 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
         )
 
         # Embedding blocks:
-        node_emb = self.node_embedding(atomic_numbers)
-        edge_emb = self.edge_embedding(dist)
+        node_emb = self._node_embedding(atomic_numbers)
+        edge_emb = self._edge_embedding(dist)
 
         # Message passing blocks:
-        for node_block, edge_block in zip(self.node_blocks, self.edge_blocks):
+        for node_block, edge_block in zip(self._node_blocks, self._edge_blocks):
             node_emb = node_block(node_emb, edge_emb, i)
             edge_emb = edge_block(
                 node_emb, edge_emb, i, j, idx_i, idx_j, idx_k, idx_ji, idx_kj
             )
 
         # Polarizability prediction block:
-        edge_polarizability = self.polarizability_predictor(edge_emb)
-        diag, off_diag = self._get_edge_polarizability_tensor(edge_polarizability)
+        edge_polarizability = self._polarizability_predictor(edge_emb)
+        diag, off_diag = _get_edge_polarizability_tensor(edge_polarizability)
         rotation = _get_rotations(unit_vec)
 
         diag = rotation @ diag @ torch.linalg.inv(rotation)
         off_diag = rotation @ off_diag @ torch.linalg.inv(rotation)
         edge_polarizability = diag * torch.eye(3) + off_diag * -(torch.eye(3) - 1)
-        edge_polarizability = self._get_polarizability_vectors(edge_polarizability)
+        edge_polarizability = _polarizability_tensors_to_vectors(edge_polarizability)
 
+        # Isolate polarizabilities from batch graphs.
         polarizability = torch.zeros((positions.size(0), 6))
         for i in range(positions.size(0)):
             mask = (edge_index[0:1] == i).T
@@ -546,7 +653,7 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
 def _radius_graph_pbc(
     lattice: Tensor, positions: Tensor, cutoff: float
 ) -> tuple[Tensor, Tensor, Tensor]:
-    """Generate structure graphs with edge indexes, unit vectors, and distances.
+    """Generate graphs for structures while respecting periodic boundary conditions.
 
     Parameters
     ----------

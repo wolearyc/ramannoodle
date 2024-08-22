@@ -5,7 +5,12 @@ import pytest
 import numpy as np
 import torch
 
-from ramannoodle.polarizability.gnn import PotGNN, _radius_graph_pbc, _get_rotations
+from ramannoodle.polarizability.gnn import (
+    PotGNN,
+    _radius_graph_pbc,
+    _get_rotations,
+    polarizability_vectors_to_tensors,
+)
 import ramannoodle.io.vasp as vasp_io
 from ramannoodle.structure.structure_utils import apply_pbc
 from ramannoodle.structure.reference import ReferenceStructure
@@ -118,7 +123,7 @@ def test_symmetry(poscar_ref_structure_fixture: ReferenceStructure) -> None:
     positions = torch.tensor([ref_structure.positions]).float()
 
     polarizability = model.forward(lattice, atomic_numbers, positions)
-    polarizability = model._get_polarizability_tensors(polarizability)
+    polarizability = polarizability_vectors_to_tensors(polarizability)
     polarizability = polarizability[0].detach().numpy()
 
     assert ref_structure._symmetry_dict is not None
@@ -145,7 +150,7 @@ def test_symmetry_displaced() -> None:
     positions = torch.tensor([ref_structure.positions + parent_displacement]).float()
 
     polarizability = model.forward(lattice, atomic_numbers, positions)
-    polarizability = model._get_polarizability_tensors(polarizability)
+    polarizability = polarizability_vectors_to_tensors(polarizability)
     polarizability = polarizability[0].detach().numpy()
 
     displacements_and_transformations = ref_structure.get_equivalent_displacements(
@@ -162,7 +167,7 @@ def test_symmetry_displaced() -> None:
                 [apply_pbc(ref_structure.positions + displacement)]
             ).float()
             model_polarizability = model.forward(lattice, atomic_numbers, positions)
-            model_polarizability = model._get_polarizability_tensors(
+            model_polarizability = polarizability_vectors_to_tensors(
                 model_polarizability
             )
             model_polarizability = model_polarizability[0].detach().numpy()
