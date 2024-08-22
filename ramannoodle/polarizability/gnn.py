@@ -564,7 +564,9 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
         cart_displacement = displacement.matmul(expanded_lattice)
         cart_distance_matrix = torch.sqrt(torch.sum(cart_displacement**2, dim=-1))
 
-        cart_unit_vectors = cart_displacement[*edge_indexes]
+        cart_unit_vectors = cart_displacement[
+            edge_indexes[0], edge_indexes[1], edge_indexes[2]
+        ]  # python 3.10 complains if we use the unpacking operator (*)
         cart_unit_vectors /= torch.linalg.norm(cart_unit_vectors, dim=-1)[:, None]
         distances = cart_distance_matrix[*edge_indexes].view(-1, 1)
         ref_distances = self._ref_distances.repeat((num_samples, 1))
