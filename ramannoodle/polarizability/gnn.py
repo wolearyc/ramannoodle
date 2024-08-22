@@ -568,7 +568,9 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
             edge_indexes[0], edge_indexes[1], edge_indexes[2]
         ]  # python 3.10 complains if we use the unpacking operator (*)
         cart_unit_vectors /= torch.linalg.norm(cart_unit_vectors, dim=-1)[:, None]
-        distances = cart_distance_matrix[*edge_indexes].view(-1, 1)
+        distances = cart_distance_matrix[
+            edge_indexes[0], edge_indexes[1], edge_indexes[2]
+        ].view(-1, 1)
         ref_distances = self._ref_distances.repeat((num_samples, 1))
         distances -= ref_distances
 
@@ -698,9 +700,13 @@ def _radius_graph_pbc(
     adjacency_matrix = torch.logical_and(adjacency_matrix, not_self_loop)
 
     edge_indexes = torch.nonzero(adjacency_matrix).T
-    cart_unit_vectors = cart_displacement[*edge_indexes]
+    cart_unit_vectors = cart_displacement[
+        edge_indexes[0], edge_indexes[1], edge_indexes[2]
+    ]
     cart_unit_vectors /= torch.linalg.norm(cart_unit_vectors, dim=-1)[:, None]
-    distances = cart_distance_matrix[*edge_indexes].view(-1, 1)
+    distances = cart_distance_matrix[
+        edge_indexes[0], edge_indexes[1], edge_indexes[2]
+    ].view(-1, 1)
 
     # Disconnect all S graphs
     edge_indexes[1] += edge_indexes[0] * num_atoms

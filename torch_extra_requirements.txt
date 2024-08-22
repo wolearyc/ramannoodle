@@ -1,0 +1,4 @@
+# Replace "cpu" with "cu118", "cu121", or "cu124" depending on pytorch installation
+-f https://data.pyg.org/whl/torch-2.4.0+cpu.html
+torch-scatter
+torch-sparse
