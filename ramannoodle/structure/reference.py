@@ -16,7 +16,6 @@ from ramannoodle.exceptions import (
 from ramannoodle.structure.structure_utils import (
     displace_positions,
     transform_positions,
-    apply_pbc,
     apply_pbc_displacement,
     calculate_displacement,
 )
@@ -52,11 +51,6 @@ def _get_positions_permutation_matrix(
 ) -> NDArray[np.float64]:
     """Calculate a permutation matrix between reference and permuted positions.
 
-    .. warning::
-        Arguments must be true permutations of each other. This function does not
-        correct for periodic boundary conditions, so it needs to be supplied a
-        structure without atoms at the unit cell boundaries.
-
     Parameters
     ----------
     reference_positions
@@ -65,26 +59,15 @@ def _get_positions_permutation_matrix(
         A 2D array with shape (N,3).
 
     """
-    reference_positions = apply_pbc(reference_positions)
-    permuted_positions = apply_pbc(permuted_positions)
-
-    argsort_reference = np.lexsort(
-        (
-            reference_positions[:, 2],
-            reference_positions[:, 1],
-            reference_positions[:, 0],
-        )
+    # Compute pairwise distance matrix.
+    reference_positions = np.expand_dims(reference_positions, 0)
+    permuted_positions = np.expand_dims(permuted_positions, 1)
+    displacement = reference_positions - permuted_positions
+    displacement = np.where(
+        displacement % 1 > 0.5, displacement % 1 - 1, displacement % 1
     )
-    argsort_permuted = np.lexsort(
-        (permuted_positions[:, 2], permuted_positions[:, 1], permuted_positions[:, 0])
-    )
-    sorted_reference = reference_positions[argsort_reference]
-    sorted_permuted = permuted_positions[argsort_permuted]
-    if not np.isclose(sorted_reference, sorted_permuted).all():
-        raise ValueError("permuted is not a permutation of reference")
-
-    permutation_matrix = np.zeros((len(reference_positions), len(reference_positions)))
-    permutation_matrix[tuple(argsort_reference), tuple(argsort_permuted)] = 1
+    distance_matrix = np.sqrt(np.sum(displacement**2, axis=-1))
+    permutation_matrix = (distance_matrix < 1e-5).T
 
     return permutation_matrix
 
