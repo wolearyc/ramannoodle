@@ -10,7 +10,9 @@ class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
     """Abstract polarizability model."""
 
     @abstractmethod
-    def get_polarizability(self, positions: NDArray[np.float64]) -> NDArray[np.float64]:
+    def calc_polarizability(
+        self, positions: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
         """Return an estimated polarizability for a set of fractional positions.
 
         Parameters

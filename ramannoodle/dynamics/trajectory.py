@@ -61,7 +61,7 @@ class Trajectory(Dynamics):
             Must be compatible with the trajectory.
         """
         try:
-            polarizability_ts = polarizability_model.get_polarizability(
+            polarizability_ts = polarizability_model.calc_polarizability(
                 self._cart_displacement_ts
             )
         except ValueError as exc:

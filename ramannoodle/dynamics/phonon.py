@@ -93,10 +93,10 @@ class Phonons(Dynamics):
         raman_tensors = []
         for displacement in self._displacements:
             try:
-                plus = polarizability_model.get_polarizability(
+                plus = polarizability_model.calc_polarizability(
                     self.ref_positions + displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
                 )
-                minus = polarizability_model.get_polarizability(
+                minus = polarizability_model.calc_polarizability(
                     self.ref_positions - displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
                 )
             except ValueError as exc:

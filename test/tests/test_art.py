@@ -365,5 +365,5 @@ def test_dummy_art(
         in str(err.value)
     )
     with pytest.raises(UsageError) as err:
-        model.get_polarizability(np.array([]))
+        model.calc_polarizability(np.array([]))
     assert "dummy model cannot calculate polarizabilities" in str(err.value)
