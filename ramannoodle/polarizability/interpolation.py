@@ -16,7 +16,7 @@ from scipy.interpolate import make_interp_spline, BSpline
 
 from ramannoodle.globals import ANSICOLORS
 from ramannoodle.polarizability.abstract import PolarizabilityModel
-from ramannoodle.structure.structure_utils import calculate_displacement
+from ramannoodle.structure.structure_utils import calc_displacement
 from ramannoodle.structure.symmetry_utils import (
     is_orthogonal_to_all,
     is_collinear_with_all,
@@ -200,7 +200,7 @@ class InterpolationModel(PolarizabilityModel):
         delta_polarizability: NDArray[np.float64] = np.zeros((3, 3))
         try:
             cart_displacement = self._ref_structure.get_cart_displacement(
-                calculate_displacement(positions, self._ref_structure.positions)
+                calc_displacement(positions, self._ref_structure.positions)
             )
 
             for basis_vector, interpolation, mask in zip(
@@ -536,7 +536,7 @@ class InterpolationModel(PolarizabilityModel):
                 polarizability = np.zeros((3, 3))
 
             try:
-                displacement = calculate_displacement(
+                displacement = calc_displacement(
                     positions,
                     self._ref_structure.positions,
                 )

@@ -17,7 +17,7 @@ from ramannoodle.structure.structure_utils import (
     displace_positions,
     transform_positions,
     apply_pbc_displacement,
-    calculate_displacement,
+    calc_displacement,
 )
 from ramannoodle.globals import ATOM_SYMBOLS
 from ramannoodle.structure import symmetry_utils
@@ -205,7 +205,7 @@ class ReferenceStructure:
                 ref_positions, rotation, translation
             )
             candidate_positions = permutation_matrix @ candidate_positions
-            candidate_displacement = calculate_displacement(
+            candidate_displacement = calc_displacement(
                 candidate_positions, self._positions
             )
 

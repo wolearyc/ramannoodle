@@ -105,7 +105,7 @@ def transform_positions(
     return displace_positions(rotated, translation)
 
 
-def calculate_displacement(
+def calc_displacement(
     positions_1: NDArray[np.float64],
     positions_2: NDArray[np.float64],
 ) -> NDArray[np.float64]:
