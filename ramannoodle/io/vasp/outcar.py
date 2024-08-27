@@ -77,21 +77,25 @@ def _read_atomic_symbols(outcar_file: TextIO) -> list[str]:
         ) from exc
 
 
-def _read_eigenvector(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64]:
+def _read_eigenvector(
+    outcar_file: TextIO, num_atoms: int, lattice: NDArray[np.float64]
+) -> NDArray[np.float64]:
     """Read the next available phonon eigenvector from a VASP OUTCAR file.
 
     Raises
     ------
     InvalidFileException
     """
-    eigenvector: list[list[float]] = []
+    eigenvector: list[NDArray[np.float64]] = []
     try:
         for line in outcar_file:
             if len(eigenvector) == num_atoms:
                 break
             if "X" in line:
                 continue
-            eigenvector.append([float(item) for item in line.split()[3:]])
+            vector = [float(item) for item in line.split()[3:]]
+            vector = vector @ np.linalg.inv(lattice)
+            eigenvector.append(vector)
         return np.array(eigenvector)
     except (ValueError, IndexError) as exc:
         raise InvalidFileException(f"eigenvector could not be parsed: {line}") from exc
@@ -256,6 +260,8 @@ def read_phonons(filepath: str | Path) -> Phonons:
         atomic_symbols = _read_atomic_symbols(outcar_file)
         atomic_weights = np.array([ATOMIC_WEIGHTS[symbol] for symbol in atomic_symbols])
         num_atoms = len(atomic_symbols)
+        lattice = _read_lattice(outcar_file)
+        ref_positions = _read_positions(outcar_file, len(atomic_symbols))
         num_degrees_of_freedom = num_atoms * 3
 
         # read in eigenvectors/eigenvalues
@@ -278,14 +284,14 @@ def read_phonons(filepath: str | Path) -> Phonons:
                     wavenumbers.append(float(line.split()[7]))
             except (NoMatchingLineFoundException, TypeError, IndexError) as exc:
                 raise InvalidFileException("eigenvalue could not be parsed") from exc
-            eigenvectors.append(_read_eigenvector(outcar_file, num_atoms))
+            eigenvectors.append(_read_eigenvector(outcar_file, num_atoms, lattice))
 
         # Divide eigenvectors by sqrt(mass) to get cartesian displacements
         wavenumbers = np.array(wavenumbers)
         eigenvectors = np.array(eigenvectors)
-        cart_displacements = eigenvectors / np.sqrt(atomic_weights)[:, np.newaxis]
+        displacements = eigenvectors / np.sqrt(atomic_weights)[:, np.newaxis]
 
-        return Phonons(wavenumbers, cart_displacements)
+        return Phonons(ref_positions, wavenumbers, displacements)
 
 
 def read_positions_and_polarizability(

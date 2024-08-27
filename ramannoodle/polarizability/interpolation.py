@@ -176,15 +176,13 @@ class InterpolationModel(PolarizabilityModel):
         verify_ndarray_shape("mask", value, self._mask.shape)
         self._mask = value
 
-    def get_polarizability(
-        self, cart_displacement: NDArray[np.float64]
-    ) -> NDArray[np.float64]:
-        """Return an estimated polarizability for a given cartesian displacement.
+    def get_polarizability(self, positions: NDArray[np.float64]) -> NDArray[np.float64]:
+        """Return an estimated polarizability for a set of fractional positions.
 
         Parameters
         ----------
-        cart_displacement
-            Å | 2D array with shape (N,3) where N is the number of atoms.
+        positions
+            Unitless | 2D array with shape (N,3) where N is the number of atoms.
 
         Returns
         -------
@@ -199,6 +197,10 @@ class InterpolationModel(PolarizabilityModel):
         """
         delta_polarizability: NDArray[np.float64] = np.zeros((3, 3))
         try:
+            cart_displacement = self._ref_structure.get_cart_displacement(
+                calculate_displacement(positions, self._ref_structure.positions)
+            )
+
             for basis_vector, interpolation, mask in zip(
                 self._cart_basis_vectors,
                 self._interpolations,

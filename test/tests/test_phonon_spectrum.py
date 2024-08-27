@@ -37,10 +37,7 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
                 f"{outcar_path}", file_format="outcar"
             )
         )
-        cart_displacement = model._ref_structure.get_cart_displacement(
-            positions - model._ref_structure.positions
-        )
-        model_polarizability = model.get_polarizability(cart_displacement)
+        model_polarizability = model.get_polarizability(positions)
         assert np.isclose(model_polarizability, known_polarizability, atol=1e-4).all()
 
 

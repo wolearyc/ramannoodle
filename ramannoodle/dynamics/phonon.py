@@ -20,24 +20,42 @@ class Phonons(Dynamics):
 
     Parameters
     ----------
+    ref_positions
+        Unitless | 2D array with shape (N,3) where N is the number of atoms.
     wavenumbers
-        cm\ :sup:`-1` | 1D array with length M.
-    cart_displacements
-        Å | 3D array with shape (M,N,3) where N is the number of atoms.
+        cm\ :sup:`-1` | 1D array with shape (M,)
+    displacements
+        Unitless | 3D array with shape (M,N,3).
 
     """
 
     def __init__(
         self,
+        ref_positions: NDArray[np.float64],
         wavenumbers: NDArray[np.float64],
-        cart_displacements: NDArray[np.float64],
+        displacements: NDArray[np.float64],
     ) -> None:
+        verify_ndarray_shape("ref_positions", ref_positions, (None, 3))
         verify_ndarray_shape("wavenumbers", wavenumbers, (None,))
         verify_ndarray_shape(
-            "cart_displacements", cart_displacements, (wavenumbers.size, None, 3)
+            "displacements",
+            displacements,
+            (wavenumbers.size, ref_positions.shape[0], 3),
         )
+        self._ref_positions = ref_positions
         self._wavenumbers: NDArray[np.float64] = wavenumbers
-        self._cart_displacements: NDArray[np.float64] = cart_displacements
+        self._displacements: NDArray[np.float64] = displacements
+
+    @property
+    def ref_positions(self) -> NDArray[np.float64]:
+        r"""Get (a copy of) ref_positions.
+
+        Returns
+        -------
+        :
+            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+        """
+        return self._ref_positions.copy()
 
     @property
     def wavenumbers(self) -> NDArray[np.float64]:
@@ -51,8 +69,8 @@ class Phonons(Dynamics):
         return self._wavenumbers.copy()
 
     @property
-    def cart_displacements(self) -> NDArray[np.float64]:
-        """Get (a copy of) cartesian displacements.
+    def displacements(self) -> NDArray[np.float64]:
+        """Get (a copy of) displacements.
 
         Returns
         -------
@@ -60,7 +78,7 @@ class Phonons(Dynamics):
             Å | 3D array with shape (M,N,3) where M is the number of phonons
             and N is the number of atoms.
         """
-        return self._cart_displacements.copy()
+        return self._displacements.copy()
 
     def get_raman_spectrum(
         self, polarizability_model: PolarizabilityModel
@@ -73,13 +91,13 @@ class Phonons(Dynamics):
             must be compatible with phonons
         """
         raman_tensors = []
-        for cart_displacement in self._cart_displacements:
+        for displacement in self._displacements:
             try:
                 plus = polarizability_model.get_polarizability(
-                    cart_displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
+                    self.ref_positions + displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
                 )
                 minus = polarizability_model.get_polarizability(
-                    -cart_displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
+                    self.ref_positions - displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
                 )
             except ValueError as exc:
                 raise ValueError(
