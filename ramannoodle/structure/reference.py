@@ -130,6 +130,11 @@ class ReferenceStructure:
         return copy.copy(self._atomic_numbers)
 
     @property
+    def num_atoms(self) -> int:
+        """Get number of atoms."""
+        return len(self._atomic_numbers)
+
+    @property
     def lattice(self) -> NDArray[np.float64]:
         """Get (a copy of) lattice.
 
@@ -206,7 +211,8 @@ class ReferenceStructure:
             )
             candidate_positions = permutation_matrix @ candidate_positions
             candidate_displacement = calc_displacement(
-                candidate_positions, self._positions
+                self._positions,
+                candidate_positions,
             )
 
             orthogonal_result = symmetry_utils.is_orthogonal_to_all(

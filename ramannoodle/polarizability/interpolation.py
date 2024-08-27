@@ -200,8 +200,16 @@ class InterpolationModel(PolarizabilityModel):
         delta_polarizability: NDArray[np.float64] = np.zeros((3, 3))
         try:
             cart_displacement = self._ref_structure.get_cart_displacement(
-                calc_displacement(positions, self._ref_structure.positions)
+                calc_displacement(self._ref_structure.positions, positions)
             )
+        except TypeError as exc:
+            raise get_type_error("positions", positions, "ndarray") from exc
+        except ValueError as exc:
+            raise get_shape_error(
+                "positions", positions, f"(_,{self._ref_structure.num_atoms},3)"
+            ) from exc
+
+        try:
 
             for basis_vector, interpolation, mask in zip(
                 self._cart_basis_vectors,
@@ -209,20 +217,8 @@ class InterpolationModel(PolarizabilityModel):
                 self._mask,
                 strict=True,
             ):
-                try:
-                    amplitude = np.dot(
-                        basis_vector.flatten(), cart_displacement.flatten()
-                    )
-                except AttributeError as exc:
-                    raise get_type_error(
-                        "cart_displacement", cart_displacement, "ndarray"
-                    ) from exc
-                except ValueError as exc:
-                    raise get_shape_error(
-                        "cart_displacement",
-                        cart_displacement,
-                        f"({len(basis_vector)},3)",
-                    ) from exc
+                amplitude = np.dot(basis_vector.flatten(), cart_displacement.flatten())
+
                 delta_polarizability += (1 - mask) * np.array(
                     interpolation(amplitude), dtype="float64"
                 )
@@ -537,8 +533,8 @@ class InterpolationModel(PolarizabilityModel):
 
             try:
                 displacement = calc_displacement(
-                    positions,
                     self._ref_structure.positions,
+                    positions,
                 )
             except ValueError as exc:
                 raise InvalidDOFException(f"incompatible outcar: {filepath}") from exc

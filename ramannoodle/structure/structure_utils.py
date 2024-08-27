@@ -111,7 +111,8 @@ def calc_displacement(
 ) -> NDArray[np.float64]:
     """Calculate minimum displacement between two fractional positions.
 
-    Respects periodic boundary conditions.
+    Respects periodic boundary conditions. Displacement is from positions_1 to
+    positions_2.
 
     Parameters
     ----------
@@ -128,4 +129,4 @@ def calc_displacement(
     positions_1 = apply_pbc(positions_1)
     positions_2 = apply_pbc(positions_2)
 
-    return apply_pbc_displacement(positions_1 - positions_2)
+    return apply_pbc_displacement(positions_2 - positions_1)
