@@ -244,7 +244,7 @@ class MDRamanSpectrum(RamanSpectrum):
         r"""Calculate and return a raw Raman spectrum.
 
         .. note:: Raw MD-derived Raman spectra will typically need to be smoothed to be
-        visualized effectively. To do this, see :func:`convolve_spectrum`.
+                  visualized effectively. To do this, see :func:`convolve_spectrum`.
 
         Parameters
         ----------

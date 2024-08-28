@@ -68,7 +68,8 @@
         "VRHFIN",
         "wavenumber",
         "wavenumbers",
-        "wspace"
+        "wspace",
+        "XDATCAR"
     ],
     "ignoreWords": [],
     "import": []

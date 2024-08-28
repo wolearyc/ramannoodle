@@ -12,6 +12,8 @@ from ramannoodle.globals import ATOM_SYMBOLS, ATOMIC_NUMBERS
 from ramannoodle.structure.reference import ReferenceStructure
 from ramannoodle.io.vasp.outcar import _get_lattice_vector_from_outcar_line
 
+# pylint: disable=R0801
+
 
 def _read_lattice(poscar_file: TextIO) -> NDArray[np.float64]:
     """Read all three lattice vectors (in angstroms) from a VASP POSCAR file.
@@ -89,6 +91,10 @@ def _read_positions(
     """
     cart_mode = False
     label = poscar_file.readline()
+    if len(label.strip()) == 0 or label[0].strip() == "":
+        raise InvalidFileException(
+            f"missing first character in coordinate format: '{label}'"
+        )
     if label[0].lower() == "s":  # selective dynamics
         label = poscar_file.readline()
     if label[0].lower() == "c":
@@ -194,7 +200,7 @@ def _get_lattice_str(lattice: NDArray[np.float64]) -> str:
 
 def _get_positions_str(positions: NDArray[np.float64]) -> str:
     """Return positions string."""
-    result = "Direct \n"
+    result = ""
     for vector in positions:
         result += f"  {vector[0]:9.16f}   {vector[1]:9.16f}   {vector[2]:9.16f}\n"
     return result
@@ -219,8 +225,6 @@ def write_structure(  # pylint: disable=too-many-arguments
     positions
         Unitless | 2D array with shape (N,3).
     filepath
-    file_format
-        Supports: "poscar" (see :ref:`Supported formats`).
     overwrite
         Overwrite the file if it exists.
     label
@@ -241,4 +245,5 @@ def write_structure(  # pylint: disable=too-many-arguments
         poscar_file.write("   1.00000000000000" + "\n")
         poscar_file.write(lattice_str)
         poscar_file.write(symbols_str)
+        poscar_file.write("Direct\n")
         poscar_file.write(positions_str)

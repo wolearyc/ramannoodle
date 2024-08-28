@@ -1,11 +1,6 @@
 ramannoodle.structure package
 =============================
 
-.. automodule:: ramannoodle.structure
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Submodules
 ----------
 
@@ -37,6 +32,14 @@ ramannoodle.structure.symmetry\_utils module
 --------------------------------------------
 
 .. automodule:: ramannoodle.structure.symmetry_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: ramannoodle.structure
    :members:
    :undoc-members:
    :show-inheritance:

@@ -14,11 +14,14 @@ import numpy as np
 from numpy.typing import NDArray
 from ramannoodle.dynamics.phonon import Phonons
 
+# from ramannoodle.dynamics.trajectory import Trajectory
+
 from ramannoodle.structure.reference import ReferenceStructure
 import ramannoodle.io.vasp as vasp_io
 
 # These  map between file formats and appropriate IO functions.
 _PHONON_READERS = {"outcar": vasp_io.outcar.read_phonons}
+# _TRAJECTORY_READERS = {}
 _POSITION_AND_POLARIZABILITY_READERS = {
     "outcar": vasp_io.outcar.read_positions_and_polarizability
 }
@@ -31,6 +34,7 @@ _REFERENCE_STRUCTURE_READERS = {
     "poscar": vasp_io.poscar.read_ref_structure,
 }
 _STRUCTURE_WRITERS = {"poscar": vasp_io.poscar.write_structure}
+_TRAJECTORY_WRITERS = {"xdatcar": vasp_io.xdatcar.write_trajectory}
 
 
 def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
@@ -57,6 +61,37 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
         return _PHONON_READERS[file_format](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
+
+
+# def read_trajectory(filepath: str | Path, file_format: str) -> Trajectory:
+#     """Read molecular dynamics trajectory from a file.
+
+#     Parameters
+#     ----------
+#     filepath
+#     file_format
+#         Supports: (none) (see :ref:`Supported formats`). To read a trajectory from an
+#         XDATCAR, use :func:`.xdatcar.read_trajectory`.
+
+#     Returns
+#     -------
+#     :
+
+#     Raises
+#     ------
+#     InvalidFileException
+#         File has unexpected format.
+#     FileNotFoundError
+#         File could not be found.
+#     """
+#     try:
+#         return _TRAJECTORY_READERS[file_format](filepath)
+#     except KeyError as exc:
+#         if file_format == "xdatcar":
+#             raise ValueError(
+#                 "generic read_trajectory does not support xdatcar"
+#             ) from exc
+#         raise ValueError(f"unsupported format: {file_format}") from exc
 
 
 def read_positions_and_polarizability(
@@ -180,6 +215,46 @@ def write_structure(  # pylint: disable=too-many-arguments
             lattice=lattice,
             atomic_numbers=atomic_numbers,
             positions=positions,
+            filepath=filepath,
+            overwrite=overwrite,
+        )
+    except KeyError as exc:
+        raise ValueError(f"unsupported format: {file_format}") from exc
+
+
+def write_trajectory(  # pylint: disable=too-many-arguments
+    lattice: NDArray[np.float64],
+    atomic_numbers: list[int],
+    positions_ts: NDArray[np.float64],
+    filepath: str | Path,
+    file_format: str,
+    overwrite: bool = False,
+) -> None:
+    """Write trajectory to file.
+
+    Parameters
+    ----------
+    lattice
+        Å | 2D array with shape (3,3).
+    atomic_numbers
+        1D list of length N where N is the number of atoms.
+    positions_ts
+        Unitless | 3D array with shape (S,N,3) where S is the number of configurations.
+    filepath
+    file_format
+        Supports: "poscar" (see :ref:`Supported formats`).
+    overwrite
+        overwrite the file if it exists.
+
+    Raises
+    ------
+    FileExistsError - File exists and ``overwrite = False``.
+    """
+    try:
+        _TRAJECTORY_WRITERS[file_format](
+            lattice=lattice,
+            atomic_numbers=atomic_numbers,
+            positions_ts=positions_ts,
             filepath=filepath,
             overwrite=overwrite,
         )
