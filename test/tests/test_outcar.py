@@ -72,3 +72,23 @@ def test_read_phonons_from_outcar_exception(
     with pytest.raises(exception_type) as err:
         generic_io.read_phonons(path_fixture, file_format="outcar")
     assert in_reason in str(err.value)
+
+
+@pytest.mark.parametrize(
+    "path_fixture, trajectory_length, last_position",
+    [
+        (
+            "test/data/LLZO/OUTCAR_trajectory",
+            15,
+            np.array([0.83330583, 0.83331287, 0.29209206]),
+        ),
+    ],
+    indirect=["path_fixture"],
+)
+def test_read_trajectory_from_outcar(
+    path_fixture: Path, trajectory_length: int, last_position: NDArray[np.float64]
+) -> None:
+    """Test read_trajectory for outcar (normal)."""
+    trajectory = generic_io.read_trajectory(path_fixture, file_format="outcar")
+    assert len(trajectory) == trajectory_length
+    assert np.isclose(last_position, trajectory[-1][-1]).all()

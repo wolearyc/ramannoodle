@@ -14,14 +14,14 @@ import numpy as np
 from numpy.typing import NDArray
 from ramannoodle.dynamics.phonon import Phonons
 
-# from ramannoodle.dynamics.trajectory import Trajectory
+from ramannoodle.dynamics.trajectory import Trajectory
 
 from ramannoodle.structure.reference import ReferenceStructure
 import ramannoodle.io.vasp as vasp_io
 
 # These  map between file formats and appropriate IO functions.
 _PHONON_READERS = {"outcar": vasp_io.outcar.read_phonons}
-# _TRAJECTORY_READERS = {}
+_TRAJECTORY_READERS = {"outcar": vasp_io.outcar.read_trajectory}
 _POSITION_AND_POLARIZABILITY_READERS = {
     "outcar": vasp_io.outcar.read_positions_and_polarizability
 }
@@ -63,35 +63,35 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
 
-# def read_trajectory(filepath: str | Path, file_format: str) -> Trajectory:
-#     """Read molecular dynamics trajectory from a file.
+def read_trajectory(filepath: str | Path, file_format: str) -> Trajectory:
+    """Read molecular dynamics trajectory from a file.
 
-#     Parameters
-#     ----------
-#     filepath
-#     file_format
-#         Supports: (none) (see :ref:`Supported formats`). To read a trajectory from an
-#         XDATCAR, use :func:`.xdatcar.read_trajectory`.
+    Parameters
+    ----------
+    filepath
+    file_format
+        Supports: "outcar" (see :ref:`Supported formats`). To read a trajectory from an
+        XDATCAR, use :func:`.xdatcar.read_trajectory`.
 
-#     Returns
-#     -------
-#     :
+    Returns
+    -------
+    :
 
-#     Raises
-#     ------
-#     InvalidFileException
-#         File has unexpected format.
-#     FileNotFoundError
-#         File could not be found.
-#     """
-#     try:
-#         return _TRAJECTORY_READERS[file_format](filepath)
-#     except KeyError as exc:
-#         if file_format == "xdatcar":
-#             raise ValueError(
-#                 "generic read_trajectory does not support xdatcar"
-#             ) from exc
-#         raise ValueError(f"unsupported format: {file_format}") from exc
+    Raises
+    ------
+    InvalidFileException
+        File has unexpected format.
+    FileNotFoundError
+        File could not be found.
+    """
+    try:
+        return _TRAJECTORY_READERS[file_format](filepath)
+    except KeyError as exc:
+        if file_format == "xdatcar":
+            raise ValueError(
+                "generic.read_trajectory does not support xdatcar."
+            ) from exc
+        raise ValueError(f"unsupported format: {file_format}") from exc
 
 
 def read_positions_and_polarizability(
