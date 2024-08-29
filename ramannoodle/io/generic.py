@@ -20,20 +20,34 @@ from ramannoodle.structure.reference import ReferenceStructure
 import ramannoodle.io.vasp as vasp_io
 
 # These  map between file formats and appropriate IO functions.
-_PHONON_READERS = {"outcar": vasp_io.outcar.read_phonons}
-_TRAJECTORY_READERS = {"outcar": vasp_io.outcar.read_trajectory}
+_PHONON_READERS = {
+    "outcar": vasp_io.outcar.read_phonons,
+    "vasprun.xml": vasp_io.vasprun.read_phonons,
+}
+_TRAJECTORY_READERS = {
+    "outcar": vasp_io.outcar.read_trajectory,
+    "vasprun.xml": vasp_io.vasprun.read_trajectory,
+}
 _POSITION_AND_POLARIZABILITY_READERS = {
-    "outcar": vasp_io.outcar.read_positions_and_polarizability
+    "outcar": vasp_io.outcar.read_positions_and_polarizability,
+    "vasprun.xml": vasp_io.vasprun.read_positions_and_polarizability,
 }
 _POSITION_READERS = {
-    "outcar": vasp_io.outcar.read_positions,
     "poscar": vasp_io.poscar.read_positions,
+    "outcar": vasp_io.outcar.read_positions,
+    "xdatcar": vasp_io.poscar.read_positions,
+    "vasprun.xml": vasp_io.vasprun.read_positions,
 }
 _REFERENCE_STRUCTURE_READERS = {
-    "outcar": vasp_io.outcar.read_ref_structure,
     "poscar": vasp_io.poscar.read_ref_structure,
+    "outcar": vasp_io.outcar.read_ref_structure,
+    "xdatcar": vasp_io.poscar.read_ref_structure,
+    "vasprun.xml": vasp_io.vasprun.read_ref_structure,
 }
-_STRUCTURE_WRITERS = {"poscar": vasp_io.poscar.write_structure}
+_STRUCTURE_WRITERS = {
+    "poscar": vasp_io.poscar.write_structure,
+    "xdatcar": vasp_io.poscar.write_structure,
+}
 _TRAJECTORY_WRITERS = {"xdatcar": vasp_io.xdatcar.write_trajectory}
 
 
@@ -44,7 +58,7 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
     ----------
     filepath
     file_format
-        Supports: "outcar" (see :ref:`Supported formats`)
+        Supports: ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
 
     Returns
     -------
@@ -70,8 +84,8 @@ def read_trajectory(filepath: str | Path, file_format: str) -> Trajectory:
     ----------
     filepath
     file_format
-        Supports: "outcar" (see :ref:`Supported formats`). To read a trajectory from an
-        XDATCAR, use :func:`.xdatcar.read_trajectory`.
+        Supports: ``"outcar"``, ``"vasprun.xml"``, (see :ref:`Supported formats`). To
+        read a trajectory from an XDATCAR, use :func:`.xdatcar.read_trajectory`.
 
     Returns
     -------
@@ -104,7 +118,7 @@ def read_positions_and_polarizability(
     ----------
     filepath
     file_format
-        Supports: "outcar" (see :ref:`Supported formats`)
+        Supports: ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
 
     Returns
     -------
@@ -136,7 +150,8 @@ def read_positions(
     ----------
     filepath
     file_format
-        Supports: "outcar", "poscar" (see :ref:`Supported formats`).
+        Supports: ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"``,  (see
+        :ref:`Supported formats`).
 
     Returns
     -------
@@ -163,7 +178,8 @@ def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStruc
     ----------
     filepath
     file_format
-        Supports: "outcar", "poscar" (see :ref:`Supported formats`).
+        Supports: ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"`` (see
+        :ref:`Supported formats`).
 
     Returns
     -------
@@ -202,7 +218,7 @@ def write_structure(  # pylint: disable=too-many-arguments
         Unitless | 2D array with shape (N,3).
     filepath
     file_format
-        Supports: "poscar" (see :ref:`Supported formats`).
+        Supports: ``"poscar"`` (see :ref:`Supported formats`).
     overwrite
         overwrite the file if it exists.
 
@@ -242,7 +258,7 @@ def write_trajectory(  # pylint: disable=too-many-arguments
         Unitless | 3D array with shape (S,N,3) where S is the number of configurations.
     filepath
     file_format
-        Supports: "poscar" (see :ref:`Supported formats`).
+        Supports: ``"xdatcar"`` (see :ref:`Supported formats`).
     overwrite
         overwrite the file if it exists.
 

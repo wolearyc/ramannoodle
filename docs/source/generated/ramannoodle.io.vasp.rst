@@ -20,6 +20,14 @@ ramannoodle.io.vasp.poscar module
    :undoc-members:
    :show-inheritance:
 
+ramannoodle.io.vasp.vasprun module
+----------------------------------
+
+.. automodule:: ramannoodle.io.vasp.vasprun
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ramannoodle.io.vasp.xdatcar module
 ----------------------------------
 

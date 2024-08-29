@@ -454,7 +454,7 @@ def read_trajectory(filepath: str | Path) -> Trajectory:
                 break
 
             if ml_step and "(ML)" not in line:
-                ml_step = False
+                ml_step = "(ML)" in line
                 continue  # we skip ab initio following ML step
             ml_step = "(ML)" in line
             cart_positions = _read_next_cart_positions_ts(
