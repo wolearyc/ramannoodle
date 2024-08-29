@@ -63,7 +63,7 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
             Must be compatible with the trajectory.
         """
         try:
-            polarizability_ts = polarizability_model.calc_polarizability(
+            polarizability_ts = polarizability_model.calc_polarizabilities(
                 self._positions_ts
             )
         except ValueError as exc:

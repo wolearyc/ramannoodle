@@ -176,20 +176,21 @@ class InterpolationModel(PolarizabilityModel):
         verify_ndarray_shape("mask", value, self._mask.shape)
         self._mask = value
 
-    def calc_polarizability(
-        self, positions: NDArray[np.float64]
+    def calc_polarizabilities(
+        self, positions_batch: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Return an estimated polarizability for a set of fractional positions.
+        """Return estimated polarizabilities for a batch of fractional positions.
 
         Parameters
         ----------
-        positions
-            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+        positions_batch
+            Unitless | 3D array with shape (S,N,3) where S is the number of samples and
+            N is the number of atoms.
 
         Returns
         -------
         :
-            Unitless | 2D array with shape (3,3).
+            Unitless | 3D array with shape (S,3,3).
 
         Raises
         ------
@@ -197,16 +198,22 @@ class InterpolationModel(PolarizabilityModel):
             If model is a dummy model.
 
         """
-        delta_polarizability: NDArray[np.float64] = np.zeros((3, 3))
         try:
-            cart_displacement = self._ref_structure.get_cart_displacement(
-                calc_displacement(self._ref_structure.positions, positions)
+            delta_polarizabilities: NDArray[np.float64] = np.zeros(
+                (positions_batch.shape[0], 3, 3)
             )
-        except TypeError as exc:
-            raise get_type_error("positions", positions, "ndarray") from exc
-        except ValueError as exc:
+            cart_displacements = self._ref_structure.get_cart_displacement(
+                calc_displacement(self._ref_structure.positions, positions_batch)
+            )
+            cart_displacements = cart_displacements.reshape(
+                cart_displacements.shape[0],
+                cart_displacements.shape[1] * cart_displacements.shape[2],
+            )
+        except (AttributeError, TypeError) as exc:
+            raise get_type_error("positions", positions_batch, "ndarray") from exc
+        except (ValueError, IndexError) as exc:
             raise get_shape_error(
-                "positions", positions, f"(_,{self._ref_structure.num_atoms},3)"
+                "positions", positions_batch, f"(_,{self._ref_structure.num_atoms},3)"
             ) from exc
 
         try:
@@ -217,10 +224,11 @@ class InterpolationModel(PolarizabilityModel):
                 self._mask,
                 strict=True,
             ):
-                amplitude = np.dot(basis_vector.flatten(), cart_displacement.flatten())
-
-                delta_polarizability += (1 - mask) * np.array(
-                    interpolation(amplitude), dtype="float64"
+                amplitudes = np.einsum(
+                    "i,ji", basis_vector.flatten(), cart_displacements
+                )
+                delta_polarizabilities += (1 - mask) * np.array(
+                    interpolation(amplitudes), dtype="float64"
                 )
         except ValueError as err:
             if self._is_dummy_model:
@@ -229,7 +237,7 @@ class InterpolationModel(PolarizabilityModel):
                 ) from err
             raise err
 
-        return delta_polarizability + self._equilibrium_polarizability
+        return delta_polarizabilities + self._equilibrium_polarizability
 
     def _get_dof(  # pylint: disable=too-many-locals
         self,

@@ -265,12 +265,12 @@ class ReferenceStructure:
         Parameters
         ----------
         displacement
-            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+            Unitless | Array with shape (...,N,3)  where N is the number of atoms.
 
         Returns
         -------
         :
-            Å | 2D array with shape (N,3).
+            Å | 2D array with shape (...,N,3).
         """
         displacement = apply_pbc_displacement(displacement)
 

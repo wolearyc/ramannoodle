@@ -93,12 +93,13 @@ class Phonons(Dynamics):
         raman_tensors = []
         for displacement in self._displacements:
             try:
-                plus = polarizability_model.calc_polarizability(
-                    self.ref_positions + displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
-                )
-                minus = polarizability_model.calc_polarizability(
-                    self.ref_positions - displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
-                )
+                epsilon = displacement * RAMAN_TENSOR_CENTRAL_DIFFERENCE
+                plus = polarizability_model.calc_polarizabilities(
+                    np.array([self.ref_positions + epsilon])
+                )[0]
+                minus = polarizability_model.calc_polarizabilities(
+                    np.array([self.ref_positions - epsilon])
+                )[0]
             except ValueError as exc:
                 raise ValueError(
                     "polarizability_model and phonons are incompatible"

@@ -37,7 +37,7 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
                 f"{outcar_path}", file_format="outcar"
             )
         )
-        model_polarizability = model.calc_polarizability(positions)
+        model_polarizability = model.calc_polarizabilities(np.array([positions]))[0]
         assert np.isclose(model_polarizability, known_polarizability, atol=1e-4).all()
 
 

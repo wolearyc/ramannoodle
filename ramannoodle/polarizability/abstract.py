@@ -10,18 +10,19 @@ class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
     """Abstract polarizability model."""
 
     @abstractmethod
-    def calc_polarizability(
-        self, positions: NDArray[np.float64]
+    def calc_polarizabilities(
+        self, positions_batch: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Return an estimated polarizability for a set of fractional positions.
+        """Return estimated polarizabilities for a batch of fractional positions.
 
         Parameters
         ----------
-        positions
-            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+        positions_batch
+            Unitless | 3D array with shape (S,N,3) where S is the number of samples and
+            N is the number of atoms.
 
         Returns
         -------
         :
-            Unitless | 2D array with shape (3,3).
+            Unitless | 3D array with shape (S,3,3).
         """
