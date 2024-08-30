@@ -7,6 +7,7 @@ Guides
 
    notebooks/Basic tutorial
    notebooks/Full tutorial
+   notebooks/Molecular dynamics
    notebooks/Masking
    io
    units
