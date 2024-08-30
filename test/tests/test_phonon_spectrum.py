@@ -259,6 +259,11 @@ def test_convolve_intensities(
         gaussian_wavenumbers, gaussian_intensities = convolve_spectrum(
             wavenumbers, intensities, "gaussian"
         )
+        # np.savez(
+        #     known_gaussian_spectrum_path,
+        #     wavenumbers=gaussian_wavenumbers,
+        #     intensities=gaussian_intensities,
+        # )
         with np.load(known_gaussian_spectrum_path) as known_spectrum:
             known_wavenumbers = known_spectrum["wavenumbers"]
             known_intensities = known_spectrum["intensities"]
@@ -268,6 +273,11 @@ def test_convolve_intensities(
         lorentzian_wavenumbers, lorentzian_intensities = convolve_spectrum(
             wavenumbers, intensities, "lorentzian"
         )
+        # np.savez(
+        #     known_lorentzian_spectrum_path,
+        #     wavenumbers=lorentzian_wavenumbers,
+        #     intensities=lorentzian_intensities,
+        # )
         with np.load(known_lorentzian_spectrum_path) as known_spectrum:
             known_wavenumbers = known_spectrum["wavenumbers"]
             known_intensities = known_spectrum["intensities"]

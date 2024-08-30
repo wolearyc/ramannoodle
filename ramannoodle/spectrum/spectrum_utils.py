@@ -40,9 +40,10 @@ def convolve_spectrum(
 
     """
     if out_wavenumbers is None:
-        out_wavenumbers = np.linspace(
-            np.min(wavenumbers) - 100, np.max(wavenumbers) + 100, 1000
-        )
+        min_wavenumber = np.min(wavenumbers) - 100
+        max_wavenumber = np.max(wavenumbers) + 100
+        num_samples = int(np.rint(max_wavenumber - min_wavenumber))
+        out_wavenumbers = np.linspace(min_wavenumber, max_wavenumber, num_samples)
     verify_ndarray_shape("out_wavenumbers", out_wavenumbers, (None,))
     verify_ndarray_shape("wavenumbers", wavenumbers, (None,))
     verify_ndarray_shape("intensities", intensities, (len(wavenumbers),))

@@ -60,6 +60,8 @@
         "Raman",
         "ramannoodle",
         "repr",
+        "rint",
+        "savez",
         "spglib",
         "symprec",
         "tablefmt",
