@@ -35,7 +35,7 @@ def _get_atomic_symbol_from_potcar_line(line: str) -> str:
     return symbol
 
 
-def _read_atomic_symbols(outcar_file: TextIO) -> list[str]:
+def _read_atomic_symbols(file: TextIO) -> list[str]:
     """Read atomic symbols from a VASP OUTCAR file.
 
     Raises
@@ -46,16 +46,16 @@ def _read_atomic_symbols(outcar_file: TextIO) -> list[str]:
     # Get atom symbols first
     potcar_symbols: list[str] = []
     try:
-        line = _skip_file_until_line_contains(outcar_file, "POTCAR:    ")
+        line = _skip_file_until_line_contains(file, "POTCAR:    ")
         potcar_symbols.append(_get_atomic_symbol_from_potcar_line(line))
-        for line in outcar_file:
+        for line in file:
             if "POTCAR" not in line:
                 break
             potcar_symbols.append(_get_atomic_symbol_from_potcar_line(line))
 
         # HACK: We read the next line and clean up as appropriate.
         # I wish the OUTCAR format was easier to parse, but alas, here we are.
-        line = outcar_file.readline()
+        line = file.readline()
         if "VRHFIN" in line:
             potcar_symbols.pop()  # We read one too many!
     except NoMatchingLineFoundException as exc:
@@ -65,7 +65,7 @@ def _read_atomic_symbols(outcar_file: TextIO) -> list[str]:
 
     # Then get atom numbers
     try:
-        line = _skip_file_until_line_contains(outcar_file, "ions per type")
+        line = _skip_file_until_line_contains(file, "ions per type")
         atomic_numbers = [int(item) for item in line.split()[4:]]
 
         atomic_symbols = []
@@ -79,7 +79,7 @@ def _read_atomic_symbols(outcar_file: TextIO) -> list[str]:
 
 
 def _read_eigenvector(
-    outcar_file: TextIO, num_atoms: int, lattice: NDArray[np.float64]
+    file: TextIO, num_atoms: int, lattice: NDArray[np.float64]
 ) -> NDArray[np.float64]:
     """Read the next available phonon eigenvector from a VASP OUTCAR file.
 
@@ -89,7 +89,7 @@ def _read_eigenvector(
     """
     eigenvector: list[NDArray[np.float64]] = []
     try:
-        for line in outcar_file:
+        for line in file:
             if len(eigenvector) == num_atoms:
                 break
             if "X" in line:
@@ -102,7 +102,7 @@ def _read_eigenvector(
         raise InvalidFileException(f"eigenvector could not be parsed: {line}") from exc
 
 
-def _read_cart_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64]:
+def _read_cart_positions(file: TextIO, num_atoms: int) -> NDArray[np.float64]:
     """Read atomic cartesian positions from a VASP OUTCAR file.
 
     Raises
@@ -111,14 +111,14 @@ def _read_cart_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.floa
     """
     try:
         _ = _skip_file_until_line_contains(
-            outcar_file, "position of ions in cartesian coordinates  (Angst):"
+            file, "position of ions in cartesian coordinates  (Angst):"
         )
     except NoMatchingLineFoundException as exc:
         raise InvalidFileException("cartesian positions not found") from exc
     cart_coordinates = []
     for _ in range(num_atoms):
         try:
-            line = outcar_file.readline()
+            line = file.readline()
             cart_coordinates.append([float(item) for item in line.split()[0:3]])
         except (EOFError, ValueError, IndexError) as exc:
             raise InvalidFileException(
@@ -128,7 +128,7 @@ def _read_cart_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.floa
     return np.array(cart_coordinates)
 
 
-def _read_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64]:
+def _read_positions(file: TextIO, num_atoms: int) -> NDArray[np.float64]:
     """Read atomic fractional positions from a VASP OUTCAR file.
 
     Raises
@@ -137,7 +137,7 @@ def _read_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64]:
     """
     try:
         _ = _skip_file_until_line_contains(
-            outcar_file, "position of ions in fractional coordinates (direct lattice)"
+            file, "position of ions in fractional coordinates (direct lattice)"
         )
     except NoMatchingLineFoundException as exc:
         raise InvalidFileException("fractional positions not found") from exc
@@ -145,7 +145,7 @@ def _read_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64]:
     positions = []
     for _ in range(num_atoms):
         try:
-            line = outcar_file.readline()
+            line = file.readline()
             positions.append([float(item) for item in line.split()[0:3]])
         except (EOFError, ValueError, IndexError) as exc:
             raise InvalidFileException(
@@ -154,7 +154,7 @@ def _read_positions(outcar_file: TextIO, num_atoms: int) -> NDArray[np.float64]:
     return np.array(positions)
 
 
-def _read_polarizability(outcar_file: TextIO) -> NDArray[np.float64]:
+def _read_polarizability(file: TextIO) -> NDArray[np.float64]:
     """Read polarizability from a VASP OUTCAR file.
 
     In actuality, we read the macroscopic dielectric tensor including local field
@@ -166,17 +166,17 @@ def _read_polarizability(outcar_file: TextIO) -> NDArray[np.float64]:
     """
     try:
         _ = _skip_file_until_line_contains(
-            outcar_file,
+            file,
             "MACROSCOPIC STATIC DIELECTRIC TENSOR (including local field effects",
         )
     except NoMatchingLineFoundException as exc:
         raise InvalidFileException("polarizability not found") from exc
-    outcar_file.readline()
+    file.readline()
 
     polarizability = []
     for _ in range(3):
         try:
-            line = outcar_file.readline()
+            line = file.readline()
             polarizability.append([float(item) for item in line.split()[0:3]])
         except (EOFError, ValueError, IndexError) as exc:
             raise InvalidFileException(
@@ -201,7 +201,7 @@ def _get_lattice_vector_from_outcar_line(line: str) -> NDArray[np.float64]:
         raise ValueError("line does not have the expected format") from exc
 
 
-def _read_lattice(outcar_file: TextIO) -> NDArray[np.float64]:
+def _read_lattice(file: TextIO) -> NDArray[np.float64]:
     """Read all three lattice vectors (in angstroms) from a VASP OUTCAR file.
 
     Raises
@@ -212,11 +212,11 @@ def _read_lattice(outcar_file: TextIO) -> NDArray[np.float64]:
     # lattice vectors. We must skip ahead.
     try:
         _ = _skip_file_until_line_contains(
-            outcar_file,
+            file,
             "Write flags",
         )
         _ = _skip_file_until_line_contains(
-            outcar_file,
+            file,
             "direct lattice vectors      ",
         )
     except NoMatchingLineFoundException as exc:
@@ -225,7 +225,7 @@ def _read_lattice(outcar_file: TextIO) -> NDArray[np.float64]:
     lattice = []
     for _ in range(3):
         try:
-            line = outcar_file.readline()
+            line = file.readline()
             lattice.append(_get_lattice_vector_from_outcar_line(line))
         except (EOFError, ValueError) as exc:
             raise InvalidFileException(f"lattice could not be parsed: {line}") from exc
@@ -255,20 +255,20 @@ def read_phonons(filepath: str | Path) -> Phonons:
     eigenvectors = []
 
     filepath = pathify(filepath)
-    with open(filepath, "r", encoding="utf-8") as outcar_file:
+    with open(filepath, "r", encoding="utf-8") as file:
 
         # get atom information
-        atomic_symbols = _read_atomic_symbols(outcar_file)
+        atomic_symbols = _read_atomic_symbols(file)
         atomic_weights = np.array([ATOMIC_WEIGHTS[symbol] for symbol in atomic_symbols])
         num_atoms = len(atomic_symbols)
-        lattice = _read_lattice(outcar_file)
-        ref_positions = _read_positions(outcar_file, len(atomic_symbols))
+        lattice = _read_lattice(file)
+        ref_positions = _read_positions(file, len(atomic_symbols))
         num_degrees_of_freedom = num_atoms * 3
 
         # read in eigenvectors/eigenvalues
         try:
             _ = _skip_file_until_line_contains(
-                outcar_file, "Eigenvectors and eigenvalues of the dynamical matrix"
+                file, "Eigenvectors and eigenvalues of the dynamical matrix"
             )
         except NoMatchingLineFoundException as exc:
             raise InvalidFileException(
@@ -276,7 +276,7 @@ def read_phonons(filepath: str | Path) -> Phonons:
             ) from exc
         for _ in range(num_degrees_of_freedom):
             try:
-                line = _skip_file_until_line_contains(outcar_file, "cm-1")
+                line = _skip_file_until_line_contains(file, "cm-1")
                 if "f/i" in line:  # if complex
                     wavenumbers.append(
                         -float(line.split()[6])  # set negative wavenumber
@@ -285,7 +285,7 @@ def read_phonons(filepath: str | Path) -> Phonons:
                     wavenumbers.append(float(line.split()[7]))
             except (NoMatchingLineFoundException, TypeError, IndexError) as exc:
                 raise InvalidFileException("eigenvalue could not be parsed") from exc
-            eigenvectors.append(_read_eigenvector(outcar_file, num_atoms, lattice))
+            eigenvectors.append(_read_eigenvector(file, num_atoms, lattice))
 
         # Divide eigenvectors by sqrt(mass) to get cartesian displacements
         wavenumbers = np.array(wavenumbers)
@@ -321,9 +321,9 @@ def read_positions_and_polarizability(
         File has an unexpected format.
     """
     filepath = pathify(filepath)
-    with open(filepath, "r", encoding="utf-8") as outcar_file:
+    with open(filepath, "r", encoding="utf-8") as file:
         positions = read_positions(filepath)
-        polarizability = _read_polarizability(outcar_file)
+        polarizability = _read_polarizability(file)
         return positions, polarizability
 
 
@@ -346,9 +346,9 @@ def read_positions(filepath: str | Path) -> NDArray[np.float64]:
         File has an unexpected format.
     """
     filepath = pathify(filepath)
-    with open(filepath, "r", encoding="utf-8") as outcar_file:
-        num_atoms = len(_read_atomic_symbols(outcar_file))
-        positions = _read_positions(outcar_file, num_atoms)
+    with open(filepath, "r", encoding="utf-8") as file:
+        num_atoms = len(_read_atomic_symbols(file))
+        positions = _read_positions(file, num_atoms)
         return positions
 
 
@@ -371,17 +371,15 @@ def read_ref_structure(filepath: str | Path) -> ReferenceStructure:
     FileNotFoundError
     """
     filepath = pathify(filepath)
-    with open(filepath, "r", encoding="utf-8") as outcar_file:
-        atomic_symbols = _read_atomic_symbols(outcar_file)
+    with open(filepath, "r", encoding="utf-8") as file:
+        atomic_symbols = _read_atomic_symbols(file)
         atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
-        lattice = _read_lattice(outcar_file)
-        positions = _read_positions(outcar_file, len(atomic_symbols))
+        lattice = _read_lattice(file)
+        positions = _read_positions(file, len(atomic_symbols))
         return ReferenceStructure(atomic_numbers, lattice, positions)
 
 
-def _read_next_cart_positions_ts(
-    outcar_file: TextIO, num_atoms: int
-) -> NDArray[np.float64]:
+def _read_next_cart_positions_ts(file: TextIO, num_atoms: int) -> NDArray[np.float64]:
     """Read Cartesian positions contained in a VASP OUTCAR file from an MD run.
 
     This function assumes that Cartesian positions are ready to be read.
@@ -391,11 +389,11 @@ def _read_next_cart_positions_ts(
     InvalidFileException
     NoMatchingLineFoundException
     """
-    outcar_file.readline()
+    file.readline()
     cart_positions = []
     for _ in range(num_atoms):
         try:
-            line = outcar_file.readline()
+            line = file.readline()
             cart_positions.append([float(item) for item in line.split()[0:3]])
         except (EOFError, ValueError, IndexError) as exc:
             raise InvalidFileException(
@@ -404,7 +402,7 @@ def _read_next_cart_positions_ts(
     return np.array(cart_positions)
 
 
-def _read_timestep(outcar_file: TextIO) -> float:
+def _read_timestep(file: TextIO) -> float:
     """Read timestep (in fs) contained in a VASP OUTCAR file.
 
     Raises
@@ -412,7 +410,7 @@ def _read_timestep(outcar_file: TextIO) -> float:
     InvalidFileException
     """
     try:
-        line = _skip_file_until_line_contains(outcar_file, "time-step for ionic-motion")
+        line = _skip_file_until_line_contains(file, "time-step for ionic-motion")
     except NoMatchingLineFoundException as exc:
         raise InvalidFileException("timestep not found") from exc
     try:
@@ -437,17 +435,17 @@ def read_trajectory(filepath: str | Path) -> Trajectory:
     FileNotFoundError
     """
     filepath = pathify(filepath)
-    with open(filepath, "r", encoding="utf-8") as outcar_file:
-        atomic_symbols = _read_atomic_symbols(outcar_file)
-        timestep = _read_timestep(outcar_file)
-        lattice = _read_lattice(outcar_file)
+    with open(filepath, "r", encoding="utf-8") as file:
+        atomic_symbols = _read_atomic_symbols(file)
+        timestep = _read_timestep(file)
+        lattice = _read_lattice(file)
 
         ml_step = False
         positions_ts = []
         while True:
             try:
                 line = _skip_file_until_line_contains(
-                    outcar_file,
+                    file,
                     "POSITION                                       TOTAL-FORCE ",
                 )
             except NoMatchingLineFoundException:
@@ -457,9 +455,7 @@ def read_trajectory(filepath: str | Path) -> Trajectory:
                 ml_step = "(ML)" in line
                 continue  # we skip ab initio following ML step
             ml_step = "(ML)" in line
-            cart_positions = _read_next_cart_positions_ts(
-                outcar_file, len(atomic_symbols)
-            )
+            cart_positions = _read_next_cart_positions_ts(file, len(atomic_symbols))
             positions_ts.append(cart_positions @ np.linalg.inv(lattice))
 
         if len(positions_ts) == 0:

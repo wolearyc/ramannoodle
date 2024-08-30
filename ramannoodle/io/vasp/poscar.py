@@ -15,7 +15,7 @@ from ramannoodle.io.vasp.outcar import _get_lattice_vector_from_outcar_line
 # pylint: disable=R0801
 
 
-def _read_lattice(poscar_file: TextIO) -> NDArray[np.float64]:
+def _read_lattice(file: TextIO) -> NDArray[np.float64]:
     """Read all three lattice vectors (in angstroms) from a VASP POSCAR file.
 
     Raises
@@ -23,8 +23,8 @@ def _read_lattice(poscar_file: TextIO) -> NDArray[np.float64]:
     InvalidFileException
     """
     try:
-        poscar_file.readline()
-        line = poscar_file.readline()
+        file.readline()
+        line = file.readline()
         scale_factor = float(line)
     except ValueError as exc:
         raise InvalidFileException(f"scale factor could not be parsed: {line}") from exc
@@ -32,7 +32,7 @@ def _read_lattice(poscar_file: TextIO) -> NDArray[np.float64]:
     lattice = []
     for _ in range(3):
         try:
-            line = poscar_file.readline()
+            line = file.readline()
             vector = _get_lattice_vector_from_outcar_line(line)
         except (EOFError, ValueError) as exc:
             raise InvalidFileException(f"lattice could not be parsed: {line}") from exc
@@ -43,7 +43,7 @@ def _read_lattice(poscar_file: TextIO) -> NDArray[np.float64]:
     return np.array(lattice) * scale_factor
 
 
-def _read_atomic_symbols(poscar_file: TextIO) -> list[str]:
+def _read_atomic_symbols(file: TextIO) -> list[str]:
     """Read atomic symbols from a VASP POSCAR file.
 
     Raises
@@ -52,7 +52,7 @@ def _read_atomic_symbols(poscar_file: TextIO) -> list[str]:
 
     """
     # First read symbols
-    line = poscar_file.readline()
+    line = file.readline()
     symbols = line.split()
     if len(symbols) == 0:
         raise InvalidFileException("no atom symbols found")
@@ -61,7 +61,7 @@ def _read_atomic_symbols(poscar_file: TextIO) -> list[str]:
             raise InvalidFileException(f"unrecognized atom symbol: {symbol}")
 
     # Then read ion counts
-    line = poscar_file.readline()
+    line = file.readline()
     str_counts = line.split()
     if len(str_counts) != len(symbols):
         spec = f"{len(str_counts)} != {len(symbols)}"
@@ -80,7 +80,7 @@ def _read_atomic_symbols(poscar_file: TextIO) -> list[str]:
 
 
 def _read_positions(
-    poscar_file: TextIO, lattice: NDArray[np.float64], num_atoms: int
+    file: TextIO, lattice: NDArray[np.float64], num_atoms: int
 ) -> NDArray[np.float64]:
     """Read atomic symbols from a VASP POSCAR file.
 
@@ -90,13 +90,13 @@ def _read_positions(
 
     """
     cart_mode = False
-    label = poscar_file.readline()
+    label = file.readline()
     if len(label.strip()) == 0 or label[0].strip() == "":
         raise InvalidFileException(
             f"missing first character in coordinate format: '{label}'"
         )
     if label[0].lower() == "s":  # selective dynamics
-        label = poscar_file.readline()
+        label = file.readline()
     if label[0].lower() == "c":
         cart_mode = True
     elif label[0].lower() != "d":
@@ -105,7 +105,7 @@ def _read_positions(
     positions = []
     for _ in range(num_atoms):
         try:
-            line = poscar_file.readline()
+            line = file.readline()
             position = [float(item) for item in line.split()[0:3]]
         except (EOFError, ValueError, IndexError) as exc:
             raise InvalidFileException(
@@ -140,10 +140,10 @@ def read_positions(
         File has an unexpected format.
     """
     filepath = pathify(filepath)
-    with open(filepath, "r", encoding="utf-8") as poscar_file:
-        lattice = _read_lattice(poscar_file)
-        atomic_symbols = _read_atomic_symbols(poscar_file)
-        positions = _read_positions(poscar_file, lattice, len(atomic_symbols))
+    with open(filepath, "r", encoding="utf-8") as file:
+        lattice = _read_lattice(file)
+        atomic_symbols = _read_atomic_symbols(file)
+        positions = _read_positions(file, lattice, len(atomic_symbols))
         return positions
 
 
@@ -164,11 +164,11 @@ def read_ref_structure(
         File was read successfully but symmetry search failed.
     """
     filepath = pathify(filepath)
-    with open(filepath, "r", encoding="utf-8") as poscar_file:
-        lattice = _read_lattice(poscar_file)
-        atomic_symbols = _read_atomic_symbols(poscar_file)
+    with open(filepath, "r", encoding="utf-8") as file:
+        lattice = _read_lattice(file)
+        atomic_symbols = _read_atomic_symbols(file)
         atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
-        positions = _read_positions(poscar_file, lattice, len(atomic_symbols))
+        positions = _read_positions(file, lattice, len(atomic_symbols))
         return ReferenceStructure(atomic_numbers, lattice, positions)
 
 
@@ -240,10 +240,10 @@ def write_structure(  # pylint: disable=too-many-arguments
     lattice_str = _get_lattice_str(lattice)
     symbols_str = _get_symbols_str(atomic_numbers)
     positions_str = _get_positions_str(positions)
-    with open(filepath, open_mode, encoding="utf-8") as poscar_file:
-        poscar_file.write(label_str)
-        poscar_file.write("   1.00000000000000" + "\n")
-        poscar_file.write(lattice_str)
-        poscar_file.write(symbols_str)
-        poscar_file.write("Direct\n")
-        poscar_file.write(positions_str)
+    with open(filepath, open_mode, encoding="utf-8") as file:
+        file.write(label_str)
+        file.write("   1.00000000000000" + "\n")
+        file.write(lattice_str)
+        file.write(symbols_str)
+        file.write("Direct\n")
+        file.write(positions_str)
