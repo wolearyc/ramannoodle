@@ -29,7 +29,7 @@ jobs:
         pip install uv
         uv pip install ${{ matrix.uv-arg }} --system -r requirements.txt
     - name: Analyzing the code with pylint
-      if: ${{ matrix.os != windows-latest }} # Windows throws strange linting errors
+      if: ${{ matrix.os != "windows-latest" }} # Windows throws strange linting errors
       run: |
         pylint $(git ls-files '*.py')
     - name: Analyzing the code with flake8
