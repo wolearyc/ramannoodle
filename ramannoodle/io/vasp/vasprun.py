@@ -2,7 +2,7 @@
 
 from typing import TextIO
 from pathlib import Path
-from xml.etree.ElementTree import Element, ParseError
+from xml.etree.ElementTree import Element
 import defusedxml.ElementTree as ET
 
 import numpy as np
@@ -21,7 +21,7 @@ def _get_root_element(file: TextIO) -> Element:
         root = ET.parse(file).getroot()
         assert isinstance(root, Element)
         return root
-    except ParseError as exc:
+    except ET.ParseError as exc:
         raise InvalidFileException("root xml element could not be found") from exc
 
 
