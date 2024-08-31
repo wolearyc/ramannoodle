@@ -23,24 +23,25 @@ class RamanSpectrum(ABC):  # pylint: disable=too-few-public-methods
         Parameters
         ----------
         orientation
-            Currently only "polycrystalline" is supported. Future versions will support
-            arbitrary orientations.
+            Supports ``"polycrystalline"``.
+
+            Future versions will support arbitrary orientations.
         laser_correction
-            Applies laser-wavelength-dependent intensity correction. If True,
-            ``laser_wavelength`` must be specified.
+            | Whether to apply laser-wavelength-dependent intensity correction.
         laser_wavelength
-            In nm.
+            | (nm) Ignored if ``laser_correction == False``.
         bose_einstein_correction
-            Applies temperature-dependent Bose Einstein correction. If True,
-            ``temperature`` must be specified.
+            | Whether to apply temperature-dependent Bose Einstein correction.
         temperature
-            In Kelvin.
+            | (K) Ignored if ``bose_einstein_correction == False``.
 
         Returns
         -------
         :
-            2-tuple. First element is wavenumbers (cm\ :sup:`-1`), a 1D array. The
-            second element is intensities (arbitrary units), a 1D array of the same
-            shape.
+            2-tuple:
+                0. | wavenumbers --
+                   | (cm\ :sup:`-1`) 1D array with shape (M,).
+                #. | intensities --
+                   | (arbitrary units) 1D array with shape (M,).
 
         """

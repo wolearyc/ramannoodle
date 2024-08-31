@@ -14,15 +14,18 @@ from ramannoodle.structure.structure_utils import apply_pbc
 
 
 class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
-    r"""Trajectory from molecular dynamics.
+    r"""Molecular dynamics trajectory.
+
+    A trajectory is represented as a positions time series (``positions_ts``) and a
+    timestep.
 
     Parameters
     ----------
     positions_ts
-        Unitless | 3D array with shape (S,N,3) where S in the number of configurations
-        and N is the number of atoms.
+        | (fractional) 3D array with shape (S,N,3) where S in the number of
+        | configurations and N is the number of atoms.
     timestep
-        In fs.
+        | (fs)
 
     """
 
@@ -49,8 +52,8 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
         Returns
         -------
         :
-            Unitless | 3D array with shape (S,N,3) where S in the number of
-            molecular dynamics snapshots and N is the number of atoms.
+            (fractional) 3D array with shape (S,N,3) where S in the number of
+            configurations and N is the number of atoms.
         """
         return self._positions_ts.copy()
 
@@ -67,7 +70,7 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
         Parameters
         ----------
         polarizability_model
-            Must be compatible with the trajectory.
+            | Must be compatible with the trajectory.
         """
         try:
             polarizability_ts = polarizability_model.calc_polarizabilities(

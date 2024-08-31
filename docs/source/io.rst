@@ -1,7 +1,7 @@
 Interfacing with first-principles software
 ==========================================
 
-Ramannoodle includes routines for reading and writing files used by quantum chemistry software. Currently, ramannoodle only supports VASP. However, we hope to include interfaces with other codes in future versions.
+Ramannoodle includes routines for reading and writing files used by quantum chemistry software. Currently, ramannoodle only supports VASP. We hope to include community-contributed interfaces with other codes in future versions.
 
 IO
 ---
@@ -55,4 +55,4 @@ The following table reviews which file types and properties are currently suppor
 +---------------------------------+------------------------------+-------------------+----------------------+----------------------+----------------+
 
 :sup:`1` Uses initial structure.
-:sup:`2` Not available in ``generic_io``
+:sup:`2` Not available in :mod:`ramannoodle.io.generic`

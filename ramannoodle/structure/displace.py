@@ -1,6 +1,6 @@
 """Routines for generating and writing displaced structures.
 
-These functions are useful for preparing polarizability calculations needed for
+These routines are useful for preparing polarizability calculations needed for
 :class:`~.InterpolationModel` and :class:`~.ARTModel`.
 
 """
@@ -38,16 +38,18 @@ def get_displaced_positions(
     Parameters
     ----------
     ref_structure
-        Reference structure containing N atoms.
+        | Reference structure containing N atoms.
     cart_displacement
-        Å | 2D array with shape (N,3). Magnitude is arbitrary.
+        (Å) 2D array with shape (N,3).
+
+        Magnitude is arbitrary.
     amplitudes
-        Å | 1D array with shape (M,).
+        | (Å) 1D array with shape (M,).
 
     Returns
     -------
     :
-        Unitless | List of length M containing arrays with shape (N,3).
+        (fractional) List of length M containing 2D arrays with shape (N,3).
 
     """
     try:
@@ -86,15 +88,18 @@ def write_displaced_structures(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     ref_structure
-        Reference structure of N atoms
+        | Reference structure containing N atoms
     cart_displacement
-        Å | 2D array with shape (N,3). Magnitude is arbitrary.
+        (Å) 2D array with shape (N,3).
+
+        Magnitude is arbitrary.
     amplitudes
-        Å | 1D array with shape (M,).
+        | (Å) 1D array with shape (M,).
     file_paths
     file_format
-        Supports: "poscar" (see :ref:`Supported formats`).
+        | Supports ``"poscar"`` (see :ref:`Supported formats`).
     overwrite
+        | Overwrite the file if it exists.
     """
     file_paths = pathify_as_list(file_paths)
     position_list = get_displaced_positions(
@@ -124,17 +129,19 @@ def get_ast_displaced_positions(
     Parameters
     ----------
     ref_structure
-        Reference structure containing N atoms.
+        | Reference structure containing N atoms.
     atom_index
     cart_direction
-        Å | 1D array with shape (3,). Magnitude is arbitrary.
+        (Å) 1D array with shape (3,).
+
+        Magnitude is arbitrary.
     amplitudes
-        Å | 1D array with shape (M,).
+        | (Å) 1D array with shape (M,).
 
     Returns
     -------
     :
-        Unitless | List of length M containing arrays with shape (N,3).
+        (fractional) List of length M containing 2D arrays with shape (N,3).
     """
     try:
         cart_direction = cart_direction / float(np.linalg.norm(cart_direction))
@@ -168,14 +175,16 @@ def write_ast_displaced_structures(  # pylint: disable=too-many-arguments
         Reference structure containing N atoms.
     atom_index
     cart_direction
-        Å | 1D array with shape (3,). Magnitude is arbitrary.
+        | (Å) 1D array with shape (3,).
+
+        Magnitude is arbitrary.
     amplitudes
-        Å | 1D array with shape (M,).
+        | (Å) 1D array with shape (M,).
     file_paths
     file_format
-        Supports: "poscar" (see :ref:`Supported formats`).
+        | Supports ``"poscar"`` (see :ref:`Supported formats`).
     overwrite
-        Whether or overwrite the file if it exists.
+        | Overwrite the file if it exists.
     """
     file_paths = pathify_as_list(file_paths)
     position_list = get_ast_displaced_positions(

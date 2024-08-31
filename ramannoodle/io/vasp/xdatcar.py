@@ -30,13 +30,15 @@ def read_positions_ts(
     Returns
     -------
     :
-        Unitless | 2D array with shape (S,N,3) where S is the number of configurations
+        (fractional) 2D array with shape (S,N,3) where S is the number of configurations
         and N is the number of atoms.
 
     Raises
     ------
+    FileNotFoundError
+        File not found.
     InvalidFileException
-        File has an unexpected format.
+        Invalid file.
     """
     filepath = pathify(filepath)
     positions_ts = []
@@ -60,18 +62,20 @@ def read_trajectory(
 ) -> Trajectory:
     """Read trajectory from a VASP XDATCAR file.
 
-    XDATCAR's do not store the timestep. Timestep must therefore be manually specified.
+    Timestep must be manually specified, as XDATCAR's do not contain the timestep.
 
     Parameters
     ----------
     filepath
     timestep
-        In fs.
+        | (fs)
 
     Raises
     ------
+    FileNotFoundError
+        File not found.
     InvalidFileException
-        File has an unexpected format.
+        Invalid file.
     """
     positions_ts = read_positions_ts(filepath)
     return Trajectory(positions_ts, timestep)
@@ -90,17 +94,17 @@ def write_trajectory(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        Å | 2D array with shape (3,3).
+        | (Å) 2D array with shape (3,3).
     atomic_numbers
-        1D list of length N where N is the number of atoms.
+        | 1D list of length N where N is the number of atoms.
     positions_ts
-        Unitless | 3D array with shape (S,N,3) where S is the number of molecular
-        dynamics snapshots.
+        | (fractional) 3D array with shape (S,N,3) where S is the number of
+        | configurations.
     filepath
     overwrite
-        Overwrite the file if it exists.
+        | Overwrite the file if it exists.
     label
-        XDATCAR label (first line).
+        | XDATCAR label (first line).
     """
     verify_trajectory(lattice, atomic_numbers, positions_ts)
     filepath = pathify(filepath)

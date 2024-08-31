@@ -18,18 +18,14 @@ def get_bose_einstein_correction(
     Parameters
     ----------
     wavenumbers
-        cm\ :sup:`-1` | 1D array with shape (M,).
+        | (cm\ :sup:`-1`) 1D array with shape (M,).
     temperature
-        In Kelvin.
+        | (K)
 
     Returns
     -------
     :
-        Correction factor for each wavenumber.
-
-    Raises
-    ------
-    ValueError
+        1D array with shape (M,).
 
     """
     try:
@@ -52,14 +48,14 @@ def get_laser_correction(
     Parameters
     ----------
     wavenumbers
-        cm\ :sup:`-1` | 1D array with shape (M,).
+        | (cm\ :sup:`-1`) 1D array with shape (M,).
     laser_wavenumber
-        In cm\ :sup:`-1`.
+        | (cm\ :sup:`-1`)
 
     Returns
     -------
     :
-        Correction factor for each wavenumber.
+        1D array with shape (M,).
 
     """
     try:
@@ -76,12 +72,15 @@ def get_laser_correction(
 class PhononRamanSpectrum(RamanSpectrum):
     r"""Phonon-based first-order Raman spectrum.
 
+    The spectrum is specified by a list of phonon wavenumbers and corresponding Raman
+    tensors.
+
     Parameters
     ----------
     phonon_wavenumbers
-        cm\ :sup:`-1` | 1D array with shape (M,) where M is the number of phonons.
+        | (cm\ :sup:`-1`) 1D array with shape (M,) where M is the number of phonons.
     raman_tensors
-        Unitless | 3D array with shape (M,3,3).
+        | 3D array with shape (M,3,3).
 
     """
 
@@ -99,23 +98,23 @@ class PhononRamanSpectrum(RamanSpectrum):
 
     @property
     def phonon_wavenumbers(self) -> NDArray[np.float64]:
-        r"""Get (a copy of) phonon_wavenumbers.
+        r"""Get (a copy of) phonon wavenumbers.
 
         Returns
         -------
         :
-            cm\ :sup:`-1` | 1D array with shape (M,) where M is the number of phonons.
+            (cm\ :sup:`-1`) 1D array with shape (M,) where M is the number of phonons.
         """
         return self._phonon_wavenumbers.copy()
 
     @property
     def raman_tensors(self) -> NDArray[np.float64]:
-        """Get (a copy of) raman_tensors.
+        """Get (a copy of) Raman tensors.
 
         Returns
         -------
         :
-            Unitless | 3D array with shape (M,3,3) where M is the number of phonons.
+            3D array with shape (M,3,3) where M is the number of phonons.
         """
         return self._raman_tensors.copy()
 
@@ -132,30 +131,31 @@ class PhononRamanSpectrum(RamanSpectrum):
         Parameters
         ----------
         orientation
-            Currently only "polycrystalline" is supported. Future versions will support
-            arbitrary orientations.
+            Supports ``"polycrystalline"``.
+
+            Future versions will support arbitrary orientations.
         laser_correction
-            Applies laser-wavelength-dependent intensity correction. If True,
-            ``laser_wavelength`` must be specified.
+            | Whether to apply laser-wavelength-dependent intensity correction.
         laser_wavelength
-            In nm.
+            | (nm) Ignored if ``laser_correction == False``.
         bose_einstein_correction
-            Applies temperature-dependent Bose Einstein correction. If True,
-            ``temperature`` must be specified.
+            | Whether to apply temperature-dependent Bose Einstein correction.
         temperature
-            In Kelvin.
+            | (K) Ignored if ``bose_einstein_correction == False``.
 
         Returns
         -------
         :
-            2-tuple. First element is wavenumbers (cm\ :sup:`-1`), a 1D array with
-            shape (M,) where M is the number of phonons. The second element is
-            intensities (arbitrary units), a 1D array with shape (M,).
+            2-tuple:
+                0. | wavenumbers --
+                   | (cm\ :sup:`-1`) 1D array with shape (M,).
+                #. | intensities --
+                   | (arbitrary units) 1D array with shape (M,).
 
         Raises
         ------
         NotImplementedError
-            Raised when any orientation besides "polycrystalline" is supplied.
+            Raised when any orientation besides ``"polycrystalline"`` is supplied.
 
         """
         if orientation != "polycrystalline":
@@ -200,13 +200,15 @@ class PhononRamanSpectrum(RamanSpectrum):
 class MDRamanSpectrum(RamanSpectrum):
     """Molecular-dynamics-based Raman spectrum.
 
+    The spectrum is specified by a polarizability time series (``polarizability_ts``)
+    and a timestep.
+
     Parameters
     ----------
     polarizability_ts
-        Polarizability time series, an array with shape (S,3,3) where S is the number
-        of molecular dynamics snapshots.
+        | 3D array with shape (S,3,3) where S is the number of configurations.
     timestep
-        in fs
+        | (fs)
 
     """
 
@@ -223,14 +225,19 @@ class MDRamanSpectrum(RamanSpectrum):
         Returns
         -------
         :
-            Array with shape (S,3,3) where S is the number of molecular dynamics
-            snapshots.
+            3D array with shape (S,3,3) where S is the number of configurations.
         """
         return self._polarizability_ts
 
     @property
     def timestep(self) -> float:
-        """Get timestep in fs."""
+        """Get timestep.
+
+        Returns
+        -------
+        :
+            (fs)
+        """
         return self._timestep
 
     def measure(  # pylint: disable=too-many-arguments
@@ -244,31 +251,32 @@ class MDRamanSpectrum(RamanSpectrum):
         r"""Calculate and return a raw Raman spectrum.
 
         .. note:: Raw MD-derived Raman spectra will typically need to be smoothed to be
-                  visualized effectively. To do this, see :func:`convolve_spectrum`.
+                  visualized effectively. See :func:`.spectrum_utils.convolve_spectrum`.
 
         Parameters
         ----------
         orientation
-            Currently only "polycrystalline" is supported. Future versions will support
-            arbitrary orientations.
+            Supports ``"polycrystalline"``.
+
+            Future versions will support arbitrary orientations.
         laser_correction
-            Applies laser-wavelength-dependent intensity correction. If True,
-            ``laser_wavelength`` must be specified.
+            | Whether to apply laser-wavelength-dependent intensity correction.
         laser_wavelength
-            In nm.
+            | (nm) Ignored if ``laser_correction == False``.
         bose_einstein_correction
-            Applies temperature-dependent Bose Einstein correction. If True,
-            ``temperature`` must be specified.
+            | Whether to apply temperature-dependent Bose Einstein correction.
         temperature
-            In Kelvin.
+            | (K) Ignored if ``bose_einstein_correction == False``.
 
         Returns
         -------
         :
-            2-tuple. First element is wavenumbers (cm\ :sup:`-1`), a 1D array with
-            shape ( ceiling(S / 2), ) where S is the number of molecular dynamics
-            snapshots. The second element is intensities (arbitrary units), a 1D array
-            of the same shape as the wavenumbers.
+            2-tuple:
+                0. | wavenumbers --
+                   | (cm\ :sup:`-1`) 1D array with shape (ceiling(S / 2),) where S is
+                   | the number of configurations.
+                #. | intensities --
+                   | (arbitrary units) 1D array with shape (ceiling(S / 2),).
 
         """
         if orientation != "polycrystalline":

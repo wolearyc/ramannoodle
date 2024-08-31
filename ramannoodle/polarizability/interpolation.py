@@ -38,7 +38,13 @@ def get_amplitude(
     cart_basis_vector: NDArray[np.float64],
     cart_displacement: NDArray[np.float64],
 ) -> float:
-    """Get amplitude of a displacement (Å)."""
+    """Get amplitude of a displacement.
+
+    Returns
+    -------
+    :
+        (Å)
+    """
     return float(np.dot(cart_basis_vector.flatten(), cart_displacement.flatten()))
 
 
@@ -61,10 +67,10 @@ def find_duplicates(vectors: Iterable[ArrayLike]) -> NDArray | None:
 
 
 class InterpolationModel(PolarizabilityModel):
-    """Polarizability model based on interpolation around degrees of freedom.
+    """Polarizability model based on interpolation around degrees of freedom (DOFs).
 
     One is free to specify the interpolation order as well as the precise
-    the degrees of freedom, so long as they are orthogonal. For example, one can
+    the DOFs, so long as they are orthogonal. For example, one can
     employ first-order (linear) interpolation around phonon displacements to calculate
     a conventional Raman spectrum. One can achieve identical results -- often with fewer
     calculations -- by using first-order interpolations around atomic displacements.
@@ -75,10 +81,9 @@ class InterpolationModel(PolarizabilityModel):
     Parameters
     ----------
     ref_structure
+        | Reference structure on which to base the model.
     equilibrium_polarizability
-        Unitless | 2D array with shape (3,3) giving polarizability of system at
-        equilibrium. This would usually correspond to the minimum energy structure. If
-        dummy model, the value of equilibrium_polarizability is ignored.
+        | 2D array with shape (3,3) with polarizability of the reference structure.
     is_dummy_model
 
     """
@@ -114,13 +119,13 @@ class InterpolationModel(PolarizabilityModel):
         Returns
         -------
         :
-            Unitless | 2D array with shape (3,3).
+            2D array with shape (3,3).
         """
         return self._equilibrium_polarizability.copy()
 
     @property
     def is_dummy_model(self) -> bool:
-        """Get is_dummy_model."""
+        """Get whether model is a dummy model."""
         return self._is_dummy_model
 
     @property
@@ -130,7 +135,7 @@ class InterpolationModel(PolarizabilityModel):
         Returns
         -------
         :
-            Å | List of length J containing 2D arrays with shape (N,3) where J is the
+            (Å) List of length J containing 2D arrays with shape (N,3) where J is the
             number of specified degrees of freedom and N is the number of atoms.
 
         """
@@ -164,14 +169,16 @@ class InterpolationModel(PolarizabilityModel):
         """Set mask.
 
         ..warning:: To avoid unintentional use of masked models, we discourage masking
-                    in-place. Instead, consider using `get masked_model`.
+                    in-place. Instead, consider using :meth:`get_masked_model`.
 
         Parameters
         ----------
         mask
             1D array of size (N,) where N is the number of specified degrees
-            of freedom (DOFs). If an element is False, its corresponding DOF will be
-            "masked" and therefore excluded from polarizability calculations.
+            of freedom (DOFs).
+
+            If an element is False, its corresponding DOF will be "masked" and excluded
+            from polarizability calculations.
         """
         verify_ndarray_shape("mask", value, self._mask.shape)
         self._mask = value
@@ -184,18 +191,18 @@ class InterpolationModel(PolarizabilityModel):
         Parameters
         ----------
         positions_batch
-            Unitless | 3D array with shape (S,N,3) where S is the number of samples and
-            N is the number of atoms.
+            | (fractional) 3D array with shape (S,N,3) where S is the number of samples
+            | and N is the number of atoms.
 
         Returns
         -------
         :
-            Unitless | 3D array with shape (S,3,3).
+            3D array with shape (S,3,3).
 
         Raises
         ------
         UsageError
-            If model is a dummy model.
+            Model is a dummy model.
 
         """
         try:
@@ -402,30 +409,34 @@ class InterpolationModel(PolarizabilityModel):
     ) -> None:
         """Add a degree of freedom (DOF).
 
-        Specification of a DOF requires a displacement (how the atoms move) alongside
-        displacement amplitudes and corresponding known polarizabilities for each
-        amplitude. Alongside the DOF specified, all DOFs related by the system's
+        Specification of a DOF requires a displacement (directions the atoms move)
+        alongside displacement amplitudes and corresponding known polarizabilities for
+        each amplitude. Alongside the DOF specified, all DOFs related by the system's
         symmetry will be added as well. The interpolation order can be specified,
         though one must ensure that sufficient data is available.
 
         Parameters
         ----------
         cart_displacement
-            Å | 2D array with shape (N,3) where N is the number of atoms. Magnitude is
-            arbitrary. Must be orthogonal to all previously added DOFs.
+            (Å) 2D array with shape (N,3) where N is the number of atoms.
+
+            Magnitude is arbitrary. Must be orthogonal to all previously added DOFs.
         amplitudes
-            Å | 1D array of length L containing amplitudes in angstroms. Duplicate
-            amplitudes are not allowed, including symmetrically equivalent
-            amplitudes.
+            (Å) 1D array with shape (L,).
+
+            Duplicate amplitudes, either those explicitly provided or those generated
+            by structural symmetries, will raise :class:`.InvalidDOFException`.
         polarizabilities
-            Unitless | 3D array with shape (L,3,3) containing known polarizabilities for
-            each amplitude. If dummy model, value of polarizabilities is ignored.
+            3D array with shape (1,3,3) or (2,3,3) containing known
+            polarizabilities for each amplitude.
+
+            If dummy model, this parameter is ignored.
         interpolation_order
-            Must be less than the number of total number of amplitudes after
-            symmetry considerations.
+            | Must be less than the number of total number of amplitudes after
+            | symmetry considerations.
         include_equilibrium_polarizability
-            If False, the equilibrium polarizability at 0.0 amplitude will not be used
-            in the interpolation.
+            | Whether to include the equilibrium polarizability at 0.0 amplitude in the
+            | interpolation.
 
         Raises
         ------
@@ -471,22 +482,27 @@ class InterpolationModel(PolarizabilityModel):
         """Add a degree of freedom (DOF) from file(s).
 
         Required displacements, amplitudes, and polarizabilities are automatically
-        determined from provided files. See "add_dof" for restrictions on these
-        parameters.
+        determined from provided files. Files should be chosen wisely such that the
+        resulting DOFs are valid under the same restrictions of :meth:`add_dof`.
 
         Parameters
         ----------
         filepaths
         file_format
-            Supports: "outcar". If dummy model, supports: "outcar", "poscar" (see
-            :ref:`Supported formats`).
+            Supports ``"outcar"`` and ``"vasprun.xml"`` (see :ref:`Supported formats`).
+
+            If dummy model, supports ``"poscar"`` and ``"xdatcar"`` as well.
 
         Raises
         ------
         FileNotFoundError
-            File could not be found.
+            File not found.
+        InvalidFileException
+            Invalid file.
         InvalidDOFException
-            DOF assembled from supplied files was invalid (see get_dof)
+            DOF assembled from supplied files was invalid. See :meth:`add_dof` for
+            restrictions.
+
 
         """
         # Checks displacements

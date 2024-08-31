@@ -21,12 +21,11 @@ class Phonons(Dynamics):
     Parameters
     ----------
     ref_positions
-        Unitless | 2D array with shape (N,3) where N is the number of atoms.
+        | (fractional) 2D array with shape (N,3) where N is the number of atoms.
     wavenumbers
-        cm\ :sup:`-1` | 1D array with shape (M,)
+        | (cm\ :sup:`-1`) 1D array with shape (M,).
     displacements
-        Unitless | 3D array with shape (M,N,3).
-
+        | (fractional) 3D array with shape (M,N,3).
     """
 
     def __init__(
@@ -48,12 +47,12 @@ class Phonons(Dynamics):
 
     @property
     def ref_positions(self) -> NDArray[np.float64]:
-        r"""Get (a copy of) ref_positions.
+        r"""Get (a copy of) reference positions.
 
         Returns
         -------
         :
-            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+            (fractional) 2D array with shape (N,3) where N is the number of atoms.
         """
         return self._ref_positions.copy()
 
@@ -64,7 +63,7 @@ class Phonons(Dynamics):
         Returns
         -------
         :
-            cm\ :sup:`-1` | 1D array with shape (M,) where M is the number of phonons.
+            (cm\ :sup:`-1`) 1D array with shape (M,) where M is the number of phonons.
         """
         return self._wavenumbers.copy()
 
@@ -75,8 +74,8 @@ class Phonons(Dynamics):
         Returns
         -------
         :
-            Å | 3D array with shape (M,N,3) where M is the number of phonons
-            and N is the number of atoms.
+            (Å) 3D array with shape (M,N,3) where M is the number of phonons and N is
+            the number of atoms.
         """
         return self._displacements.copy()
 
@@ -88,7 +87,7 @@ class Phonons(Dynamics):
         Parameters
         ----------
         polarizability_model
-            must be compatible with phonons
+            | Must be compatible with phonons.
         """
         raman_tensors = []
         for displacement in self._displacements:

@@ -1,1 +1,1 @@
-"""Facilitates calculation of Raman spectra from VASP calculations."""
+"""Facilitates calculation of Raman spectra from first principles calculations."""

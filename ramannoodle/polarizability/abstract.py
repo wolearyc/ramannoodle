@@ -18,11 +18,11 @@ class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
         Parameters
         ----------
         positions_batch
-            Unitless | 3D array with shape (S,N,3) where S is the number of samples and
-            N is the number of atoms.
+            | (fractional) 3D array with shape (S,N,3) where S is the number of samples
+            | and N is the number of atoms.
 
         Returns
         -------
         :
-            Unitless | 3D array with shape (S,3,3).
+            3D array with shape (S,3,3).
         """

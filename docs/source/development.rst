@@ -1,5 +1,5 @@
-Dev Guide
-=========
+Development
+===========
 
 Contributions to ramannoodle - in the form of bug reports, feature suggestions, pull requests, etc. -  are always welcome! We are particularly interested in adding new interfaces to first-principles codes as well as developing new polarizability models. This document provides a few development guidelines. Please reach out on Github with any questions or if you want to collaborate :)
 

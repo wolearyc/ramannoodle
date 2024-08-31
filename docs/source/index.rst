@@ -6,13 +6,18 @@
 ramannoodle documentation
 =========================
 
-**Ramannoodle** is a Python API for calculating Raman spectra from first principles calculations in an efficient, flexible, and transparent way.
+**Ramannoodle** is a Python API for efficiently calculating Raman spectra from first principles calculations. Ramannoodle supports molecular-dynamics- and phonon-based Raman calculations and includes interfaces with VASP.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    introduction
+   tutorials
    guides
    API <generated/ramannoodle>
-   dev guide
+   development
+
+.. |br| raw:: html
+
+   <br />

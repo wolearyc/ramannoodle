@@ -132,12 +132,14 @@ def read_positions(
     Returns
     -------
     :
-        Unitless | 2D array with shape (N,3) where N is the number of atoms.
+        (fractional) 2D array with shape (N,3) where N is the number of atoms.
 
     Raises
     ------
+    FileNotFoundError
+        File not found.
     InvalidFileException
-        File has an unexpected format.
+        Invalid file.
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as file:
@@ -158,10 +160,12 @@ def read_ref_structure(
 
     Raises
     ------
+    FileNotFoundError
+        File not found.
     InvalidFileException
-        File has an unexpected format.
+        Invalid file.
     SymmetryException
-        File was read successfully but symmetry search failed.
+        Structural symmetry determination failed.
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as file:
@@ -219,16 +223,16 @@ def write_structure(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        Å | 2D array with shape (3,3).
+        | (Å) 2D array with shape (3,3).
     atomic_numbers
-        1D list of length N where N is the number of atoms.
+        | 1D list of length N where N is the number of atoms.
     positions
-        Unitless | 2D array with shape (N,3).
+        | (fractional) 2D array with shape (N,3).
     filepath
     overwrite
-        Overwrite the file if it exists.
+        | Overwrite the file if it exists.
     label
-        POSCAR label (first line).
+        | POSCAR label (first line).
     """
     verify_structure(lattice, atomic_numbers, positions)
     filepath = pathify(filepath)

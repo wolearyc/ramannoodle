@@ -21,22 +21,26 @@ def convolve_spectrum(
     Parameters
     ----------
     wavenumbers
-        cm\ :sup:`-1` | 1D array with shape (M,).
+        | (cm\ :sup:`-1`) 1D array with shape (M,).
     intensities
-        Arbitrary units | 1D array with shape (M,).
+        | (arbitrary units) 1D array with shape (M,).
     function
-        Convolution function. Must be either "gaussian" or "lorentzian".
+        | Supports ``"gaussian"`` or ``"lorentzian"``.
     width
-        In cm\ :sup:`-1`.
+        | (cm\ :sup:`-1`)
     out_wavenumbers
-        cm\ :sup:`-1` | Optional parameter the output wavenumbers. If None,
-        wavenumbers are determined automatically.
+        (cm\ :sup:`-1`) 1D array with shape (L,) where L is arbitrary.
+
+        If None, ``out_wavenumbers`` is determined automatically.
 
     Returns
     -------
     :
-        2-tuple containing wavenumbers (cm\ :sup:`-1`) and corresponding intensities
-        (arbitrary units).
+        2-tuple:
+                0. | wavenumbers (``out_wavenumbers``) --
+                   | (cm\ :sup:`-1`) 1D array with shape (L,).
+                #. | intensities --
+                   | (arbitrary units) 1D array with shape (L,).
 
     """
     if out_wavenumbers is None:
@@ -103,16 +107,18 @@ def calc_signal_spectrum(
     Parameters
     ----------
     signal
-        Array with shape (S,) where S is the number of samples.
+        | Array with shape (S,) where S is the number of samples.
     sampling_rate
-        In fs.
+        | (fs)
 
     Returns
     -------
     :
-        2-tuple. The first element is the wavenumbers in cm\ :sup:`-1`, an array with
-        shape ( ceiling(S / 2), ). The second element is the intensities (arbitrary
-        units), an array with the same shape as wavenumbers.
+        2-tuple:
+            0. | wavenumbers --
+               | (cm\ :sup:`-1`) 1D array with shape (ceiling(S / 2),).
+            #. | intensities --
+               | (arbitrary units) 1D array with shape (ceiling(S / 2),).
 
     """
     autocorrelation = _calc_autocorrelation(signal)

@@ -3,8 +3,8 @@
 Generic IO routines are somewhat inflexible but are necessary for certain
 functionality. Users are strongly encouraged to use IO routines contained in the
 code-specific subpackages. For example, IO for VASP POSCAR and OUTCAR files can be
-accomplished using `ramannoodle.io.vasp.poscar` or :mod:`ramannoodle.io.vasp.outcar`
-respectively.
+accomplished using :mod:`ramannoodle.io.vasp.poscar` or
+:mod:`ramannoodle.io.vasp.outcar` respectively.
 
 """
 
@@ -58,7 +58,7 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
     ----------
     filepath
     file_format
-        Supports: ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
+        | Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`).
 
     Returns
     -------
@@ -66,10 +66,10 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
 
     Raises
     ------
-    InvalidFileException
-        File has unexpected format.
     FileNotFoundError
-        File could not be found.
+        File not found.
+    InvalidFileException
+        Invalid file.
     """
     try:
         return _PHONON_READERS[file_format](filepath)
@@ -84,8 +84,9 @@ def read_trajectory(filepath: str | Path, file_format: str) -> Trajectory:
     ----------
     filepath
     file_format
-        Supports: ``"outcar"``, ``"vasprun.xml"``, (see :ref:`Supported formats`). To
-        read a trajectory from an XDATCAR, use :func:`.xdatcar.read_trajectory`.
+        | Supports ``"outcar"``, ``"vasprun.xml"``, (see :ref:`Supported formats`).
+        | Use :func:`.vasp.xdatcar.read_trajectory` to read a trajectory from an
+        | XDATCAR.
 
     Returns
     -------
@@ -93,10 +94,10 @@ def read_trajectory(filepath: str | Path, file_format: str) -> Trajectory:
 
     Raises
     ------
-    InvalidFileException
-        File has unexpected format.
     FileNotFoundError
-        File could not be found.
+        File not found.
+    InvalidFileException
+        Invalid file.
     """
     try:
         return _TRAJECTORY_READERS[file_format](filepath)
@@ -118,21 +119,23 @@ def read_positions_and_polarizability(
     ----------
     filepath
     file_format
-        Supports: ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
+        | Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`).
 
     Returns
     -------
     :
-        2-tuple, whose first element is the fractional positions, a 2D array with shape
-        (N,3) where N is the number of atoms. The second element is the polarizability
-        (unitless), a 2D array with shape (3,3).
+        2-tuple:
+            0. | positions --
+               | (fractional) 2D array with shape (N,3) where N is the number of atoms.
+            #. | polarizability --
+               | (fractional) 2D array with shape (3,3).
 
     Raises
     ------
-    InvalidFileException
-        File has unexpected format.
     FileNotFoundError
-        File could not be found.
+        File not found.
+    InvalidFileException
+        Invalid file.
     """
     try:
         return _POSITION_AND_POLARIZABILITY_READERS[file_format](filepath)
@@ -150,8 +153,8 @@ def read_positions(
     ----------
     filepath
     file_format
-        Supports: ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"``,  (see
-        :ref:`Supported formats`).
+        | Supports ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"``  (see
+        | :ref:`Supported formats`).
 
     Returns
     -------
@@ -160,10 +163,11 @@ def read_positions(
 
     Raises
     ------
-    InvalidFileException
-        File has unexpected format.
     FileNotFoundError
-        File could not be found.
+        File not found.
+    InvalidFileException
+        Invalid file.
+
     """
     try:
         return _POSITION_READERS[file_format](filepath)
@@ -178,19 +182,21 @@ def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStruc
     ----------
     filepath
     file_format
-        Supports: ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"`` (see
-        :ref:`Supported formats`).
+        | Supports ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"`` (see
+        | :ref:`Supported formats`).
 
     Returns
     -------
-    StructuralSymmetry
+    :
 
     Raises
     ------
-    InvalidFileException
-        File has unexpected format.
     FileNotFoundError
-        File could not be found.
+        File not found.
+    InvalidFileException
+        Invalid file.
+    SymmetryException
+        Structural symmetry determination failed.
     """
     try:
         return _REFERENCE_STRUCTURE_READERS[file_format](filepath)
@@ -211,20 +217,23 @@ def write_structure(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        Å | 2D array with shape (3,3).
+        | (Å) 2D array with shape (3,3).
     atomic_numbers
-        1D list of length N where N is the number of atoms.
+        | 1D list of length N where N is the number of atoms.
     positions
-        Unitless | 2D array with shape (N,3).
+        | (fractional) 2D array with shape (N,3).
     filepath
     file_format
-        Supports: ``"poscar"`` (see :ref:`Supported formats`).
+        | Supports ``"poscar"`` (see :ref:`Supported formats`).
     overwrite
-        overwrite the file if it exists.
+        | Overwrite the file if it exists.
+    label
+        | POSCAR label (first line).
 
     Raises
     ------
-    FileExistsError - File exists and ``overwrite = False``.
+    FileExistsError
+        File exists and ``overwrite == False``.
     """
     try:
         _STRUCTURE_WRITERS[file_format](
@@ -251,20 +260,22 @@ def write_trajectory(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        Å | 2D array with shape (3,3).
+        | (Å) 2D array with shape (3,3).
     atomic_numbers
-        1D list of length N where N is the number of atoms.
+        | 1D list of length N where N is the number of atoms.
     positions_ts
-        Unitless | 3D array with shape (S,N,3) where S is the number of configurations.
+        | (fractional) 3D array with shape (S,N,3) where S is the number of
+        | configurations.
     filepath
     file_format
-        Supports: ``"xdatcar"`` (see :ref:`Supported formats`).
+        | Supports ``"xdatcar"`` (see :ref:`Supported formats`).
     overwrite
-        overwrite the file if it exists.
+        | Overwrite the file if it exists.
 
     Raises
     ------
-    FileExistsError - File exists and ``overwrite = False``.
+    FileExistsError
+        File exists and ``overwrite == False``.
     """
     try:
         _TRAJECTORY_WRITERS[file_format](
