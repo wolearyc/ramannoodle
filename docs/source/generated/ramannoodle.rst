@@ -1,11 +1,6 @@
 ramannoodle package
 ===================
 
-.. automodule:: ramannoodle
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Subpackages
 -----------
 
@@ -33,6 +28,14 @@ ramannoodle.globals module
 --------------------------
 
 .. automodule:: ramannoodle.globals
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: ramannoodle
    :members:
    :undoc-members:
    :show-inheritance:

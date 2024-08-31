@@ -1,1 +1,1 @@
-"""Classes for storing and manipulating spectra."""
+"""Classes and functions for calculating and manipulating spectra."""

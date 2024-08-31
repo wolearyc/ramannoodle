@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ramannoodle"
-version = "0.2.0"
+version = "0.3.0"
 authors = [
     {name = "Willis O'Leary", email = "wolearyc@gmail.com"},
 ]
@@ -14,9 +14,21 @@ requires-python = ">=3.10"
 keywords = ["raman", "spectrum", "vasp", "dft", "phonons", "molecular", "dynamics", "polarizability" ]
 license = {text = "MIT"}
 dependencies = [
-    "numpy >= 2.0.1",
-    "scipy >= 1.14.0",
-    "spglib >= 2.5.0",
+    "numpy >= 1.24.0;python_version=='3.10'", # minimum recommended
+    "numpy >= 1.24.0;python_version=='3.11'", # minimum recommended
+    "numpy >= 1.26.0;python_version=='3.12'", # minimum working
+    "scipy >= 1.10.0;python_version=='3.10'", # minimum recommended
+    "scipy >= 1.10.0;python_version=='3.11'", # minimum recommended
+    "scipy >= 1.11.2;python_version=='3.12'", # minimum working
+    "spglib >= 1.16.4;python_version=='3.10'", # minimum working
+    "spglib >= 1.16.4;python_version=='3.11'", # minimum working
+    "spglib >= 1.16.4;python_version=='3.12'", # minimum working
+    "defusedxml >= 0.6.0;python_version=='3.10'", # minimum working
+    "defusedxml >= 0.6.0;python_version=='3.11'", # minimum working
+    "defusedxml >= 0.6.0;python_version=='3.12'", # minimum working
+    "tabulate >= 0.8.8;python_version=='3.10'", # minimum working
+    "tabulate >= 0.8.8;python_version=='3.11'", # minimum working
+    "tabulate >= 0.8.8;python_version=='3.12'", # minimum working
     "torch >= 2.4.0",
     "torch-geometric >= 2.5.3",
     "torch-sparse >= 0.6.18",

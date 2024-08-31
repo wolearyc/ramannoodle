@@ -1,4 +1,4 @@
-"""Tests for VASP-POSCAR-related routines."""
+"""Tests for VASP-POSCAR-related functions."""
 
 from typing import Type
 from pathlib import Path
@@ -104,7 +104,7 @@ def test_write_read_poscar(
             np.ones((3, 3)),
             [1, 1, 1, 3, 4, 4, 4, 30, 30],
             np.zeros((9, 3)),
-            "test/data/TiO2",
+            "test/data/TiO2/POSCAR",
             FileExistsError,
             "File exists",
             False,

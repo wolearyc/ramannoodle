@@ -16,9 +16,9 @@ def are_collinear(vector_1: NDArray[np.float64], vector_2: NDArray[np.float64]) 
     Parameters
     ----------
     vector_1
-        1D array with shape (M,).
+        | 1D array with shape (M,).
     vector_2
-        1D array with shape (M,).
+        | 1D array with shape (M,).
 
     """
     try:
@@ -47,13 +47,13 @@ def is_orthogonal_to_all(
     Parameters
     ----------
     vector_1
-        1D array with shape (M,).
+        | 1D array with shape (M,).
     vectors
-        Iterable containing 1D arrays with shape (M,).
+        | Iterable containing 1D arrays with shape (M,).
 
     Returns
     -------
-    int
+    :
         First index of non-orthogonal vector, otherwise -1.
 
     """
@@ -83,14 +83,14 @@ def is_collinear_with_all(
     Parameters
     ----------
     vector_1
-        1D array with shape (M,).
+        | 1D array with shape (M,).
     vectors
-        Iterable containing 1D arrays with shape (M,).
+        | Iterable containing 1D arrays with shape (M,).
 
     Returns
     -------
-    int
-        First index of non-collinear vector, otherwise -1.
+    :
+        | First index of non-collinear vector, otherwise -1.
 
     """
     # This implementation could be made more efficient.
@@ -109,13 +109,13 @@ def is_non_collinear_with_all(
     Parameters
     ----------
     vector_1
-        1D array with shape (M,).
+        | 1D array with shape (M,).
     vectors
-        Iterable containing 1D arrays with shape (M,).
+        | Iterable containing 1D arrays with shape (M,).
 
     Returns
     -------
-    int
+    :
         First index of collinear vector, otherwise -1.
 
     """

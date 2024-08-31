@@ -1,4 +1,4 @@
-"""Routines for generating and writing displaced structures.
+"""Functions for generating and writing displaced structures.
 
 These functions are useful for preparing polarizability calculations needed for
 :class:`~.InterpolationModel` and :class:`~.ARTModel`.
@@ -6,7 +6,7 @@ These functions are useful for preparing polarizability calculations needed for
 """
 
 # Design note:
-# These routines are not implemented in ReferenceStructure to give
+# These functions are not implemented in ReferenceStructure to give
 # greater modularity. For example, when different displacement methods are added (such
 # as Monte Carlo rattling or random displacements), we'd rather not add code to
 # Reference Structure. These functions stand alone, just like the IO functions.
@@ -38,16 +38,18 @@ def get_displaced_positions(
     Parameters
     ----------
     ref_structure
-        Reference structure containing N atoms.
+        | Reference structure containing N atoms.
     cart_displacement
-        Å | 2D array with shape (N,3). Magnitude is arbitrary.
+        (Å) 2D array with shape (N,3).
+
+        Magnitude is arbitrary.
     amplitudes
-        Å | 1D array with shape (M,).
+        | (Å) 1D array with shape (M,).
 
     Returns
     -------
     :
-        Unitless | List of length M containing arrays with shape (N,3).
+        (fractional) List of length M containing 2D arrays with shape (N,3).
 
     """
     try:
@@ -77,7 +79,7 @@ def write_displaced_structures(  # pylint: disable=too-many-arguments
     ref_structure: ReferenceStructure,
     cart_displacement: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
-    file_paths: str | Path | list[str] | list[Path],
+    filepaths: str | Path | list[str] | list[Path],
     file_format: str,
     overwrite: bool = False,
 ) -> None:
@@ -86,23 +88,26 @@ def write_displaced_structures(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     ref_structure
-        Reference structure of N atoms
+        | Reference structure containing N atoms
     cart_displacement
-        Å | 2D array with shape (N,3). Magnitude is arbitrary.
+        (Å) 2D array with shape (N,3).
+
+        Magnitude is arbitrary.
     amplitudes
-        Å | 1D array with shape (M,).
-    file_paths
+        | (Å) 1D array with shape (M,).
+    filepaths
     file_format
-        Supports: "poscar" (see :ref:`Supported formats`).
+        | Supports ``"poscar"`` (see :ref:`Supported formats`).
     overwrite
+        | Overwrite the file if it exists.
     """
-    file_paths = pathify_as_list(file_paths)
+    filepaths = pathify_as_list(filepaths)
     position_list = get_displaced_positions(
         ref_structure, cart_displacement, amplitudes
     )
-    verify_list_len("file_paths", file_paths, len(position_list))
+    verify_list_len("filepaths", filepaths, len(position_list))
 
-    for position, filepath in zip(position_list, file_paths):
+    for position, filepath in zip(position_list, filepaths):
         generic_io.write_structure(
             ref_structure.lattice,
             ref_structure.atomic_numbers,
@@ -124,17 +129,19 @@ def get_ast_displaced_positions(
     Parameters
     ----------
     ref_structure
-        Reference structure containing N atoms.
+        | Reference structure containing N atoms.
     atom_index
     cart_direction
-        Å | 1D array with shape (3,). Magnitude is arbitrary.
+        (Å) 1D array with shape (3,).
+
+        Magnitude is arbitrary.
     amplitudes
-        Å | 1D array with shape (M,).
+        | (Å) 1D array with shape (M,).
 
     Returns
     -------
     :
-        Unitless | List of length M containing arrays with shape (N,3).
+        (fractional) List of length M containing 2D arrays with shape (N,3).
     """
     try:
         cart_direction = cart_direction / float(np.linalg.norm(cart_direction))
@@ -156,7 +163,7 @@ def write_ast_displaced_structures(  # pylint: disable=too-many-arguments
     atom_index: int,
     cart_direction: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
-    file_paths: str | Path | list[str] | list[Path],
+    filepaths: str | Path | list[str] | list[Path],
     file_format: str,
     overwrite: bool = False,
 ) -> None:
@@ -168,22 +175,24 @@ def write_ast_displaced_structures(  # pylint: disable=too-many-arguments
         Reference structure containing N atoms.
     atom_index
     cart_direction
-        Å | 1D array with shape (3,). Magnitude is arbitrary.
+        | (Å) 1D array with shape (3,).
+
+        Magnitude is arbitrary.
     amplitudes
-        Å | 1D array with shape (M,).
-    file_paths
+        | (Å) 1D array with shape (M,).
+    filepaths
     file_format
-        Supports: "poscar" (see :ref:`Supported formats`).
+        | Supports ``"poscar"`` (see :ref:`Supported formats`).
     overwrite
-        Whether or overwrite the file if it exists.
+        | Overwrite the file if it exists.
     """
-    file_paths = pathify_as_list(file_paths)
+    filepaths = pathify_as_list(filepaths)
     position_list = get_ast_displaced_positions(
         ref_structure, atom_index, cart_direction, amplitudes
     )
-    verify_list_len("file_paths", file_paths, len(position_list))
+    verify_list_len("filepaths", filepaths, len(position_list))
 
-    for position, filepath in zip(position_list, file_paths):
+    for position, filepath in zip(position_list, filepaths):
         generic_io.write_structure(
             ref_structure.lattice,
             ref_structure.atomic_numbers,
