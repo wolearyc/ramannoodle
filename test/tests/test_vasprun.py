@@ -1,5 +1,6 @@
 """Tests for VASP vasprun.xml routines."""
 
+from typing import Type, Callable
 from pathlib import Path
 
 import numpy as np
@@ -8,6 +9,8 @@ from numpy.typing import NDArray
 import pytest
 
 import ramannoodle.io.generic as generic_io
+import ramannoodle.io.vasp as vasp_io
+from ramannoodle.exceptions import InvalidFileException
 
 
 # pylint: disable=protected-access
@@ -145,3 +148,57 @@ def test_read_phonons(
     assert len(phonons.wavenumbers) == degrees_of_freedom
     assert np.isclose(phonons.wavenumbers[0:5], known_wavenumbers).all()
     assert np.isclose(phonons.displacements[-1][-1], known_last_displacement).all()
+
+
+@pytest.mark.parametrize(
+    "read_function, path_fixture, exception_type, reason",
+    [
+        (
+            vasp_io.vasprun.read_positions,
+            "test/data/TiO2/POSCAR",
+            InvalidFileException,
+            "root xml element could not be found",
+        ),
+        (
+            vasp_io.vasprun.read_positions_and_polarizability,
+            "test/data/malformed/vasprun.xml",
+            InvalidFileException,
+            "initial positions not found",
+        ),
+        (
+            vasp_io.vasprun.read_positions,
+            "test/data/malformed/vasprun.xml",
+            InvalidFileException,
+            "initial positions not found",
+        ),
+        (
+            vasp_io.vasprun.read_phonons,
+            "test/data/malformed/vasprun.xml",
+            InvalidFileException,
+            "atomic symbols not found",
+        ),
+        (
+            vasp_io.vasprun.read_ref_structure,
+            "test/data/malformed/vasprun.xml",
+            InvalidFileException,
+            "atomic symbols not found",
+        ),
+        (
+            vasp_io.vasprun.read_trajectory,
+            "test/data/malformed/vasprun.xml",
+            InvalidFileException,
+            "no trajectory found",
+        ),
+    ],
+    indirect=["path_fixture"],
+)
+def test_read_vasprun_exception(
+    read_function: Callable[[str | Path], None],
+    path_fixture: Path,
+    exception_type: Type[Exception],
+    reason: str,
+) -> None:
+    """Test vasprun read routines (exception)."""
+    with pytest.raises(exception_type) as err:
+        read_function(path_fixture)
+    assert reason in str(err.value)

@@ -1,12 +1,12 @@
 """Functions for interacting with vasprun.xml files."""
 
+from typing import TextIO
 from pathlib import Path
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element, ParseError
 import defusedxml.ElementTree as ET
 
 import numpy as np
 from numpy.typing import NDArray
-
 
 from ramannoodle.io.io_utils import pathify
 from ramannoodle.exceptions import InvalidFileException
@@ -14,6 +14,15 @@ from ramannoodle.globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.dynamics.trajectory import Trajectory
 from ramannoodle.structure.reference import ReferenceStructure
+
+
+def _get_root_element(file: TextIO) -> Element:
+    try:
+        root = ET.parse(file).getroot()
+        assert isinstance(root, Element)
+        return root
+    except ParseError as exc:
+        raise InvalidFileException("root xml element could not be found") from exc
 
 
 def _parse_atomic_symbols(root: Element) -> list[str]:
@@ -126,7 +135,7 @@ def read_positions_and_polarizability(
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as file:
-        root = ET.parse(file).getroot()
+        root = _get_root_element(file)
         structure_varray = root.find("./structure[@name='initialpos']/varray")
         if structure_varray is None:
             raise InvalidFileException("initial positions not found")
@@ -155,7 +164,7 @@ def read_positions(filepath: str | Path) -> NDArray[np.float64]:
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as file:
-        root = ET.parse(file).getroot()
+        root = _get_root_element(file)
         structure_varray = root.find("./structure[@name='initialpos']/varray")
         if structure_varray is None:
             raise InvalidFileException("initial positions not found")
@@ -184,7 +193,7 @@ def read_ref_structure(filepath: str | Path) -> ReferenceStructure:
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as file:
-        root = ET.parse(file).getroot()
+        root = _get_root_element(file)
         atomic_symbols = _parse_atomic_symbols(root)
         atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
         lattice = _parse_lattice(root)
@@ -226,7 +235,7 @@ def read_trajectory(filepath: str | Path) -> Trajectory:
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as file:
-        root = ET.parse(file).getroot()
+        root = _get_root_element(file)
 
         structures = root.iterfind("structure")
         positions_ts = []
@@ -307,7 +316,7 @@ def read_phonons(filepath: str | Path) -> Phonons:
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as file:
-        root = ET.parse(file).getroot()
+        root = _get_root_element(file)
 
         atomic_symbols = _parse_atomic_symbols(root)
         atomic_weights = np.array([ATOMIC_WEIGHTS[symbol] for symbol in atomic_symbols])

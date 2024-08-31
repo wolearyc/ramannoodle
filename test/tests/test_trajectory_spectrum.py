@@ -1,5 +1,7 @@
 """Testing for spectra."""
 
+from typing import Type
+
 import numpy as np
 from numpy.typing import NDArray
 import pytest
@@ -88,3 +90,51 @@ def test_spectrum(
 
         assert np.isclose(wavenumbers, known_wavenumbers).all()
         assert np.isclose(intensities, known_intensities, atol=1e-3).all()
+
+
+@pytest.mark.parametrize(
+    "outcar_ref_structure_fixture,timestep,key,exception_type,reason",
+    [
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            5,
+            0,
+            ValueError,
+            "polarizability_model and trajectory are incompatible",
+        ),
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            -1,
+            0,
+            ValueError,
+            "timestep must be positive",
+        ),
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            [1, 2],
+            0,
+            TypeError,
+            "timestep should have type float, not list",
+        ),
+    ],
+    indirect=["outcar_ref_structure_fixture"],
+)
+def test_trajectory_exception(
+    outcar_ref_structure_fixture: ReferenceStructure,
+    timestep: float,
+    key: int | slice,
+    exception_type: Type[Exception],
+    reason: str,
+) -> None:
+    """Test Trajectory class (exception)."""
+    ref_structure = outcar_ref_structure_fixture
+    model = InterpolationModel(ref_structure, np.zeros((3, 3)))
+
+    with pytest.raises(exception_type) as err:
+        trajectory = vasp_io.xdatcar.read_trajectory(
+            "test/data/STO/XDATCAR", timestep=timestep
+        )
+        trajectory.get_raman_spectrum(model)
+        trajectory[key]  # flake8: noqa:W0104 # pylint: disable=pointless-statement
+
+    assert reason in str(err.value)

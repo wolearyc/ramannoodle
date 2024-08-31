@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 
 from ramannoodle.dynamics.abstract import Dynamics
 from ramannoodle.polarizability.abstract import PolarizabilityModel
-from ramannoodle.exceptions import verify_ndarray_shape
+from ramannoodle.exceptions import verify_ndarray_shape, get_type_error
 from ramannoodle.spectrum.raman import MDRamanSpectrum
 from ramannoodle.structure.structure_utils import apply_pbc
 
@@ -32,6 +32,13 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
         timestep: float,
     ) -> None:
         verify_ndarray_shape("positions_ts", positions_ts, (None, None, 3))
+        try:
+            timestep = float(timestep)
+        except TypeError as exc:
+            raise get_type_error("timestep", timestep, "float") from exc
+        if timestep <= 0:
+            raise ValueError("timestep must be positive")
+
         self._positions_ts = apply_pbc(positions_ts)
         self._timestep = timestep
 
@@ -88,9 +95,6 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
         try:
             return self._positions_ts[key]
         except IndexError as exc:
-            raise IndexError("trajectory index out of range") from exc
-        except TypeError as exc:
-            type_name = type(key).__name__
-            raise TypeError(
-                f"trajectory indices must be integers or slices, not {type_name}"
-            ) from exc
+            if "out of bounds" in str(exc):
+                raise IndexError("trajectory index out of bounds") from exc
+            raise exc
