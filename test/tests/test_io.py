@@ -12,20 +12,39 @@ from ramannoodle.io.io_utils import pathify_as_list
 
 
 @pytest.mark.parametrize(
-    "read_function, file_format",
+    "read_function, file_format, reason",
     [
-        (generic_io.read_phonons, "bogus_format"),
-        (generic_io.read_positions_and_polarizability, "bogus_format"),
-        (generic_io.read_positions, "bogus_format"),
+        (generic_io.read_phonons, "bogus_format", "unsupported format: bogus_format"),
+        (
+            generic_io.read_positions_and_polarizability,
+            "bogus_format",
+            "unsupported format: bogus_format",
+        ),
+        (generic_io.read_positions, "bogus_format", "unsupported format: bogus_format"),
+        (
+            generic_io.read_trajectory,
+            "xdatcar",
+            "generic.read_trajectory does not support xdatcar",
+        ),
+        (
+            generic_io.read_trajectory,
+            "bogus_format",
+            "unsupported format: bogus_format",
+        ),
+        (
+            generic_io.read_ref_structure,
+            "bogus_format",
+            "unsupported format: bogus_format",
+        ),
     ],
 )
 def test_generic_read_exception(
-    read_function: Callable[[str | Path, str], None], file_format: str
+    read_function: Callable[[str | Path, str], None], file_format: str, reason: str
 ) -> None:
     """Test generic read functions (exception)."""
     with pytest.raises(ValueError) as err:
         read_function("fake path", file_format)
-    assert f"unsupported format: {file_format}" in str(err.value)
+    assert reason in str(err.value)
 
 
 @pytest.mark.parametrize(

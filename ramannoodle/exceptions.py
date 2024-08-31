@@ -6,27 +6,27 @@ from numpy.typing import NDArray
 
 
 class NoMatchingLineFoundException(Exception):
-    """Raised when no line can be found in file."""
+    """No matching line can be found in file."""
 
 
 class InvalidFileException(Exception):
-    """Raised when a file cannot be read due to formatting issues."""
+    """File cannot be read, likely due to due to invalid or unexpected format."""
 
 
 class InvalidDOFException(Exception):
-    """Raised when a degree of freedom is invalid."""
+    """A supplied degree of freedom is invalid."""
 
 
 class DOFWarning(UserWarning):
-    """Raised when a degree of freedom may not have been specified as intended."""
+    """A degree of freedom may not have been specified as intended."""
 
 
 class SymmetryException(Exception):
-    """Raised when symmetry operation fails."""
+    """Symmetry operation failed."""
 
 
 class UsageError(Exception):
-    """Raised when a user does something they shouldn't.
+    """The user has done something they shouldn't.
 
     This exception is used sparingly, as (ideally) the structure of the API should
     dictate what the user should and shouldn't do.

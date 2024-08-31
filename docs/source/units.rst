@@ -3,27 +3,29 @@ Units
 
 Ramannoodle uses the following units:
 
-+------------------------+--------------------+
-| Quantity               | Units              |
-+========================+====================+
-| Wavenumbers            | cm\ :sup:`-1`      |
-+------------------------+--------------------+
-| Intensities            | Arbitrary units    |
-+------------------------+--------------------+
-| Fractional coordinates | Unitless           |
-+------------------------+--------------------+
-| Polarizability         | Unitless\ :sup:`*` |
-+------------------------+--------------------+
-| Cartesian coordinates  | Å                  |
-+------------------------+--------------------+
-| Temperature            | K                  |
-+------------------------+--------------------+
-| Wavelength             | nm                 |
-+------------------------+--------------------+
++--------------------------+---------------+
+| Quantity                 | Units         |
++==========================+===============+
+| Wavenumbers              | cm\ :sup:`-1` |
++--------------------------+---------------+
+| Intensities              | Unitless      |
++--------------------------+---------------+
+| Fractional coordinates   | Unitless      |
++--------------------------+---------------+
+| Cartesian coordinates    | Å             |
++--------------------------+---------------+
+| Polarizability\ :sup:`1` | Unitless      |
++--------------------------+---------------+
+| Temperature              | K             |
++--------------------------+---------------+
+| Wavelength               | nm            |
++--------------------------+---------------+
+| Time                     | fs            |
++--------------------------+---------------+
 
-\ :sup:`*` Dielectric tensor is used.
+\ :sup:`1` Dielectric tensor is used.
 
-Ramannoodle almost always expresses positions, displacements, and directions in fractional coordinates. Those parameters that are expressed in Cartesian coordinates always have the prefix ``cart_`` appended
+By default, Ramannoodle works with positions, displacements, and directions in fractional coordinates. Some parameters are expressed in Cartesian coordinates; these parameters always have the prefix ``cart_`` appended:
 
 .. code-block:: python
 

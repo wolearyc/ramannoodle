@@ -63,3 +63,22 @@ def verify_structure(
             raise ValueError(f"invalid atomic number: {atomic_number}")
     verify_ndarray_shape("positions", positions, (len(atomic_numbers), 3))
     verify_positions("positions", positions)
+
+
+def verify_trajectory(
+    lattice: NDArray[np.float64],
+    atomic_numbers: list[int],
+    positions_ts: NDArray[np.float64],
+) -> None:
+    """Verify a trajectory.
+
+    :meta private:
+    """
+    verify_ndarray_shape("lattice", lattice, (3, 3))
+    verify_list_len("atomic_numbers", atomic_numbers, None)
+    for atomic_number in atomic_numbers:
+        if atomic_number not in ATOM_SYMBOLS.keys():
+            raise ValueError(f"invalid atomic number: {atomic_number}")
+    verify_ndarray_shape("positions_ts", positions_ts, (None, len(atomic_numbers), 3))
+    if (0 > positions_ts).any() or (positions_ts > 1.0).any():
+        raise ValueError("positions_ts has coordinates that are not between 0 and 1")

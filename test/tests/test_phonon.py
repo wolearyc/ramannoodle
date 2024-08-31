@@ -1,4 +1,4 @@
-"""Tests for phonon-related routines."""
+"""Tests for phonon-related functions."""
 
 from typing import Type
 
@@ -14,31 +14,41 @@ from ramannoodle.polarizability.art import ARTModel
 
 
 @pytest.mark.parametrize(
-    "wavenumbers, cart_displacements, exception_type, in_reason",
+    "ref_positions, wavenumbers, displacements, exception_type, in_reason",
     [
         (
+            {},
+            np.array([0, 1, 2, 3]),
+            np.zeros((4, 10, 3)),
+            TypeError,
+            "ref_positions should have type ndarray, not dict",
+        ),
+        (
+            np.random.random([10, 3]),
             [0, 1, 2, 3],
             np.zeros((4, 10, 3)),
             TypeError,
             "wavenumbers should have type ndarray, not list",
         ),
         (
+            np.random.random([10, 3]),
             np.array([0, 1, 2, 3]),
             np.zeros((5, 10, 3)),
             ValueError,
-            "cart_displacements has wrong shape: (5,10,3) != (4,_,3)",
+            "displacements has wrong shape: (5,10,3) != (4,10,3)",
         ),
     ],
 )
 def test_phonons_exception(
+    ref_positions: NDArray[np.float64],
     wavenumbers: NDArray[np.float64],
-    cart_displacements: NDArray[np.float64],
+    displacements: NDArray[np.float64],
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
     """Test phonon construction (exception)."""
     with pytest.raises(exception_type) as err:
-        Phonons(wavenumbers, cart_displacements)
+        Phonons(ref_positions, wavenumbers, displacements)
     assert in_reason in str(err.value)
 
 

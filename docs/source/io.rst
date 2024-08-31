@@ -1,7 +1,7 @@
 Interfacing with first-principles software
 ==========================================
 
-Ramannoodle includes routines for reading and writing files used by quantum chemistry software. Currently, ramannoodle only supports VASP. However, we hope to include interfaces with other codes in future versions.
+Ramannoodle includes functions for reading and writing files used by quantum chemistry software. Currently, ramannoodle only supports VASP. We hope to include community-contributed interfaces with other codes in future versions.
 
 IO
 ---
@@ -42,10 +42,17 @@ Supported formats
 
 The following table reviews which file types and properties are currently supported by ramannoodle's IO functions:
 
-+-------------------------------+------------------------------+-------------------+------------+----------------+
-| File format (``file_format``) | :class:`.ReferenceStructure` | :class:`.Phonons` | positions  | polarizability |
-+===============================+==============================+===================+============+================+
-| POSCAR (``"poscar"``)         | read/write                   |                   | read/write |                |
-+-------------------------------+------------------------------+-------------------+------------+----------------+
-| OUTCAR (``"outcar"``)         | read                         | read              | read       | read           |
-+-------------------------------+------------------------------+-------------------+------------+----------------+
++---------------------------------+------------------------------+-------------------+----------------------+----------------------+----------------+
+| File format (``file_format``)   | :class:`.ReferenceStructure` | :class:`.Phonons` | :class:`.Trajectory` | positions            | polarizability |
++=================================+==============================+===================+======================+======================+================+
+| POSCAR (``"poscar"``)           | read/write                   |                   |                      | read/write           |                |
++---------------------------------+------------------------------+-------------------+----------------------+----------------------+----------------+
+| OUTCAR (``"outcar"``)           | read\ :sup:`1`               | read              | read                 | read\ :sup:`1`       | read           |
++---------------------------------+------------------------------+-------------------+----------------------+----------------------+----------------+
+| XDATCAR (``"xdatcar"``)         | read\ :sup:`1`/write         |                   | read\ :sup:`2`/write | read\ :sup:`1`/write |                |
++---------------------------------+------------------------------+-------------------+----------------------+----------------------+----------------+
+| vasprun.xml (``"vasprun.xml"``) | read\ :sup:`1`               | read              | read                 | read\ :sup:`1`       | read           |
++---------------------------------+------------------------------+-------------------+----------------------+----------------------+----------------+
+
+:sup:`1` Uses initial structure.
+:sup:`2` Not available in :mod:`ramannoodle.io.generic`

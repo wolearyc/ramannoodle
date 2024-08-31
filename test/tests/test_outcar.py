@@ -1,4 +1,4 @@
-"""Tests for VASP-related routines."""
+"""Tests for VASP-related functions."""
 
 from pathlib import Path
 from typing import Type
@@ -20,15 +20,16 @@ from ramannoodle.exceptions import InvalidFileException
             "test/data/TiO2/phonons_OUTCAR",
             108,
             np.array([811.691808, 811.691808, 811.691808, 811.691808]),
-            np.array([-0.068172, 0.046409, 0.000000]) / np.sqrt(ATOMIC_WEIGHTS["Ti"]),
-            np.array([-0.011752, 0.074105, 0.000000]) / np.sqrt(ATOMIC_WEIGHTS["O"]),
+            np.array([-0.00599217, 0.00407925, 0.0]) / np.sqrt(ATOMIC_WEIGHTS["Ti"]),
+            np.array([-0.00103298, 0.00651367, 0.0]) / np.sqrt(ATOMIC_WEIGHTS["O"]),
         ),
         (
             "test/data/STO/phonons_OUTCAR",
             319,
             np.array([834.330726, 823.697768, 823.697768, 823.697768]),
-            np.array([-0.000016, 0.000016, 0.000016]) / np.sqrt(ATOMIC_WEIGHTS["Sr"]),
-            np.array([0.000000, -0.094664, 0.001916]) / np.sqrt(ATOMIC_WEIGHTS["O"]),
+            np.array([-1.01496507e-06, 1.01496507e-06, 1.01496507e-06])
+            / np.sqrt(ATOMIC_WEIGHTS["Sr"]),
+            np.array([0.0, -0.00600504, 0.00012154]) / np.sqrt(ATOMIC_WEIGHTS["O"]),
         ),
     ],
     indirect=["path_fixture"],
@@ -46,14 +47,14 @@ def test_read_phonons_from_outcar(
     known_degrees_of_freedom = known_num_atoms * 3
     assert phonons.wavenumbers.shape == (known_degrees_of_freedom,)
     assert np.isclose(phonons.wavenumbers[0:4], known_wavenumbers).all()
-    assert phonons.cart_displacements.shape == (
+    assert phonons.displacements.shape == (
         known_degrees_of_freedom,
         known_num_atoms,
         3,
     )
-    assert np.isclose(phonons.cart_displacements[0, 0], known_first_displacement).all()
-    print(phonons.cart_displacements[-1, -1])
-    assert np.isclose(phonons.cart_displacements[-1, -1], known_last_displacement).all()
+    assert np.isclose(phonons.displacements[0, 0], known_first_displacement).all()
+    print(phonons.displacements[-1, -1])
+    assert np.isclose(phonons.displacements[-1, -1], known_last_displacement).all()
 
 
 @pytest.mark.parametrize(
@@ -71,3 +72,23 @@ def test_read_phonons_from_outcar_exception(
     with pytest.raises(exception_type) as err:
         generic_io.read_phonons(path_fixture, file_format="outcar")
     assert in_reason in str(err.value)
+
+
+@pytest.mark.parametrize(
+    "path_fixture, trajectory_length, last_position",
+    [
+        (
+            "test/data/LLZO/OUTCAR_trajectory",
+            15,
+            np.array([0.83330583, 0.83331287, 0.29209206]),
+        ),
+    ],
+    indirect=["path_fixture"],
+)
+def test_read_trajectory_from_outcar(
+    path_fixture: Path, trajectory_length: int, last_position: NDArray[np.float64]
+) -> None:
+    """Test read_trajectory for outcar (normal)."""
+    trajectory = generic_io.read_trajectory(path_fixture, file_format="outcar")
+    assert len(trajectory) == trajectory_length
+    assert np.isclose(last_position, trajectory[-1][-1]).all()

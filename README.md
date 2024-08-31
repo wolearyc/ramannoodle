@@ -8,7 +8,9 @@
 
 ## About
 
-**ramannoodle** is a Python API for calculating Raman spectra from first-principles calculations. Ramannoodle is built from the ground up with the goals of being:
+**Ramannoodle** is a Python API for efficiently calculating Raman spectra from first principles calculations. Ramannoodle supports molecular-dynamics- and phonon-based Raman calculations and includes interfaces with VASP.
+
+Ramannoodle is designed from the ground up to be:
 
 1. **EFFICIENT**
 
@@ -22,14 +24,14 @@
 
     Ramannoodle is designed to give the user a good understanding of what is being calculated at varying levels of abstraction.
 
-**Ramannoodle interfaces with...**
+Ramannoodle includes interfaces with:
 
 * VASP
 * phonopy (planned)
 
 ## Installation
 
-ramannoodle can be installed via pip:
+Ramannoodle can be installed via pip:
 
 `
 $ pip install ramannoodle
@@ -41,7 +43,7 @@ $ pip install ramannoodle
 
 ## Contributing
 
-Contributions in the form of bug reports, feature suggestions, and pull requests are always welcome! Those contributing code should check out the [dev guide](https://ramannoodle.readthedocs.io/en/latest/dev%20guide.html).
+Contributions in the form of bug reports, feature suggestions, and pull requests are always welcome! Those contributing code should check out the [dev guide](https://ramannoodle.readthedocs.io/en/latest/development.html).
 
 ## Citing
 
@@ -49,12 +51,6 @@ coming soon...
 
 ## Future releases
 
-**0.3.0**
-* Support for molecular dynamics
-* IO support for Phonopy
-
-**1.0.0**
-* Official release and fixed public API
-
-**1.1.0**
-* ML polarizability models
+* **0.4.0** | ML polarizability models
+* **0.5.0** | Advanced spectra analyses
+* **1.0.0** | Official release

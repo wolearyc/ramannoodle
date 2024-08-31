@@ -2,8 +2,8 @@
 
 from abc import ABC, abstractmethod
 
-from ramannoodle.spectrum.raman import PhononRamanSpectrum
 from ramannoodle.polarizability.abstract import PolarizabilityModel
+from ramannoodle.spectrum.abstract import RamanSpectrum
 
 
 class Dynamics(ABC):  # pylint: disable=too-few-public-methods
@@ -12,11 +12,11 @@ class Dynamics(ABC):  # pylint: disable=too-few-public-methods
     @abstractmethod
     def get_raman_spectrum(
         self, polarizability_model: PolarizabilityModel
-    ) -> PhononRamanSpectrum:
+    ) -> RamanSpectrum:
         """Calculate a raman spectrum using a polarizability model.
 
         Parameters
         ----------
         polarizability_model
-            must be compatible with the dynamics
+            | Must be compatible with the dynamics.
         """

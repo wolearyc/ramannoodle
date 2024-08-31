@@ -17,7 +17,7 @@ from ramannoodle.structure.structure_utils import (
     displace_positions,
     transform_positions,
     apply_pbc_displacement,
-    calculate_displacement,
+    calc_displacement,
 )
 from ramannoodle.globals import ATOM_SYMBOLS
 from ramannoodle.structure import symmetry_utils
@@ -78,20 +78,20 @@ class ReferenceStructure:
     Parameters
     ----------
     atomic_numbers
-        List of length N where N is the number of atoms.
+        | List of length N where N is the number of atoms.
     lattice
-        Å | Lattice vectors expressed as a 2D array with shape (3,3).
+        | (Å) 2D array with shape (3,3).
     positions
-        Unitless | 2D array with shape (N,3) where N is the number of atoms.
+        | (fractional) 2D array with shape (N,3).
     symprec
-        Å | Distance tolerance for symmetry search (spglib).
+        | (Å) Distance tolerance for symmetry search (spglib).
     angle_tolerance
-        Degrees | Angle tolerance for symmetry search (spglib).
+        | (°) Angle tolerance for symmetry search (spglib).
 
     Raises
     ------
     SymmetryException
-        Symmetry could not be determined for supplied structure.
+        Structural symmetry determination failed.
 
     """
 
@@ -130,6 +130,11 @@ class ReferenceStructure:
         return copy.copy(self._atomic_numbers)
 
     @property
+    def num_atoms(self) -> int:
+        """Get number of atoms."""
+        return len(self._atomic_numbers)
+
+    @property
     def lattice(self) -> NDArray[np.float64]:
         """Get (a copy of) lattice.
 
@@ -147,17 +152,26 @@ class ReferenceStructure:
         Returns
         -------
         :
-            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+            (fractional) 2D array with shape (N,3) where N is the number of atoms.
         """
         return self._positions.copy()
 
-    def get_num_nonequivalent_atoms(self) -> int:
+    @property
+    def num_nonequivalent_atoms(self) -> int:
         """Get number of nonequivalent atoms."""
         assert self._symmetry_dict is not None
         return len(set(self._symmetry_dict["equivalent_atoms"]))
 
     def get_equivalent_atom_dict(self) -> dict[int, list[int]]:
-        """Get dictionary of equivalent atoms indexes."""
+        """Get dictionary of equivalent atoms indexes.
+
+        Returns
+        -------
+        :
+            dict:
+                | atom index --> list of equivalent atom indexes
+
+        """
         assert self._symmetry_dict is not None
         result: dict[int, list[int]] = {}
         for index, equiv_index in enumerate(self._symmetry_dict["equivalent_atoms"]):
@@ -175,7 +189,7 @@ class ReferenceStructure:
         Parameters
         ----------
         displacement
-            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+            | (fractional) 2D array with shape (N,3) where N is the number of atoms.
 
         Returns
         -------
@@ -185,7 +199,7 @@ class ReferenceStructure:
             within each dictionary will be collinear, corresponding to
             the same degree of freedom. The provided transformations are those that
             transform ``displacement`` into that degree of freedom. Displacements are
-            in fractional coordinates (unitless).
+            in fractional coordinates.
 
         """
         displacement = apply_pbc_displacement(displacement)
@@ -205,8 +219,9 @@ class ReferenceStructure:
                 ref_positions, rotation, translation
             )
             candidate_positions = permutation_matrix @ candidate_positions
-            candidate_displacement = calculate_displacement(
-                candidate_positions, self._positions
+            candidate_displacement = calc_displacement(
+                self._positions,
+                candidate_positions,
             )
 
             orthogonal_result = symmetry_utils.is_orthogonal_to_all(
@@ -254,17 +269,17 @@ class ReferenceStructure:
     def get_cart_displacement(
         self, displacement: NDArray[np.float64]
     ) -> NDArray[np.float64]:
-        """Convert a (fractional) displacement into cartesian coordinates.
+        """Convert a (fractional) displacement into Cartesian coordinates.
 
         Parameters
         ----------
         displacement
-            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+            | (fractional) Array with shape (...,N,3)  where N is the number of atoms.
 
         Returns
         -------
         :
-            Å | 2D array with shape (N,3).
+            (Å) | Array with shape (...,N,3).
         """
         displacement = apply_pbc_displacement(displacement)
 
@@ -276,12 +291,12 @@ class ReferenceStructure:
         Parameters
         ----------
         direction
-            Unitless | 1D array with shape (3,).
+            | (fractional) 1D array with shape (3,).
 
         Returns
         -------
         :
-            Å | 1D array with shape (3,).
+            (Å) 1D array with shape (3,).
         """
         direction = apply_pbc_displacement(direction)
         try:
@@ -297,12 +312,12 @@ class ReferenceStructure:
         Parameters
         ----------
         cart_displacement
-            Å | 2D array with shape (N,3) where N is the number of atoms.
+            | (Å) 2D array with shape (N,3) where N is the number of atoms.
 
         Returns
         -------
         :
-            Unitless | 2D array with shape (N,3) where N is the number of atoms.
+            (fractional) 2D array with shape (N,3).
         """
         verify_ndarray_shape("cart_displacement", cart_displacement, (None, 3))
         displacement = (cart_displacement) @ np.linalg.inv(self.lattice)
@@ -316,12 +331,12 @@ class ReferenceStructure:
         Parameters
         ----------
         cart_direction
-            Å | 1D array with shape (3,).
+            | (Å) 1D array with shape (3,).
 
         Returns
         -------
         :
-            Unitless | 1D array with shape (3,).
+            | (fractional) 1D array with shape (3,).
         """
         verify_ndarray_shape("direction", cart_direction, (3,))
         displacement = np.array([cart_direction]) @ np.linalg.inv(self.lattice)
@@ -334,8 +349,9 @@ class ReferenceStructure:
         ----------
         atom_symbols
             If integer or list of integers, specifies atom indexes. If string or list
-            of strings, specifies atom symbols. Mixtures of integers and strings are
-            allowed.
+            of strings, specifies atom symbols.
+
+            Mixtures of indexes and symbols are allowed.
         """
         symbols = [ATOM_SYMBOLS[number] for number in self._atomic_numbers]
         indexes = []

@@ -1,4 +1,4 @@
-"""Tests for structure displacement routines."""
+"""Tests for structure displacement functions."""
 
 from typing import Type
 
