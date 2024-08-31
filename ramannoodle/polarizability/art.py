@@ -58,7 +58,7 @@ class ARTModel(InterpolationModel):
         :meth:`add_art_from_files`.
 
     .. warning::
-        Due to the way ARTModel is implemented, the predicted tensor of the equilibrium
+        Due to the way ARTModel is implemented, the predicted tensor of the reference
         structure may be offset slightly. This is a fixed offset and therefore has no
         influence on Raman spectra calculations.
 
@@ -66,7 +66,7 @@ class ARTModel(InterpolationModel):
     ----------
     ref_structure
         | Reference structure on which to base the model.
-    equilibrium_polarizability
+    ref_polarizability
         | 2D array with shape (3,3) giving polarizability of the reference structure.
     is_dummy_model
 
@@ -78,7 +78,7 @@ class ARTModel(InterpolationModel):
         amplitudes: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
         interpolation_order: int,
-        include_equilibrium_polarizability: bool = True,
+        include_ref_polarizability: bool = True,
     ) -> None:
         """Disable add_dof.
 
@@ -171,7 +171,7 @@ class ARTModel(InterpolationModel):
             amplitudes,
             polarizabilities,
             1,
-            include_equilibrium_polarizability=False,
+            include_ref_polarizability=False,
         )
 
     def add_art_from_files(

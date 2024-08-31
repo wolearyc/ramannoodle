@@ -82,7 +82,7 @@ class InterpolationModel(PolarizabilityModel):
     ----------
     ref_structure
         | Reference structure on which to base the model.
-    equilibrium_polarizability
+    ref_polarizability
         | 2D array with shape (3,3) with polarizability of the reference structure.
     is_dummy_model
 
@@ -91,17 +91,15 @@ class InterpolationModel(PolarizabilityModel):
     def __init__(
         self,
         ref_structure: ReferenceStructure,
-        equilibrium_polarizability: NDArray[np.float64],
+        ref_polarizability: NDArray[np.float64],
         is_dummy_model: bool = False,
     ) -> None:
         if is_dummy_model:
-            equilibrium_polarizability = np.zeros((3, 3))
-        verify_ndarray_shape(
-            "equilibrium_polarizability", equilibrium_polarizability, (3, 3)
-        )
+            ref_polarizability = np.zeros((3, 3))
+        verify_ndarray_shape("ref_polarizability", ref_polarizability, (3, 3))
 
         self._ref_structure = ref_structure
-        self._equilibrium_polarizability = equilibrium_polarizability
+        self._ref_polarizability = ref_polarizability
         self._is_dummy_model = is_dummy_model
         self._cart_basis_vectors: list[NDArray[np.float64]] = []
         self._interpolations: list[BSpline] = []
@@ -113,15 +111,15 @@ class InterpolationModel(PolarizabilityModel):
         return copy.deepcopy(self._ref_structure)
 
     @property
-    def equilibrium_polarizability(self) -> NDArray[np.float64]:
-        """Get (a copy of) equilibrium polarizability.
+    def ref_polarizability(self) -> NDArray[np.float64]:
+        """Get (a copy of) reference polarizability.
 
         Returns
         -------
         :
             2D array with shape (3,3).
         """
-        return self._equilibrium_polarizability.copy()
+        return self._ref_polarizability.copy()
 
     @property
     def is_dummy_model(self) -> bool:
@@ -244,14 +242,14 @@ class InterpolationModel(PolarizabilityModel):
                 ) from err
             raise err
 
-        return delta_polarizabilities + self._equilibrium_polarizability
+        return delta_polarizabilities + self._ref_polarizability
 
     def _get_dof(  # pylint: disable=too-many-locals
         self,
         parent_displacement: NDArray[np.float64],
         amplitudes: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
-        include_equilibrium_polarizability: bool,
+        include_ref_polarizability: bool,
     ) -> tuple[
         list[NDArray[np.float64]], list[list[float]], list[list[NDArray[np.float64]]]
     ]:
@@ -300,7 +298,7 @@ class InterpolationModel(PolarizabilityModel):
 
             interpolation_x: list[float] = []
             interpolation_y: list[NDArray[np.float64]] = []
-            if include_equilibrium_polarizability:
+            if include_ref_polarizability:
                 interpolation_x.append(0.0)
                 interpolation_y.append(np.zeros((3, 3)))
 
@@ -315,9 +313,7 @@ class InterpolationModel(PolarizabilityModel):
                 for amplitude, polarizability in zip(amplitudes, polarizabilities):
                     interpolation_x.append(multiplier * amplitude)
                     rotation = transformation[0]
-                    delta_polarizability = (
-                        polarizability - self._equilibrium_polarizability
-                    )
+                    delta_polarizability = polarizability - self._ref_polarizability
 
                     interpolation_y.append(
                         (np.linalg.inv(rotation) @ delta_polarizability @ rotation)
@@ -405,7 +401,7 @@ class InterpolationModel(PolarizabilityModel):
         amplitudes: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
         interpolation_order: int,
-        include_equilibrium_polarizability: bool = True,
+        include_ref_polarizability: bool = True,
     ) -> None:
         """Add a degree of freedom (DOF).
 
@@ -434,8 +430,8 @@ class InterpolationModel(PolarizabilityModel):
         interpolation_order
             | Must be less than the number of total number of amplitudes after
             | symmetry considerations.
-        include_equilibrium_polarizability
-            | Whether to include the equilibrium polarizability at 0.0 amplitude in the
+        include_ref_polarizability
+            | Whether to include the references polarizability at 0.0 amplitude in the
             | interpolation.
 
         Raises
@@ -462,7 +458,7 @@ class InterpolationModel(PolarizabilityModel):
             parent_displacement,
             amplitudes,
             polarizabilities,
-            include_equilibrium_polarizability,
+            include_ref_polarizability,
         )
 
         # Then append the DOF - checks amplitudes (in form of interpolation_xs)
