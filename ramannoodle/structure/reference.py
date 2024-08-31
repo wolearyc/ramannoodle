@@ -156,7 +156,8 @@ class ReferenceStructure:
         """
         return self._positions.copy()
 
-    def get_num_nonequivalent_atoms(self) -> int:
+    @property
+    def num_nonequivalent_atoms(self) -> int:
         """Get number of nonequivalent atoms."""
         assert self._symmetry_dict is not None
         return len(set(self._symmetry_dict["equivalent_atoms"]))

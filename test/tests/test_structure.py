@@ -147,7 +147,7 @@ def test_ref_structure(
     """Test StructuralSymmetry (normal)."""
     # Equivalent atoms test
     ref_structure = outcar_ref_structure_fixture
-    assert ref_structure.get_num_nonequivalent_atoms() == known_nonequivalent_atoms
+    assert ref_structure.num_nonequivalent_atoms == known_nonequivalent_atoms
 
     # Equivalent displacement test
     displacement = ref_structure.positions * 0  # pylint: disable=protected-access
