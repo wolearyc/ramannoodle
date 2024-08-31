@@ -43,8 +43,6 @@ intersphinx_disabled_domains = ['std']
 templates_path = ['_templates']
 exclude_patterns = []
 
-language = 'english'
-
 autodoc_member_order = 'groupwise'
 
 # -- Options for HTML output -------------------------------------------------
