@@ -30,6 +30,7 @@ extensions = [
     'IPython.sphinxext.ipython_console_highlighting'
 ]
 autodoc_typehints = 'description'
+nbsphinx_allow_errors = True
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
@@ -42,7 +43,7 @@ intersphinx_disabled_domains = ['std']
 templates_path = ['_templates']
 exclude_patterns = []
 
-language = 'Python'
+language = 'english'
 
 autodoc_member_order = 'groupwise'
 

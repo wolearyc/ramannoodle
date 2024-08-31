@@ -74,8 +74,8 @@ class Phonons(Dynamics):
         Returns
         -------
         :
-            (Å) 3D array with shape (M,N,3) where M is the number of phonons and N is
-            the number of atoms.
+            (fractional) 3D array with shape (M,N,3) where M is the number of phonons
+            and N is the number of atoms.
         """
         return self._displacements.copy()
 

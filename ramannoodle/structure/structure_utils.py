@@ -11,7 +11,7 @@ from ramannoodle.exceptions import (
 
 
 def apply_pbc(positions: NDArray[np.float64]) -> NDArray[np.float64]:
-    """Return fractional positions such that all coordinates are b/t 0 and 1.
+    """Return fractional positions such that all coordinates are between 0 and 1.
 
     Parameters
     ----------
@@ -30,7 +30,7 @@ def apply_pbc(positions: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def apply_pbc_displacement(displacement: NDArray[np.float64]) -> NDArray[np.float64]:
-    """Return fractional displacement such as all coordinates are b/t -0.5 and 0.5.
+    """Return fractional displacement such as all coordinates are between -0.5 and 0.5.
 
     Parameters
     ----------
@@ -82,7 +82,7 @@ def transform_positions(
     Parameters
     ----------
     positions
-        (fractional) | 2D array with shape (N,3) where N is the number of atoms
+        | (fractional) 2D array with shape (N,3) where N is the number of atoms
     rotation
         | 2D array with shape (3,3).
     translation
@@ -111,8 +111,7 @@ def calc_displacement(
 ) -> NDArray[np.float64]:
     """Calculate minimum displacement between two fractional positions.
 
-    Respects periodic boundary conditions. Displacement is from positions_1 to
-    positions_2.
+    Respects periodic boundary conditions.
 
     Parameters
     ----------
@@ -125,6 +124,8 @@ def calc_displacement(
     -------
     :
         (fractional) 2D array with shape (N,3).
+
+        Displacement is from ``positions_1`` to ``positions_2``.
     """
     positions_1 = apply_pbc(positions_1)
     positions_2 = apply_pbc(positions_2)

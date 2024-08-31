@@ -182,7 +182,7 @@ class ARTModel(InterpolationModel):
         """Add an atomic Raman tensor (ART) from file(s).
 
         Required directions, amplitudes, and polarizabilities are automatically
-        determined from provided files. Files should be chosen wisely such that the
+        determined from provided files. Files should be chosen such that the
         resulting ARTs are valid under the same restrictions of :meth:`add_art`.
 
         Parameters

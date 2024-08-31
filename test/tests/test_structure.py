@@ -1,4 +1,4 @@
-"""Testing for symmetry-related routines."""
+"""Testing for symmetry-related functions."""
 
 from typing import Type
 

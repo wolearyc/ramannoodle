@@ -482,7 +482,7 @@ class InterpolationModel(PolarizabilityModel):
         """Add a degree of freedom (DOF) from file(s).
 
         Required displacements, amplitudes, and polarizabilities are automatically
-        determined from provided files. Files should be chosen wisely such that the
+        determined from provided files. Files should be chosen such that the
         resulting DOFs are valid under the same restrictions of :meth:`add_dof`.
 
         Parameters

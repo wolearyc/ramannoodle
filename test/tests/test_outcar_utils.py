@@ -1,4 +1,4 @@
-"""Tests for VASP-related routines."""
+"""Tests for VASP-related functions."""
 
 from typing import TextIO, Type
 import numpy as np

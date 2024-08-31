@@ -1,7 +1,7 @@
-"""Generic IO routines.
+"""Generic IO functions.
 
-Generic IO routines are somewhat inflexible but are necessary for certain
-functionality. Users are strongly encouraged to use IO routines contained in the
+Generic IO functions are somewhat inflexible but are necessary for certain
+functionality. Users are strongly encouraged to use IO functions contained in the
 code-specific subpackages. For example, IO for VASP POSCAR and OUTCAR files can be
 accomplished using :mod:`ramannoodle.io.vasp.poscar` or
 :mod:`ramannoodle.io.vasp.outcar` respectively.

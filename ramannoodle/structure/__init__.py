@@ -1,1 +1,1 @@
-"""Classes and routines for atomic structures and structural symmetries."""
+"""Classes and functions for atomic structures and structural symmetries."""

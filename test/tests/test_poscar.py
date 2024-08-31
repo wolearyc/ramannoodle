@@ -1,4 +1,4 @@
-"""Tests for VASP-POSCAR-related routines."""
+"""Tests for VASP-POSCAR-related functions."""
 
 from typing import Type
 from pathlib import Path

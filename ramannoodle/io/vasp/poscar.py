@@ -123,7 +123,7 @@ def _read_positions(
 def read_positions(
     filepath: str | Path,
 ) -> NDArray[np.float64]:
-    """Extract fractional positions from a VASP POSCAR file.
+    """Read fractional positions from a VASP POSCAR file.
 
     Parameters
     ----------
@@ -152,7 +152,7 @@ def read_positions(
 def read_ref_structure(
     filepath: str | Path,
 ) -> ReferenceStructure:
-    """Extract reference structure from a VASP POSCAR file.
+    """Read reference structure from a VASP POSCAR file.
 
     Parameters
     ----------

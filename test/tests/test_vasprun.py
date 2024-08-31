@@ -1,4 +1,4 @@
-"""Tests for VASP vasprun.xml routines."""
+"""Tests for VASP vasprun.xml functions."""
 
 from typing import Type, Callable
 from pathlib import Path
@@ -198,7 +198,7 @@ def test_read_vasprun_exception(
     exception_type: Type[Exception],
     reason: str,
 ) -> None:
-    """Test vasprun read routines (exception)."""
+    """Test vasprun read functions (exception)."""
     with pytest.raises(exception_type) as err:
         read_function(path_fixture)
     assert reason in str(err.value)

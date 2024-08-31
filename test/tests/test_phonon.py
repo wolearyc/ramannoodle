@@ -1,4 +1,4 @@
-"""Tests for phonon-related routines."""
+"""Tests for phonon-related functions."""
 
 from typing import Type
 

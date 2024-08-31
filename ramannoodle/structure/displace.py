@@ -1,12 +1,12 @@
-"""Routines for generating and writing displaced structures.
+"""Functions for generating and writing displaced structures.
 
-These routines are useful for preparing polarizability calculations needed for
+These functions are useful for preparing polarizability calculations needed for
 :class:`~.InterpolationModel` and :class:`~.ARTModel`.
 
 """
 
 # Design note:
-# These routines are not implemented in ReferenceStructure to give
+# These functions are not implemented in ReferenceStructure to give
 # greater modularity. For example, when different displacement methods are added (such
 # as Monte Carlo rattling or random displacements), we'd rather not add code to
 # Reference Structure. These functions stand alone, just like the IO functions.
