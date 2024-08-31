@@ -79,7 +79,7 @@ def write_displaced_structures(  # pylint: disable=too-many-arguments
     ref_structure: ReferenceStructure,
     cart_displacement: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
-    file_paths: str | Path | list[str] | list[Path],
+    filepaths: str | Path | list[str] | list[Path],
     file_format: str,
     overwrite: bool = False,
 ) -> None:
@@ -95,19 +95,19 @@ def write_displaced_structures(  # pylint: disable=too-many-arguments
         Magnitude is arbitrary.
     amplitudes
         | (Å) 1D array with shape (M,).
-    file_paths
+    filepaths
     file_format
         | Supports ``"poscar"`` (see :ref:`Supported formats`).
     overwrite
         | Overwrite the file if it exists.
     """
-    file_paths = pathify_as_list(file_paths)
+    filepaths = pathify_as_list(filepaths)
     position_list = get_displaced_positions(
         ref_structure, cart_displacement, amplitudes
     )
-    verify_list_len("file_paths", file_paths, len(position_list))
+    verify_list_len("filepaths", filepaths, len(position_list))
 
-    for position, filepath in zip(position_list, file_paths):
+    for position, filepath in zip(position_list, filepaths):
         generic_io.write_structure(
             ref_structure.lattice,
             ref_structure.atomic_numbers,
@@ -163,7 +163,7 @@ def write_ast_displaced_structures(  # pylint: disable=too-many-arguments
     atom_index: int,
     cart_direction: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
-    file_paths: str | Path | list[str] | list[Path],
+    filepaths: str | Path | list[str] | list[Path],
     file_format: str,
     overwrite: bool = False,
 ) -> None:
@@ -180,19 +180,19 @@ def write_ast_displaced_structures(  # pylint: disable=too-many-arguments
         Magnitude is arbitrary.
     amplitudes
         | (Å) 1D array with shape (M,).
-    file_paths
+    filepaths
     file_format
         | Supports ``"poscar"`` (see :ref:`Supported formats`).
     overwrite
         | Overwrite the file if it exists.
     """
-    file_paths = pathify_as_list(file_paths)
+    filepaths = pathify_as_list(filepaths)
     position_list = get_ast_displaced_positions(
         ref_structure, atom_index, cart_direction, amplitudes
     )
-    verify_list_len("file_paths", file_paths, len(position_list))
+    verify_list_len("filepaths", filepaths, len(position_list))
 
-    for position, filepath in zip(position_list, file_paths):
+    for position, filepath in zip(position_list, filepaths):
         generic_io.write_structure(
             ref_structure.lattice,
             ref_structure.atomic_numbers,
