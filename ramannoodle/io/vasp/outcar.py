@@ -325,7 +325,8 @@ def read_positions_and_polarizability(
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as file:
-        positions = read_positions(filepath)
+        num_atoms = len(_read_atomic_symbols(file))
+        positions = _read_positions(file, num_atoms)
         polarizability = _read_polarizability(file)
         return positions, polarizability
 
@@ -354,6 +355,43 @@ def read_positions(filepath: str | Path) -> NDArray[np.float64]:
         num_atoms = len(_read_atomic_symbols(file))
         positions = _read_positions(file, num_atoms)
         return positions
+
+
+def read_structure_and_polarizability(
+    filepath: str | Path,
+) -> tuple[NDArray[np.float64], list[int], NDArray[np.float64], NDArray[np.float64]]:
+    """Read lattice, fractional positions, atomic numbers, polarizability from OUTCAR.
+
+    The polarizability returned by VASP is, in fact, a dielectric tensor. However,
+    this is inconsequential to the calculation of Raman spectra.
+
+    Parameters
+    ----------
+    filepath
+
+    Returns
+    -------
+    :
+        4-tuple, whose first element is the lattice (Å), a 2D array with shape (3,3).
+        The second element is the atomic numbers, a list of length N where N is the
+        number of atoms. The third element is positions, a 2D array with shape (N,3).
+        The fourth element is the polarizability (unitless), a 2D array with shape
+        (3,3).
+
+    Raises
+    ------
+    FileNotFoundError
+    InvalidFileException
+        File has an unexpected format.
+    """
+    filepath = pathify(filepath)
+    with open(filepath, "r", encoding="utf-8") as outcar_file:
+        atomic_symbols = _read_atomic_symbols(outcar_file)
+        atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
+        lattice = _read_lattice(outcar_file)
+        positions = _read_positions(outcar_file, len(atomic_numbers))
+        polarizability = _read_polarizability(outcar_file)
+        return lattice, atomic_numbers, positions, polarizability
 
 
 def read_ref_structure(filepath: str | Path) -> ReferenceStructure:

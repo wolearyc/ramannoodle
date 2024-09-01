@@ -38,7 +38,7 @@ repos:
         args: [--strict]
         additional_dependencies:
           [
-            pytest,types-tabulate
+            pytest,types-tabulate,torch
           ]
         exclude: "conf.py"
 -   repo: https://github.com/pycqa/flake8
