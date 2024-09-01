@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /
+Allow: /*/latest/
+Allow: /en/latest/   # Fallback for bots that don't understand wildcards
+Sitemap: https://ramannoodle.readthedocs.io/sitemap.xml
