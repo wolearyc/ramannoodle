@@ -3,17 +3,17 @@
 defusedxml >= 0.6.0;python_version=='3.10' # minimum working
 defusedxml >= 0.6.0;python_version=='3.11' # minimum working
 defusedxml >= 0.6.0;python_version=='3.12' # minimum working
-flake8 == 7.1.0
+flake8 == 7.1.1
 numpy >= 1.24.0;python_version=='3.10' # minimum recommended
 numpy >= 1.24.0;python_version=='3.11' # minimum recommended
 numpy >= 1.26.0;python_version=='3.12' # minimum working
-pre-commit == 3.7.1
-pylint == 3.2.6
-pytest == 8.3.1
+pre-commit == 3.8.0
+pylint == 3.2.7
+pytest == 8.3.2
 scipy >= 1.10.0;python_version=='3.10' # minimum recommended
 scipy >= 1.10.0;python_version=='3.11' # minimum recommended
 scipy >= 1.11.2;python_version=='3.12' # minimum working
-setuptools == 71.1.0
+setuptools == 74.1.2
 spglib >= 1.16.4;python_version=='3.10' # minimum working
 spglib >= 1.16.4;python_version=='3.11' # minimum working
 spglib >= 1.16.4;python_version=='3.12' # minimum working
