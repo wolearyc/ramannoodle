@@ -1,1 +1,3 @@
-torch==2.4.0
+torch==2.4.1;platform_system=="darwin"
+torch==2.4.1+cpu;platform_system=="linux"
+torch==2.4.1+cpu;platform_system=="Windows"
