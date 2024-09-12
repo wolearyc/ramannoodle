@@ -1,4 +1,4 @@
 torch-geometric==2.5.3
 # Replace "cpu" with "cu118", "cu121", or "cu124" depending on pytorch installation
-torch-scatter==2.1.2 -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
-torch-sparse==0.6.18 -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
+torch-scatter==2.1.2
+torch-sparse==0.6.18
