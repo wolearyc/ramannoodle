@@ -104,6 +104,42 @@ def test_batch_polarizability(poscar_ref_structure_fixture: ReferenceStructure) 
         assert torch.allclose(batch_polarizability, polarizabilities)
 
 
+@pytest.mark.parametrize(
+    "poscar_ref_structure_fixture",
+    [
+        ("test/data/TiO2/POSCAR"),
+    ],
+    indirect=["poscar_ref_structure_fixture"],
+)
+def test_gpu(poscar_ref_structure_fixture: ReferenceStructure) -> None:
+    """Test putting model on gpus."""
+    ref_structure = poscar_ref_structure_fixture
+
+    device = "cpu"
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif torch.backends.mps.is_available():
+        device = "mps"
+    else:
+        return
+
+    torch.set_default_device(device)  # type: ignore
+    model = PotGNN(ref_structure, 5, 5, 5, 5)
+    model.eval()
+
+    for batch_size in range(1, 4):
+
+        # Generate random data.
+        num_atoms = len(ref_structure.atomic_numbers)
+        lattice = torch.from_numpy(ref_structure.lattice).float().to("mps")
+        atomic_numbers = torch.tensor(ref_structure.atomic_numbers)
+
+        batch_lattices = lattice.expand(batch_size, 3, 3)
+        batch_atomic_numbers = atomic_numbers.expand(batch_size, num_atoms)
+        batch_positions = torch.randn(batch_size, num_atoms, 3)
+        _ = model.forward(batch_lattices, batch_atomic_numbers, batch_positions)
+
+
 # @pytest.mark.parametrize(
 #     "poscar_ref_structure_fixture",
 #     [
