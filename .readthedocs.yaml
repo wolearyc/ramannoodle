@@ -5,12 +5,14 @@ build:
   tools:
     python: "3.12"
   commands:
+    - python -mvirtualenv $READTHEDOCS_VIRTUALENV_PATH
+    - python -m pip install --upgrade --no-cache-dir pip setuptools
+    - python -m pip install --upgrade --no-cache-dir sphinx readthedocs-sphinx-ext
     - python -m pip install --exists-action=w --no-cache-dir -r docs/requirements.txt
     - python -m pip install --exists-action=w --no-cache-dir -r deps/requirements.txt
     - python -m pip install --exists-action=w --no-cache-dir -r deps/torch_geometric_requirements.txt
     - python -m pip install --exists-action=w --no-cache-dir -r deps/torch_requirements.txt  --index-url https://download.pytorch.org/whl/cpu
     - python -m pip install --exists-action=w --no-cache-dir -r deps/torch_extra_requirements.txt --no-index  -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
-    - python -m sphinx -T -b html -d _build/doctrees -D language=en . $READTHEDOCS_OUTPUT/html
 
 sphinx:
   configuration: docs/source/conf.py
