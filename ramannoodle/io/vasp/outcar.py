@@ -5,14 +5,18 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-
-from ramannoodle.io.io_utils import _skip_file_until_line_contains, pathify
+from ramannoodle.io.io_utils import (
+    _skip_file_until_line_contains,
+    pathify,
+    _read_polarizability_dataset,
+)
 from ramannoodle.exceptions import InvalidFileException, NoMatchingLineFoundException
 from ramannoodle.globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from ramannoodle.exceptions import get_type_error
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.dynamics.trajectory import Trajectory
 from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
 
 
 # Utilities for OUTCAR. Warning: some of these functions partially read files.
@@ -392,6 +396,30 @@ def read_structure_and_polarizability(
         positions = _read_positions(outcar_file, len(atomic_numbers))
         polarizability = _read_polarizability(outcar_file)
         return lattice, atomic_numbers, positions, polarizability
+
+
+def read_polarizability_dataset(
+    filepaths: str | Path | list[str] | list[Path],
+) -> PolarizabilityDataset:
+    """Read polarizability dataset from OUTCAR files.
+
+    Parameters
+    ----------
+    filepaths
+
+    Returns
+    -------
+    :
+
+    Raises
+    ------
+    FileNotFoundError
+    InvalidFileException
+        File has an unexpected format.
+    IncompatibleFileException
+        File is incompatible with the dataset.
+    """
+    return _read_polarizability_dataset(filepaths, read_structure_and_polarizability)
 
 
 def read_ref_structure(filepath: str | Path) -> ReferenceStructure:

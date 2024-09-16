@@ -8,12 +8,13 @@ import defusedxml.ElementTree as ET
 import numpy as np
 from numpy.typing import NDArray
 
-from ramannoodle.io.io_utils import pathify
+from ramannoodle.io.io_utils import pathify, _read_polarizability_dataset
 from ramannoodle.exceptions import InvalidFileException
 from ramannoodle.globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.dynamics.trajectory import Trajectory
 from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
 
 
 def _get_root_element(file: TextIO) -> Element:
@@ -190,6 +191,30 @@ def read_structure_and_polarizability(
         positions = _parse_positions(structure_varray)
         polarizability = _parse_polarizability(root)
         return lattice, atomic_numbers, positions, polarizability
+
+
+def read_polarizability_dataset(
+    filepaths: str | Path | list[str] | list[Path],
+) -> PolarizabilityDataset:
+    """Read polarizability dataset from OUTCAR files.
+
+    Parameters
+    ----------
+    filepaths
+
+    Returns
+    -------
+    :
+
+    Raises
+    ------
+    FileNotFoundError
+    InvalidFileException
+        File has an unexpected format.
+    IncompatibleFileException
+        File is incompatible with the dataset.
+    """
+    return _read_polarizability_dataset(filepaths, read_structure_and_polarizability)
 
 
 def read_positions(filepath: str | Path) -> NDArray[np.float64]:

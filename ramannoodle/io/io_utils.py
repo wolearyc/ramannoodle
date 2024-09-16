@@ -1,18 +1,21 @@
 """Universal IO utility functions."""
 
-from typing import TextIO
+from typing import TextIO, Callable
 from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
+from tqdm import tqdm
 
 from ramannoodle.exceptions import (
     NoMatchingLineFoundException,
     verify_ndarray_shape,
     verify_positions,
     verify_list_len,
+    IncompatibleStructureException,
 )
 from ramannoodle.globals import ATOM_SYMBOLS
+from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
 
 
 def _skip_file_until_line_contains(file: TextIO, content: str) -> str:
@@ -84,3 +87,66 @@ def verify_trajectory(
     verify_ndarray_shape("positions_ts", positions_ts, (None, len(atomic_numbers), 3))
     if (0 > positions_ts).any() or (positions_ts > 1.0).any():
         raise ValueError("positions_ts has coordinates that are not between 0 and 1")
+
+
+def _read_polarizability_dataset(
+    filepaths: str | Path | list[str] | list[Path],
+    read_structure_and_polarizability_fn: Callable[
+        [str | Path],
+        tuple[NDArray[np.float64], list[int], NDArray[np.float64], NDArray[np.float64]],
+    ],
+) -> PolarizabilityDataset:
+    """Read polarizability dataset from OUTCAR files.
+
+    Parameters
+    ----------
+    filepath
+    read_structure_and_polarizability_fn
+
+    Returns
+    -------
+    :
+
+    Raises
+    ------
+    FileNotFoundError
+    InvalidFileException
+        File has an unexpected format.
+    IncompatibleFileException
+        File is incompatible with the dataset.
+    """
+    filepaths = pathify_as_list(filepaths)
+
+    lattices: list[NDArray[np.float64]] = []
+    atomic_numbers_list: list[list[int]] = []
+    positions_list: list[NDArray[np.float64]] = []
+    polarizabilities: list[NDArray[np.float64]] = []
+    for file_index, filepath in tqdm(list(enumerate(filepaths)), unit="files"):
+        lattice, atomic_numbers, positions, polarizability = (
+            read_structure_and_polarizability_fn(filepath)
+        )
+        if file_index != 0:
+            if not np.isclose(lattices[0], lattice, atol=1e-5).all():
+                raise IncompatibleStructureException(
+                    f"incompatible lattice: {filepath}"
+                )
+            if atomic_numbers_list[0] != atomic_numbers:
+                raise IncompatibleStructureException(
+                    f"incompatible atomic numbers: {filepath}"
+                )
+            if positions_list[0].shape != positions.shape:  # check, just to be safe
+                raise IncompatibleStructureException(
+                    f"incompatible atomic positions: {filepath}"
+                )
+        lattices.append(lattice)
+        atomic_numbers_list.append(atomic_numbers)
+        positions_list.append(positions)
+        polarizabilities.append(polarizability)
+
+    return PolarizabilityDataset(
+        np.array(lattices),
+        atomic_numbers_list,
+        np.array(positions_list),
+        np.array(polarizabilities),
+        scale_mode="standard",
+    )
