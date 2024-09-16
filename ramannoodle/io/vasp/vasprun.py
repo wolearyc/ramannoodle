@@ -147,6 +147,51 @@ def read_positions_and_polarizability(
         return positions, polarizability
 
 
+def read_structure_and_polarizability(
+    filepath: str | Path,
+) -> tuple[NDArray[np.float64], list[int], NDArray[np.float64], NDArray[np.float64]]:
+    """Read lattice, positions, atomic numbers, and polarizability from a vasprun.xml.
+
+    The polarizability returned by VASP is, in fact, a dielectric tensor. However,
+    this is inconsequential to the calculation of Raman spectra.
+
+    Parameters
+    ----------
+    filepath
+
+    Returns
+    -------
+    :
+        4-tuple:
+            0. | lattice --
+               | (Å) 2D array with shape (3,3).
+            #. | atomic numbers --
+               | List of length N where N is the number of atoms.
+            #. | positions --
+               | (fractional) 2D array with shape (N,3) where N is the number of atoms.
+            #. | polarizability --
+               | 2D array with shape (3,3).
+
+    Raises
+    ------
+    FileNotFoundError
+    InvalidFileException
+        Invalid file.
+    """
+    filepath = pathify(filepath)
+    with open(filepath, "r", encoding="utf-8") as file:
+        root = _get_root_element(file)
+        atomic_symbols = _parse_atomic_symbols(root)
+        atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
+        lattice = _parse_lattice(root)
+        structure_varray = root.find("./structure[@name='initialpos']/varray")
+        if structure_varray is None:
+            raise InvalidFileException("initial positions not found")
+        positions = _parse_positions(structure_varray)
+        polarizability = _parse_polarizability(root)
+        return lattice, atomic_numbers, positions, polarizability
+
+
 def read_positions(filepath: str | Path) -> NDArray[np.float64]:
     """Read fractional positions from a vasprun.xml file.
 
