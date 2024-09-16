@@ -118,7 +118,7 @@ def test_gpu(poscar_ref_structure_fixture: ReferenceStructure) -> None:
         device = "cuda"
     # mps backend doesn't work with github runners
     # https://github.com/actions/runner-images/issues/9918
-    elif torch.backends.mps.is_available() and os.getenv("GITHUB_ACTIONS") == "true":
+    elif torch.backends.mps.is_available() and os.getenv("GITHUB_ACTIONS") != "true":
         device = "mps"
     else:
         return

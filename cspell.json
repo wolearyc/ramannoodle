@@ -76,6 +76,7 @@
         "timestep",
         "timesteps",
         "toctree",
+        "tqdm",
         "undoc",
         "Unitless",
         "varray",
