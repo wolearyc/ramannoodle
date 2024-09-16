@@ -121,7 +121,7 @@ def _read_polarizability_dataset(
     atomic_numbers_list: list[list[int]] = []
     positions_list: list[NDArray[np.float64]] = []
     polarizabilities: list[NDArray[np.float64]] = []
-    for file_index, filepath in tqdm(list(enumerate(filepaths)), unit="files"):
+    for file_index, filepath in tqdm(list(enumerate(filepaths)), unit=" files"):
         lattice, atomic_numbers, positions, polarizability = (
             read_structure_and_polarizability_fn(filepath)
         )
