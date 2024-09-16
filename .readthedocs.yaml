@@ -1,17 +1,16 @@
 version: "2"
 
 build:
-  os: "ubuntu-22.04"
+  os: ubuntu-22.04
   tools:
     python: "3.12"
-
-python:
-  install:
-    - requirements: docs/requirements.txt
-    - requirements: deps/requirements.txt
-    - requirements: deps/torch_requirements.txt -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
-    - requirements: deps/torch_geometric_requirements.txt
-    - requirements: deps/torch_extra_requirements.txt
+  commands:
+    - python -m pip install --exists-action=w --no-cache-dir -r docs/requirements.txt
+    - python -m pip install --exists-action=w --no-cache-dir -r deps/requirements.txt
+    - python -m pip install --exists-action=w --no-cache-dir -r deps/torch_requirements.txt -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
+    - python -m pip install --exists-action=w --no-cache-dir -r deps/torch_geometric_requirements.txt
+    - python -m pip install --exists-action=w --no-cache-dir -r deps/torch_extra_requirements.txt
+    - python -m sphinx -T -b html -d _build/doctrees -D language=en . $READTHEDOCS_OUTPUT/html
 
 sphinx:
   configuration: docs/source/conf.py
