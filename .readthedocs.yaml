@@ -9,7 +9,7 @@ python:
   install:
     - requirements: docs/requirements.txt
     - requirements: deps/requirements.txt
-    - requirements: deps/torch_requirements.txt
+    - requirements: deps/torch_requirements.txt -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
     - requirements: deps/torch_geometric_requirements.txt
     - requirements: deps/torch_extra_requirements.txt
 
