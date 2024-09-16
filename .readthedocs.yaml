@@ -14,7 +14,7 @@ build:
     - python -m pip install --exists-action=w --no-cache-dir -r deps/torch_requirements.txt  --index-url https://download.pytorch.org/whl/cpu
     - python -m pip install --exists-action=w --no-cache-dir -r deps/torch_extra_requirements.txt --no-index  -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
     - cat docs/source/conf.py
-    - python -m sphinx -T -b html -d _build/doctrees -D language=en . $READTHEDOCS_OUTPUT/html
+    - python -m sphinx -T -b html -d _build/doctrees -D language=en docs/source/conf.py $READTHEDOCS_OUTPUT/html
 
 sphinx:
   configuration: docs/source/conf.py
