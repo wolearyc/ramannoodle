@@ -33,7 +33,8 @@ _POSITION_AND_POLARIZABILITY_READERS = {
     "vasprun.xml": vasp_io.vasprun.read_positions_and_polarizability,
 }
 _STRUCTURE_AND_POLARIZABILITY_READERS = {
-    "outcar": vasp_io.outcar.read_structure_and_polarizability
+    "outcar": vasp_io.outcar.read_structure_and_polarizability,
+    "vasprun.xml": vasp_io.vasprun.read_structure_and_polarizability,
 }
 _POSITION_READERS = {
     "poscar": vasp_io.poscar.read_positions,
@@ -156,7 +157,7 @@ def read_structure_and_polarizability(
     ----------
     filepath
     file_format
-        Supports: "outcar" (see :ref:`Supported formats`)
+        Supports: ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
 
     Returns
     -------
