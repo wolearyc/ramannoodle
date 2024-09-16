@@ -8,7 +8,10 @@ build:
 python:
   install:
     - requirements: docs/requirements.txt
-    - requirements: requirements.txt
+    - requirements: deps/requirements.txt
+    - requirements: deps/torch_requirements.txt
+    - requirements: deps/torch_geometric_requirements.txt
+    - requirements: deps/torch_extra_requirements.txt
 
 sphinx:
   configuration: docs/source/conf.py
