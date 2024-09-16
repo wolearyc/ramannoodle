@@ -29,8 +29,8 @@ jobs:
         pip install uv
         uv pip install ${{ matrix.uv-arg }} --system -r deps/requirements.txt
         uv pip install ${{ matrix.uv-arg }} --system -r deps/torch_geometric_requirements.txt
-        uv pip install ${{ matrix.uv-arg }} --system -r deps/torch_requirements.txt  --index-url https://download.pytorch.org/whl/cpu
-        uv pip install ${{ matrix.uv-arg }} --system --no-index -r deps/torch_extra_requirements.txt -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
+        uv pip install ${{ matrix.uv-arg }} --system -r deps/torch_requirements.txt
+        uv pip install ${{ matrix.uv-arg }} --system --no-index -r deps/torch_extra_requirements.txt
     - name: Analyzing the code with pylint
       if: ${{ matrix.os != 'windows-latest' }} # Windows throws strange linting errors
       run: |
