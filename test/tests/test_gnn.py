@@ -1,16 +1,14 @@
 """Testing for GNN-based models."""
 
+import os
+
 import pytest
 
 # import numpy as np
 import torch
 
-from ramannoodle.polarizability.gnn import (
-    PotGNN,
-    _radius_graph_pbc,
-    _get_rotations,
-    # polarizability_vectors_to_tensors,
-)
+from ramannoodle.polarizability.torch.gnn import PotGNN
+from ramannoodle.polarizability.torch.utils import _radius_graph_pbc, get_rotations
 
 # import ramannoodle.io.vasp as vasp_io
 # from ramannoodle.structure.structure_utils import apply_pbc
@@ -20,10 +18,10 @@ from ramannoodle.structure.reference import ReferenceStructure
 
 
 def test_get_rotations() -> None:
-    """Test _get_rotations (normal)."""
+    """Test get_rotations (normal)."""
     unit_vector = torch.randn((40, 3))
 
-    rotation = _get_rotations(unit_vector)
+    rotation = get_rotations(unit_vector)
 
     rotated = torch.matmul(rotation, torch.tensor([1.0, 0.0, 0.0]))
     known = unit_vector / torch.linalg.norm(unit_vector, dim=1).view(-1, 1)
@@ -118,7 +116,9 @@ def test_gpu(poscar_ref_structure_fixture: ReferenceStructure) -> None:
     device = "cpu"
     if torch.cuda.is_available():
         device = "cuda"
-    elif torch.backends.mps.is_available():
+    # mps backend doesn't work with github runners
+    # https://github.com/actions/runner-images/issues/9918
+    elif torch.backends.mps.is_available() and os.getenv("GITHUB_ACTIONS") == "true":
         device = "mps"
     else:
         return
