@@ -41,6 +41,8 @@ def pathify_as_list(filepaths: str | Path | list[str] | list[Path]) -> list[Path
     """
     if isinstance(filepaths, list):
         paths = []
+        if len(filepaths) == 0:
+            raise ValueError("filepaths is empty")
         for item in filepaths:
             paths.append(pathify(item))
         return paths
