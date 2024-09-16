@@ -18,6 +18,7 @@ from ramannoodle.dynamics.trajectory import Trajectory
 
 from ramannoodle.structure.reference import ReferenceStructure
 import ramannoodle.io.vasp as vasp_io
+from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
 
 # These  map between file formats and appropriate IO functions.
 _PHONON_READERS = {
@@ -35,6 +36,10 @@ _POSITION_AND_POLARIZABILITY_READERS = {
 _STRUCTURE_AND_POLARIZABILITY_READERS = {
     "outcar": vasp_io.outcar.read_structure_and_polarizability,
     "vasprun.xml": vasp_io.vasprun.read_structure_and_polarizability,
+}
+_POLARIZABILITY_DATASET_READERS = {
+    "outcar": vasp_io.outcar.read_polarizability_dataset,
+    "vasprun.xml": vasp_io.vasprun.read_polarizability_dataset,
 }
 _POSITION_READERS = {
     "poscar": vasp_io.poscar.read_positions,
@@ -177,6 +182,36 @@ def read_structure_and_polarizability(
     """
     try:
         return _STRUCTURE_AND_POLARIZABILITY_READERS[file_format](filepath)
+    except KeyError as exc:
+        raise ValueError(f"unsupported format: {file_format}") from exc
+
+
+def read_polarizability_dataset(
+    filepaths: str | Path | list[str] | list[Path],
+    file_format: str,
+) -> PolarizabilityDataset:
+    """Read polarizability dataset from files.
+
+    Parameters
+    ----------
+    filepath
+    file_format
+        | Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
+
+    Returns
+    -------
+    :
+
+    Raises
+    ------
+    FileNotFoundError
+    InvalidFileException
+        File has an unexpected format.
+    IncompatibleFileException
+        File is incompatible with the dataset.
+    """
+    try:
+        return _POLARIZABILITY_DATASET_READERS[file_format](filepaths)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
 

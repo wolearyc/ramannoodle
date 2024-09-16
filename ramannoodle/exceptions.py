@@ -13,6 +13,10 @@ class InvalidFileException(Exception):
     """File cannot be read, likely due to due to invalid or unexpected format."""
 
 
+class IncompatibleStructureException(Exception):
+    """Supplied file is incompatible."""
+
+
 class InvalidDOFException(Exception):
     """A supplied degree of freedom is invalid."""
 

@@ -1,5 +1,7 @@
 """Polarizability PyTorch dataset."""
 
+import copy
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -117,19 +119,88 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         self._positions = torch.from_numpy(positions).type(default_type)
         self._polarizabilities = torch.from_numpy(polarizabilities)
 
-        mean, stddev, scaled = _scale_and_flatten_polarizabilities(
+        _, _, scaled = _scale_and_flatten_polarizabilities(
             self._polarizabilities, scale_mode=scale_mode
         )
-        self._mean_polarizability = mean.type(default_type)
-        self._stddev_polarizability = stddev.type(default_type)
         self._scaled_polarizabilities = scaled.type(default_type)
+
+    @property
+    def num_atoms(self) -> int:
+        """Get number of atoms per sample."""
+        return self._positions.size(1)
+
+    @property
+    def num_samples(self) -> int:
+        """Get number of samples."""
+        return self._positions.size(0)
+
+    @property
+    def atomic_numbers(self) -> Tensor:
+        """Get (a copy of) atomic numbers.
+
+        Returns
+        -------
+        :
+            2D tensor with size [S,N] where S is the number of samples and N is the
+            number of atoms.
+        """
+        return copy.copy(self._atomic_numbers)
+
+    @property
+    def positions(self) -> Tensor:
+        """Get (a copy of) positions.
+
+        Returns
+        -------
+        :
+            3D tensor with size [S,N,3] where S is the number of samples and N is the
+            number of atoms.
+        """
+        return self._positions.detach().clone()
+
+    @property
+    def polarizabilities(self) -> Tensor:
+        """Get (a copy of) polarizabilities.
+
+        Returns
+        -------
+        :
+            3D tensor with size [S,3,3] where S is the number of samples.
+        """
+        return self._polarizabilities.detach().clone()
+
+    @property
+    def scaled_polarizabilities(self) -> Tensor:
+        """Get (a copy of) scaled polarizabilities.
+
+        Returns
+        -------
+        :
+            2D tensor with size [S,6] where S is the number of samples.
+        """
+        return self._scaled_polarizabilities.detach().clone()
+
+    @property
+    def mean_polarizability(self) -> Tensor:
+        """Get mean polarizability.
+
+        Return
+        ------
+        :
+            2D tensor with size [3,3].
+        """
+        return self._polarizabilities.mean(0, keepdim=True)
+
+    @property
+    def stddev_polarizability(self) -> Tensor:
+        """Get standard deviation of polarizability."""
+        return self._polarizabilities.std(0, unbiased=False, keepdim=True)
 
     def scale_polarizabilities(self, mean: Tensor, stddev: Tensor) -> None:
         """Standard-scale polarizabilities given a mean and standard deviation.
 
-        This method may be used to scale validation/test datasets according
+        This method may be used to scale validation or test datasets according
         to the mean and standard deviation of the training set, as is best practice.
-        This method does **not** update ...
 
         Parameters
         ----------
@@ -163,7 +234,7 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
 
     def __len__(self) -> int:
         """Get number of samples."""
-        return len(self._positions)
+        return self.num_samples
 
     def __getitem__(self, i: int) -> tuple[Tensor, Tensor, Tensor, Tensor]:
         """Get lattice, atomic numbers, positions, and scaled polarizabilities."""
