@@ -12,6 +12,8 @@ from torch.utils.data import Dataset
 from ramannoodle.exceptions import verify_ndarray_shape, verify_list_len, get_type_error
 import ramannoodle.polarizability.torch.utils as rn_torch_utils
 
+TORCH_PRESENT = True
+
 
 def _scale_and_flatten_polarizabilities(
     polarizabilities: Tensor,

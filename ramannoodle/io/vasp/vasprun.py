@@ -14,7 +14,11 @@ from ramannoodle.globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.dynamics.trajectory import Trajectory
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
+
+try:
+    from ramannoodle.polarizability.torch import dataset
+except ModuleNotFoundError:
+    import ramannoodle.polarizability.torch.dummy_dataset as dataset  # type: ignore
 
 
 def _get_root_element(file: TextIO) -> Element:
@@ -195,7 +199,7 @@ def read_structure_and_polarizability(
 
 def read_polarizability_dataset(
     filepaths: str | Path | list[str] | list[Path],
-) -> PolarizabilityDataset:
+) -> dataset.PolarizabilityDataset:
     """Read polarizability dataset from OUTCAR files.
 
     Parameters
