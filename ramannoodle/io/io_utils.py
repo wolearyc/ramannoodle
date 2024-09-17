@@ -15,7 +15,11 @@ from ramannoodle.exceptions import (
     IncompatibleStructureException,
 )
 from ramannoodle.globals import ATOM_SYMBOLS
-from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
+
+try:
+    from ramannoodle.polarizability.torch import dataset
+except ModuleNotFoundError:
+    import ramannoodle.polarizability.torch.dummy_dataset as dataset  # type: ignore
 
 
 def _skip_file_until_line_contains(file: TextIO, content: str) -> str:
@@ -95,7 +99,7 @@ def _read_polarizability_dataset(
         [str | Path],
         tuple[NDArray[np.float64], list[int], NDArray[np.float64], NDArray[np.float64]],
     ],
-) -> PolarizabilityDataset:
+) -> dataset.PolarizabilityDataset:
     """Read polarizability dataset from OUTCAR files.
 
     Parameters
@@ -114,7 +118,11 @@ def _read_polarizability_dataset(
         File has an unexpected format.
     IncompatibleFileException
         File is incompatible with the dataset.
+    ModuleNotFoundError
+        Torch installation could not be found.
     """
+    if not dataset.TORCH_PRESENT:
+        raise ModuleNotFoundError("torch installation not found")
     filepaths = pathify_as_list(filepaths)
 
     lattices: list[NDArray[np.float64]] = []
@@ -143,7 +151,7 @@ def _read_polarizability_dataset(
         positions_list.append(positions)
         polarizabilities.append(polarizability)
 
-    return PolarizabilityDataset(
+    return dataset.PolarizabilityDataset(
         np.array(lattices),
         atomic_numbers_list,
         np.array(positions_list),

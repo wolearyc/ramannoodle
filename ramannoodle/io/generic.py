@@ -18,7 +18,11 @@ from ramannoodle.dynamics.trajectory import Trajectory
 
 from ramannoodle.structure.reference import ReferenceStructure
 import ramannoodle.io.vasp as vasp_io
-from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
+
+try:
+    from ramannoodle.polarizability.torch import dataset
+except ModuleNotFoundError:
+    import ramannoodle.polarizability.torch.dummy_dataset as dataset  # type: ignore
 
 # These  map between file formats and appropriate IO functions.
 _PHONON_READERS = {
@@ -189,7 +193,7 @@ def read_structure_and_polarizability(
 def read_polarizability_dataset(
     filepaths: str | Path | list[str] | list[Path],
     file_format: str,
-) -> PolarizabilityDataset:
+) -> dataset.PolarizabilityDataset:
     """Read polarizability dataset from files.
 
     Parameters
