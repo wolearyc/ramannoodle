@@ -10,7 +10,7 @@
 
 **Ramannoodle** is a Python API for efficiently calculating Raman spectra from first principles calculations. Ramannoodle supports molecular-dynamics- and phonon-based Raman calculations and includes interfaces with VASP.
 
-Ramannoodle is designed from the ground up to be:
+Ramannoodle aims to be:
 
 1. **EFFICIENT**
 
@@ -33,9 +33,19 @@ Ramannoodle includes interfaces with:
 
 Ramannoodle can be installed via pip:
 
-`
+```
 $ pip install ramannoodle
-`
+```
+
+Due to idiosyncrasies with PyTorch's build system, installing ramannoodle's machine learning modules is slightly more involved. First, PyTorch must be installed ([pip commands](https://pytorch.org/get-started/locally/)). Then, corresponding torch-scatter and torch-sparse packages must be installed. Finally, Ramannoodle can then be installed with the appropriate options.
+
+For example, installation on a Linux system using PyTorch 2.4.1 (cpu implementation) is done as follows:
+
+```
+$ pip install torch==2.4.1+cpu --index-url https://download.pytorch.org/whl/cpu
+$ pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.4.0+cpu.html
+$ pip install ramannoodle[torch]
+```
 
 ## Documentation
 
