@@ -4,11 +4,15 @@ import os
 
 import pytest
 
-# import numpy as np
+import numpy as np
 import torch
 
 from ramannoodle.polarizability.torch.gnn import PotGNN
-from ramannoodle.polarizability.torch.utils import _radius_graph_pbc, get_rotations
+from ramannoodle.polarizability.torch.utils import (
+    _radius_graph_pbc,
+    get_rotations,
+    get_polarizability_tensors,
+)
 
 # import ramannoodle.io.vasp as vasp_io
 # from ramannoodle.structure.structure_utils import apply_pbc
@@ -138,6 +142,41 @@ def test_gpu(poscar_ref_structure_fixture: ReferenceStructure) -> None:
         batch_atomic_numbers = atomic_numbers.expand(batch_size, num_atoms)
         batch_positions = torch.randn(batch_size, num_atoms, 3)
         _ = model.forward(batch_lattices, batch_atomic_numbers, batch_positions)
+
+    torch.set_default_device("cpu")  # type: ignore
+
+
+@pytest.mark.parametrize(
+    "poscar_ref_structure_fixture",
+    [
+        ("test/data/TiO2/POSCAR"),
+    ],
+    indirect=["poscar_ref_structure_fixture"],
+)
+def test_calc_polarizabilities(
+    poscar_ref_structure_fixture: ReferenceStructure,
+) -> None:
+    """Test of calc_polarizabilities (normal)."""
+    ref_structure = poscar_ref_structure_fixture
+    model = PotGNN(ref_structure, 5, 5, 5, 5, 0, 5)
+    model.eval()
+
+    for batch_size in range(1, 4):
+
+        # Generate random data.
+        num_atoms = len(ref_structure.atomic_numbers)
+        lattice = torch.from_numpy(ref_structure.lattice).float()
+        atomic_numbers = torch.tensor(ref_structure.atomic_numbers)
+
+        batch_lattices = lattice.expand(batch_size, 3, 3)
+        batch_atomic_numbers = atomic_numbers.expand(batch_size, num_atoms)
+        batch_positions = torch.randn(batch_size, num_atoms, 3)
+
+        forward = model.forward(batch_lattices, batch_atomic_numbers, batch_positions)
+        forward = get_polarizability_tensors(forward.detach().clone()).numpy()
+        calc = model.calc_polarizabilities(batch_positions.detach().clone().numpy())
+
+        assert np.allclose(forward, calc)
 
 
 # @pytest.mark.parametrize(

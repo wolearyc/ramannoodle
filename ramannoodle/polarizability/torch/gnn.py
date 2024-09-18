@@ -4,8 +4,16 @@ from __future__ import annotations
 
 import typing
 
+import numpy as np
+from numpy.typing import NDArray
+
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.exceptions import get_torch_missing_error, UsageError
+from ramannoodle.exceptions import (
+    get_torch_missing_error,
+    UsageError,
+    verify_ndarray_shape,
+)
+from ramannoodle.polarizability.abstract import PolarizabilityModel
 
 try:
     import torch
@@ -398,7 +406,9 @@ def _get_edge_polarizability_vectors(
     return rn_torch_utils.get_polarizability_vectors(edge_polarizability)
 
 
-class PotGNN(Module):  # pylint: disable=too-many-instance-attributes
+class PotGNN(
+    Module, PolarizabilityModel
+):  # pylint: disable=too-many-instance-attributes
     r"""POlarizability Tensor Graph Neural Network (PotGNN).
 
     GNN architecture was inspired by the "direct force architecture" developed in Park
@@ -616,3 +626,41 @@ class PotGNN(Module):  # pylint: disable=too-many-instance-attributes
             polarizability[structure_i] = torch.sum(edge_polarizability * mask, dim=0)
             polarizability[structure_i] /= count
         return polarizability
+
+    def calc_polarizabilities(
+        self, positions_batch: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
+        """Return estimated polarizabilities for a batch of fractional positions.
+
+        Parameters
+        ----------
+        positions_batch
+            | (fractional) 3D array with shape (S,N,3) where S is the number of samples
+            | and N is the number of atoms.
+
+        Returns
+        -------
+        :
+            3D array with shape (S,3,3).
+        """
+        verify_ndarray_shape(
+            "positions_batch", positions_batch, (None, self._ref_structure.num_atoms, 3)
+        )
+        self.eval()
+        batch_size = positions_batch.shape[0]
+        lattice = torch.tensor(self._ref_structure.lattice)
+        lattice = lattice.unsqueeze(0).expand((batch_size, -1, -1))
+        atomic_numbers = torch.tensor(
+            self._ref_structure.atomic_numbers, dtype=torch.int
+        )
+        atomic_numbers = atomic_numbers.unsqueeze(0).expand((batch_size, -1))
+
+        default_type = torch.get_default_dtype()
+        polarizability = self.forward(
+            lattice.type(default_type),
+            atomic_numbers,
+            torch.tensor(positions_batch).type(default_type),
+        )
+        polarizability = rn_torch_utils.get_polarizability_tensors(polarizability)
+
+        return polarizability.detach().clone().numpy()
