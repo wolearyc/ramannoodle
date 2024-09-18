@@ -4,25 +4,30 @@ from __future__ import annotations
 
 import typing
 
-import torch
-from torch import Tensor
-from torch.nn import (
-    BatchNorm1d,
-    Embedding,
-    Linear,
-    ModuleList,
-    Sequential,
-    Module,
-    LayerNorm,
-)
-
-from torch_geometric.nn.inits import reset
-from torch_geometric.nn.models.dimenet import triplets
-from torch_geometric.nn.models.schnet import ShiftedSoftplus
-from torch_geometric.utils import scatter
-
 from ramannoodle.structure.reference import ReferenceStructure
-import ramannoodle.polarizability.torch.utils as rn_torch_utils
+from ramannoodle.exceptions import get_torch_missing_error
+
+try:
+    import torch
+    from torch import Tensor
+    from torch.nn import (
+        BatchNorm1d,
+        Embedding,
+        Linear,
+        ModuleList,
+        Sequential,
+        Module,
+        LayerNorm,
+    )
+
+    from torch_geometric.nn.inits import reset
+    from torch_geometric.nn.models.dimenet import triplets
+    from torch_geometric.nn.models.schnet import ShiftedSoftplus
+    from torch_geometric.utils import scatter
+
+    import ramannoodle.polarizability.torch.utils as rn_torch_utils
+except ModuleNotFoundError as exc:
+    raise get_torch_missing_error() from exc
 
 # pylint: disable=not-callable
 

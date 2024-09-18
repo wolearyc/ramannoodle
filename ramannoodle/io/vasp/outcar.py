@@ -12,15 +12,15 @@ from ramannoodle.io.io_utils import (
 )
 from ramannoodle.exceptions import InvalidFileException, NoMatchingLineFoundException
 from ramannoodle.globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
-from ramannoodle.exceptions import get_type_error
+from ramannoodle.exceptions import get_type_error, UsageError
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.dynamics.trajectory import Trajectory
 from ramannoodle.structure.reference import ReferenceStructure
 
 try:
-    from ramannoodle.polarizability.torch import dataset
-except ModuleNotFoundError:
-    import ramannoodle.polarizability.torch.dummy_dataset as dataset  # type: ignore
+    from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
+except UsageError:
+    pass
 
 
 # Utilities for OUTCAR. Warning: some of these functions partially read files.
@@ -404,7 +404,7 @@ def read_structure_and_polarizability(
 
 def read_polarizability_dataset(
     filepaths: str | Path | list[str] | list[Path],
-) -> dataset.PolarizabilityDataset:
+) -> "PolarizabilityDataset":
     """Read polarizability dataset from OUTCAR files.
 
     Parameters

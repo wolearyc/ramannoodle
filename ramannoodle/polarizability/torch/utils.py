@@ -2,10 +2,13 @@
 
 from typing import Sequence
 
-import torch
-from torch import Tensor
+from ramannoodle.exceptions import get_type_error, get_torch_missing_error
 
-from ramannoodle.exceptions import get_type_error
+try:
+    import torch
+    from torch import Tensor
+except ModuleNotFoundError as exc:
+    raise get_torch_missing_error() from exc
 
 # pylint complains about torch.norm
 # pylint: disable=not-callable

@@ -5,12 +5,21 @@ import copy
 import numpy as np
 from numpy.typing import NDArray
 
-import torch
-from torch import Tensor
-from torch.utils.data import Dataset
+from ramannoodle.exceptions import (
+    verify_ndarray_shape,
+    verify_list_len,
+    get_type_error,
+    get_torch_missing_error,
+)
 
-from ramannoodle.exceptions import verify_ndarray_shape, verify_list_len, get_type_error
-import ramannoodle.polarizability.torch.utils as rn_torch_utils
+try:
+    import torch
+    from torch import Tensor
+    from torch.utils.data import Dataset
+    import ramannoodle.polarizability.torch.utils as rn_torch_utils
+except ModuleNotFoundError as exc:
+    raise get_torch_missing_error() from exc
+
 
 TORCH_PRESENT = True
 

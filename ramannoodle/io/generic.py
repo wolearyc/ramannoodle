@@ -12,17 +12,18 @@ from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
+
 from ramannoodle.dynamics.phonon import Phonons
-
 from ramannoodle.dynamics.trajectory import Trajectory
-
 from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.exceptions import UsageError, get_torch_missing_error
 import ramannoodle.io.vasp as vasp_io
 
+TORCH_PRESENT = True
 try:
-    from ramannoodle.polarizability.torch import dataset
-except ModuleNotFoundError:
-    import ramannoodle.polarizability.torch.dummy_dataset as dataset  # type: ignore
+    from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
+except UsageError:
+    TORCH_PRESENT = False
 
 # These  map between file formats and appropriate IO functions.
 _PHONON_READERS = {
@@ -193,7 +194,7 @@ def read_structure_and_polarizability(
 def read_polarizability_dataset(
     filepaths: str | Path | list[str] | list[Path],
     file_format: str,
-) -> dataset.PolarizabilityDataset:
+) -> "PolarizabilityDataset":
     """Read polarizability dataset from files.
 
     Parameters
@@ -214,6 +215,8 @@ def read_polarizability_dataset(
     IncompatibleFileException
         File is incompatible with the dataset.
     """
+    if not TORCH_PRESENT:
+        raise get_torch_missing_error()
     try:
         return _POLARIZABILITY_DATASET_READERS[file_format](filepaths)
     except KeyError as exc:

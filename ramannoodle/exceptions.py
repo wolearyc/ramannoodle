@@ -133,3 +133,9 @@ def verify_positions(name: str, array: NDArray) -> None:
     verify_ndarray_shape(name, array, (None, 3))
     if (0 > array).any() or (array > 1.0).any():
         raise ValueError(f"{name} has coordinates that are not between 0 and 1")
+
+
+def get_torch_missing_error() -> UsageError:
+    """Get error indicating that torch is not installed."""
+    required_modules = "'torch', 'torch-scatter', and 'torch-sparse' modules"
+    return UsageError(f"torch functionality requires {required_modules}")
