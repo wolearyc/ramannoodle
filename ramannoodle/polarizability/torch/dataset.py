@@ -20,7 +20,6 @@ try:
 except ModuleNotFoundError as exc:
     raise get_torch_missing_error() from exc
 
-
 TORCH_PRESENT = True
 
 
@@ -44,12 +43,12 @@ def _scale_and_flatten_polarizabilities(
     -------
     :
         3-tuple:
-                0. | mean --
-                   | Element-wise mean of polarizabilities.
-                #. | standard deviation --
-                   | Element-wise standard deviation of polarizabilities.
-                #. | polarizability vectors --
-                   | 2D tensor with size [S,6].
+            0. | mean --
+               | Element-wise mean of polarizabilities.
+            #. | standard deviation --
+               | Element-wise standard deviation of polarizabilities.
+            #. | polarizability vectors --
+               | 2D tensor with size [S,6].
 
     """
     rn_torch_utils.verify_tensor_size(
@@ -79,7 +78,7 @@ def _scale_and_flatten_polarizabilities(
 class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
     """PyTorch dataset of atomic structures and polarizabilities.
 
-    Polarizabilities are scaled and flattened into vectors containing the six
+    Polarizabilities are scaled and flattened into 6-vectors containing the
     independent tensor components.
 
     Parameters
@@ -87,7 +86,7 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
     lattices
         | (Å) 3D array with shape (S,3,3) where S is the number of samples.
     atomic_numbers
-        | List of length S containing lists of length N, where N is the number of atoms.
+        | List of length S containing lists of length N where N is the number of atoms.
     positions
         | (fractional) 3D array with shape (S,N,3).
     polarizabilities
@@ -204,7 +203,13 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
 
     @property
     def stddev_polarizability(self) -> Tensor:
-        """Get standard deviation of polarizability."""
+        """Get standard deviation of polarizabilities.
+
+        Return
+        ------
+        :
+            2D tensor with size [3,3].
+        """
         return self._polarizabilities.std(0, unbiased=False, keepdim=True)
 
     def scale_polarizabilities(self, mean: Tensor, stddev: Tensor) -> None:

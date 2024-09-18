@@ -1,1 +1,1 @@
-"""Modules for polarizability model based on graph neural networks."""
+"""Modules for polarizability models implemented with PyTorch."""

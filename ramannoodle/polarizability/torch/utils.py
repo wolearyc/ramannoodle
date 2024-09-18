@@ -7,6 +7,7 @@ from ramannoodle.exceptions import get_type_error, get_torch_missing_error
 try:
     import torch
     from torch import Tensor
+    from torch_geometric.nn.models.dimenet import triplets as dimenet_triplets
 except ModuleNotFoundError as exc:
     raise get_torch_missing_error() from exc
 
@@ -15,17 +16,17 @@ except ModuleNotFoundError as exc:
 
 
 def polarizability_vectors_to_tensors(polarizability_vectors: Tensor) -> Tensor:
-    """Convert polarizability vectors to tensors.
+    """Convert polarizability vectors to symmetric tensors.
 
     Parameters
     ----------
     polarizability_vectors
-        Tensor with size [S,6].
+        | 2D Tensor with size [S,6].
 
     Returns
     -------
     :
-        Symmetric tensor with size [S,3,3].
+        3D tensor with size [S,3,3].
     """
     indices = torch.tensor(
         [
@@ -46,7 +47,7 @@ def polarizability_vectors_to_tensors(polarizability_vectors: Tensor) -> Tensor:
         ) from exc
 
 
-def _get_polarizability_tensors(x: Tensor) -> Tensor:
+def get_polarizability_tensors(polarizability_vectors: Tensor) -> Tensor:
     """X should have size (_,6)."""
     indices = torch.tensor(
         [
@@ -55,7 +56,13 @@ def _get_polarizability_tensors(x: Tensor) -> Tensor:
             [4, 5, 2],
         ]
     )
-    return x[:, indices]
+    return polarizability_vectors[:, indices]
+
+
+def get_polarizability_vectors(polarizability_tensors: Tensor) -> Tensor:
+    """X should have size (_,3,3)."""
+    indices = torch.tensor([[0, 0], [1, 1], [2, 2], [0, 1], [0, 2], [1, 2]]).T
+    return polarizability_tensors[:, indices[0], indices[1]]
 
 
 def _get_tensor_size_str(size: Sequence[int | None]) -> str:
@@ -224,3 +231,95 @@ def _radius_graph_pbc(
     return get_graph_info(
         cart_displacement, edge_indexes, cart_distance_matrix, num_atoms
     )
+
+
+class BatchTriplets:
+    """Graph triplets.
+
+    Parameters
+    ----------
+    num_nodes
+    ref_edge_indexes
+    """
+
+    def __init__(self, num_nodes: int, ref_edge_indexes: Tensor):
+        self._num_nodes = num_nodes
+        self._num_edges = len(ref_edge_indexes[1])
+        with torch.device("cpu"):
+            self._ref_triplets = dimenet_triplets(
+                edge_index=ref_edge_indexes[[1, 2]].to("cpu"),
+                num_nodes=self._num_nodes,
+            )
+        self._ref_triplets = tuple(
+            t.to(torch.get_default_device()) for t in self._ref_triplets
+        )
+        assert len(self._ref_triplets) == 7  # type hint
+        self._num_triplets = self._ref_triplets[2].size(0)
+
+        self._cached_batch_size = 1
+        self._cached_triplets = self._ref_triplets
+
+    @property
+    def cached_batch_size(self) -> int:
+        """Get batch size of current cache."""
+        return self._cached_batch_size
+
+    def get_triplets(
+        self, batch_size: int
+    ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
+        """Get triplets for a given batch size.
+
+        Returns
+        -------
+        :
+            7-tuple:
+                0. | i --
+                   | Node 1 of edge pairs, a 1D tensor with size [E,].
+                #. | j --
+                   | Node 2 of edge pairs, a 1D tensor with size [E,].
+                #. | index_i --
+                   | Node 1 of edge triplets, a 1D tensor with size [T,] where T is the
+                   | number of triplets.
+                #. | index_j --
+                   | Node 2 of edge triplets, a 1D tensor with size [T,].
+                #. | index_k --
+                   | Node 3 of edge triplets, a 1D tensor with size [T,].
+                #. | index_ji --
+                   | Index of (j,i) corresponding to (index_j,index_i), a 1D tensor
+                   | with size [T,].
+                #. | index_kj --
+                   | Index of (k,j) corresponding to (index_k,index_j), a 1D tensor
+                   | with size [T,].
+
+        """
+        if batch_size != self._cached_batch_size:
+            i, j, index_i, index_j, index_k, index_ji, index_kj = tuple(
+                t.repeat(batch_size) for t in self._ref_triplets
+            )
+
+            batch_indexes = torch.tensor([range(batch_size)]).repeat_interleave(
+                self._num_edges, dim=1
+            )[0]
+            for index in [i, j]:
+                index += batch_indexes * self._num_nodes
+
+            batch_indexes = torch.tensor([range(batch_size)]).repeat_interleave(
+                self._num_triplets, dim=1
+            )[0]
+            for index in [index_i, index_j, index_k]:
+                index += batch_indexes * self._num_nodes
+            for index in [index_ji, index_kj]:
+                index += batch_indexes * self._num_edges
+
+            self._cached_triplets = (
+                i,
+                j,
+                index_i,
+                index_j,
+                index_k,
+                index_ji,
+                index_kj,
+            )
+            self._cached_batch_size = batch_size
+
+        return self._cached_triplets

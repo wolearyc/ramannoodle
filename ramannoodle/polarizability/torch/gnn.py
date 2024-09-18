@@ -5,7 +5,7 @@ from __future__ import annotations
 import typing
 
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.exceptions import get_torch_missing_error
+from ramannoodle.exceptions import get_torch_missing_error, UsageError
 
 try:
     import torch
@@ -19,14 +19,11 @@ try:
         Module,
         LayerNorm,
     )
-
     from torch_geometric.nn.inits import reset
-    from torch_geometric.nn.models.dimenet import triplets
     from torch_geometric.nn.models.schnet import ShiftedSoftplus
     from torch_geometric.utils import scatter
-
     import ramannoodle.polarizability.torch.utils as rn_torch_utils
-except ModuleNotFoundError as exc:
+except (ModuleNotFoundError, UsageError) as exc:
     raise get_torch_missing_error() from exc
 
 # pylint: disable=not-callable
@@ -35,22 +32,20 @@ except ModuleNotFoundError as exc:
 class GaussianFilter(torch.nn.Module):
     """Gaussian filter.
 
-    Parameters should be chosen such that all expected inputs are between start and
-    stop.
+    Parameters should be chosen such that all expected inputs are between lower and
+    upper bounds.
 
     Parameters
     ----------
-    start
-        | Lower bound.
-    stop
-        | Upper bound.
+    lower_bound
+    upper_bound
     steps
-        | Number of steps between start and stop.
+        | Number of steps to take between lower_bound and upper_bound.
     """
 
-    def __init__(self, start: float, stop: float, steps: int):
+    def __init__(self, lower_bound: float, upper_bound: float, steps: int):
         super().__init__()
-        offset = torch.linspace(start, stop, steps)
+        offset = torch.linspace(lower_bound, upper_bound, steps)
         self.coefficient = -0.5 / (float(offset[1]) - float(offset[0])) ** 2
         self.register_buffer("offset", offset)
 
@@ -59,7 +54,7 @@ class GaussianFilter(torch.nn.Module):
 
         Parameters
         ----------
-        X
+        x
             | 1D tensor with size [D,]. Typically contains interatomic distances.
 
         Returns
@@ -146,6 +141,11 @@ class EdgeBlock(torch.nn.Module):
 
     Architecture and notation is based on equation (6) in https://doi.org/10.1038/
     s41524-021-00543-3. The architecture has been modified to use batch normalization.
+
+    Parameters
+    ----------
+    size_node_embedding
+    size_edge_embedding
     """
 
     def __init__(
@@ -188,7 +188,23 @@ class EdgeBlock(torch.nn.Module):
         i: Tensor,
         j: Tensor,
     ) -> Tensor:
-        """Get c2 embedding."""
+        """Get c2 embedding.
+
+        Parameters
+        ----------
+        node_embedding
+            | 2D tensor with size [N,size_node_embedding] where N is the number of
+            | nodes.
+        i
+            | Node 1 of edge pairs, a 1D tensor with size [E,].
+        j
+            | Node 2 of edge pairs, a 1D tensor with size [E,].
+
+        Returns
+        -------
+        :
+            2D tensor with size [E,size_edge_embedding].
+        """
         c2 = node_embedding[i] * node_embedding[j]
         c2 = self.c2_norm_1(self.c2_linear(c2))
         c2_filter, c2_core = c2.chunk(2, dim=1)
@@ -206,7 +222,35 @@ class EdgeBlock(torch.nn.Module):
         index_ji: Tensor,
         index_kj: Tensor,
     ) -> Tensor:
-        """Get c3 embedding."""
+        """Get c3 embedding.
+
+        Parameters
+        ----------
+        node_embedding
+            | 2D tensor with size [N,size_node_embedding] where N is the number of
+            | nodes.
+        edge_embedding
+            | 2D tensor with size [E,size_edge_embedding] where E is the number of
+            | edges.
+        index_i
+            | Node 1 of edge triplets, a 1D tensor with size [T,] where T is the number
+            | of triplets.
+        index_j
+            | Node 2 of edge triplets, a 1D tensor with size [T,].
+        index_k
+            | Node 3 of edge triplets, a 1D tensor with size [T,].
+        index_ji
+            | Index of (j,i) corresponding to (index_j,index_i), a 1D tensor with size
+            | [T,.]
+        index_kj
+            | Index of (k,j) corresponding to (index_k,index_j), a 1D tensor with size
+            | [T,.]
+
+        Returns
+        -------
+        :
+            2D tensor with size [E,size_edge_embedding].
+        """
         c3 = torch.cat(
             [
                 node_embedding[index_i],
@@ -242,8 +286,42 @@ class EdgeBlock(torch.nn.Module):
         index_ji: Tensor,
         index_kj: Tensor,
     ) -> Tensor:
-        """Forward pass."""
+        """Forward pass.
+
+        Parameters
+        ----------
+        node_embedding
+            | 2D tensor with size [N,size_node_embedding] where N is the number of
+            | nodes.
+        edge_embedding
+            | 2D tensor with size [E,size_edge_embedding] where E is the number of
+            | edges.
+        i
+            | Node 1 of edge pairs, a 1D tensor with size [E,].
+        j
+            | Node 2 of edge pairs, a 1D tensor with size [E,].
+        index_i
+            | Node 1 of edge triplets, a 1D tensor with size [T,] where T is the number
+            | of triplets.
+        index_j
+            | Node 2 of edge triplets, a 1D tensor with size [T,].
+        index_k
+            | Node 3 of edge triplets, a 1D tensor with size [T,].
+        index_ji
+            | Index of (j,i) corresponding to (index_j,index_i), a 1D tensor with size
+            | [T,.]
+        index_kj
+            | Index of (k,j) corresponding to (index_k,index_j), a 1D tensor with size
+            | [T,.]
+
+        Returns
+        -------
+        :
+            2D tensor with size [E,size_edge_embedding].
+
+        """
         c2_embedding = self._get_c2_embedding(node_embedding, i, j)
+        # pylint: disable=duplicate-code
         c3_embedding = self._get_c3_embedding(
             node_embedding,
             edge_embedding,
@@ -256,7 +334,71 @@ class EdgeBlock(torch.nn.Module):
         return (edge_embedding + c2_embedding + c3_embedding).tanh()
 
 
-class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
+def _get_edge_polarizability_vectors(
+    polarizability_embedding: Tensor,
+    unit_vector: Tensor,
+) -> Tensor:
+    """Convert polarizability embedding to edge polarizability vectors.
+
+    Parameters
+    ----------
+    polarizability_embedding
+        | 2D tensor with size [E,12] where E is the number of edges.
+    unit_vector
+        | (Å) Unit vectors of edges, a 2D tensor with size [E,3].
+
+    Returns
+    -------
+    :
+        2D tensor with size [E,6].
+    """
+    a1 = torch.zeros((polarizability_embedding.size(0), 3, 3))
+    a1[:, 0, 0] = polarizability_embedding[:, 0]
+    a1[:, 1, 1] = polarizability_embedding[:, 1]
+    a1[:, 2, 2] = polarizability_embedding[:, 1]
+    a2 = torch.zeros((polarizability_embedding.size(0), 3, 3))
+    a2[:, 0, 0] = polarizability_embedding[:, 2]
+    a2[:, 1, 1] = polarizability_embedding[:, 3]
+    a2[:, 2, 2] = polarizability_embedding[:, 3]
+    a3 = torch.zeros((polarizability_embedding.size(0), 3, 3))
+    a3[:, 0, 0] = polarizability_embedding[:, 4]
+    a3[:, 1, 1] = polarizability_embedding[:, 5]
+    a3[:, 2, 2] = polarizability_embedding[:, 5]
+    a4 = torch.zeros((polarizability_embedding.size(0), 3, 3))
+    a4[:, 0, 0] = polarizability_embedding[:, 6]
+    a4[:, 1, 1] = polarizability_embedding[:, 7]
+    a4[:, 2, 2] = polarizability_embedding[:, 7]
+    a5 = torch.zeros((polarizability_embedding.size(0), 3, 3))
+    a5[:, 0, 0] = polarizability_embedding[:, 8]
+    a5[:, 1, 1] = polarizability_embedding[:, 9]
+    a5[:, 2, 2] = polarizability_embedding[:, 9]
+    a6 = torch.zeros((polarizability_embedding.size(0), 3, 3))
+    a6[:, 0, 0] = polarizability_embedding[:, 10]
+    a6[:, 1, 1] = polarizability_embedding[:, 11]
+    a6[:, 2, 2] = polarizability_embedding[:, 11]
+
+    rotation = rn_torch_utils.get_rotations(unit_vector)
+    inv_rotation = torch.linalg.inv(rotation)
+
+    a1 = rotation @ a1 @ inv_rotation
+    a2 = rotation @ a2 @ inv_rotation
+    a3 = rotation @ a3 @ inv_rotation
+    a4 = rotation @ a4 @ inv_rotation
+    a5 = rotation @ a5 @ inv_rotation
+    a6 = rotation @ a6 @ inv_rotation
+
+    edge_polarizability = (
+        a1 * torch.tensor([[0, 1, 0], [1, 0, 0], [0, 0, 0]])
+        + a2 * torch.tensor([[0, 0, 1], [0, 0, 0], [1, 0, 0]])
+        + a3 * torch.tensor([[0, 0, 0], [0, 0, 1], [0, 1, 0]])
+        + a4 * torch.tensor([[1, 0, 0], [0, 0, 0], [0, 0, 0]])
+        + a5 * torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
+        + a6 * torch.tensor([[0, 0, 0], [0, 0, 0], [0, 0, 1]])
+    )
+    return rn_torch_utils.get_polarizability_vectors(edge_polarizability)
+
+
+class PotGNN(Module):  # pylint: disable=too-many-instance-attributes
     r"""POlarizability Tensor Graph Neural Network (PotGNN).
 
     GNN architecture was inspired by the "direct force architecture" developed in Park
@@ -273,86 +415,56 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
     size_node_embedding
     size_edge_embedding
     num_message_passes
+    gaussian_filter_start
+        | (Å) Lower bound of the Gaussian filter used in initial edge embedding.
+    gaussian_filter_end
+        | (Å) Upper bound of the Gaussian filter used in initial edge embedding.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments,too-many-instance-attributes
         self,
         ref_structure: ReferenceStructure,
         cutoff: float,
         size_node_embedding: int,
         size_edge_embedding: int,
         num_message_passes: int,
+        gaussian_filter_start: float,
+        gaussian_filter_end: float,
     ):
         super().__init__()
-        default_type = torch.get_default_dtype()
-        default_device = torch.get_default_device()
 
         self._ref_structure = ref_structure
         self._cutoff = cutoff
 
         # Set up graph.
-        self._ref_edge_indexes, _, self._ref_distances = (
-            rn_torch_utils._radius_graph_pbc(
-                torch.from_numpy(ref_structure.lattice)
-                .unsqueeze(0)
-                .type(default_type)
-                .to(default_device),
-                torch.from_numpy(ref_structure.positions)
-                .unsqueeze(0)
-                .type(default_type)
-                .to(default_device),
-                cutoff,
-            )
+        lattice = torch.from_numpy(ref_structure.lattice).unsqueeze(0)
+        positions = torch.from_numpy(ref_structure.positions).unsqueeze(0)
+        self._ref_edge_indexes, _, _ = rn_torch_utils._radius_graph_pbc(
+            lattice.type(torch.get_default_dtype()).to(torch.get_default_device()),
+            positions.type(torch.get_default_dtype()).to(torch.get_default_device()),
+            cutoff,
         )
-        self._num_nodes = len(ref_structure.atomic_numbers)
-        self._num_edges = len(self._ref_edge_indexes[1])
-        with torch.device("cpu"):
-            (
-                self._ref_i,
-                self._ref_j,
-                self._ref_index_i,
-                self._ref_index_j,
-                self._ref_index_k,
-                self._ref_index_kj,
-                self._ref_index_ji,
-            ) = triplets(
-                edge_index=self._ref_edge_indexes[[1, 2]].to("cpu"),
-                num_nodes=self._num_nodes,
-            )
-        self._ref_i = self._ref_i.to(default_device)
-        self._ref_j = self._ref_j.to(default_device)
-        self._ref_index_i = self._ref_index_i.to(default_device)
-        self._ref_index_j = self._ref_index_j.to(default_device)
-        self._ref_index_k = self._ref_index_k.to(default_device)
-        self._ref_index_kj = self._ref_index_kj.to(default_device)
-        self._ref_index_ji = self._ref_index_ji.to(default_device)
+        self._batch_triplets = rn_torch_utils.BatchTriplets(
+            len(ref_structure.atomic_numbers), self._ref_edge_indexes
+        )
 
-        self._num_triplets = self._ref_index_i.size(0)
-
-        # Graph index cache
-        self._cached_batch_size = -1
-        self._cached_i = torch.zeros([]).type(torch.int)
-        self._cached_j = torch.zeros([]).type(torch.int)
-        self._cached_index_i = torch.zeros([]).type(torch.int)
-        self._cached_index_j = torch.zeros([]).type(torch.int)
-        self._cached_index_k = torch.zeros([]).type(torch.int)
-        self._cached_index_kj = torch.zeros([]).type(torch.int)
-        self._cached_index_ji = torch.zeros([]).type(torch.int)
-
+        # Atom types map
         unique_atomic_numbers = set(ref_structure.atomic_numbers)
         self._num_atom_types = len(unique_atomic_numbers)
-        self._atom_types = (torch.zeros(119) - 1).type(torch.int)
+        self._atom_type_map = (torch.zeros(119) - 1).type(torch.int)
         for atom_type, atomic_number in enumerate(unique_atomic_numbers):
-            self._atom_types[atomic_number] = atom_type
+            self._atom_type_map[atomic_number] = atom_type
 
         self._node_embedding = Sequential(
             Embedding(self._num_atom_types, size_node_embedding),
-            ShiftedSoftplus(),  # nonlinear activation layer
+            ShiftedSoftplus(),
             Linear(size_node_embedding, size_node_embedding),
-            ShiftedSoftplus(),  # nonlinear activation layer
+            ShiftedSoftplus(),
             Linear(size_node_embedding, size_node_embedding),
         )
-        self._edge_embedding = GaussianFilter(0.0, 5.0, size_edge_embedding)
+        self._edge_embedding = GaussianFilter(
+            gaussian_filter_start, gaussian_filter_end, size_edge_embedding
+        )
 
         self._node_blocks = ModuleList(
             [
@@ -367,7 +479,7 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
             ]
         )
 
-        self._polarizability_predictor = Sequential(
+        self._to_polarizability_embedding = Sequential(
             Linear(size_edge_embedding, size_edge_embedding),
             BatchNorm1d(size_edge_embedding),
             ShiftedSoftplus(),
@@ -377,7 +489,22 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
         )
 
     def _convert_to_atom_type(self, atomic_numbers: Tensor) -> Tensor:
-        return self._atom_types[atomic_numbers]
+        """Convert atomic numbers into atom types.
+
+        Atom types must be defined for all atomic numbers.
+
+        Parameters
+        ----------
+        atomic_numbers
+            | Tensor with arbitrary shape.
+
+        Returns
+        -------
+        :
+            Tensor with the same shape as atomic_numbers.
+
+        """
+        return self._atom_type_map[atomic_numbers]
 
     def reset_parameters(self) -> None:
         """Reset model parameters."""
@@ -387,67 +514,32 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
             node_block.reset_parameters()
         for edge_block in self._edge_blocks:
             edge_block.reset_parameters()
-        reset(self._polarizability_predictor)
-
-    def _get_edge_polarizability_tensor(
-        self, x: Tensor
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
-        """X should have size (_,2)."""
-        t1 = torch.zeros((x.size(0), 3, 3))
-        t1[:, 0, 0] = x[:, 0]
-        t1[:, 1, 1] = x[:, 1]
-        t1[:, 2, 2] = x[:, 1]
-        t2 = torch.zeros((x.size(0), 3, 3))
-        t2[:, 0, 0] = x[:, 2]
-        t2[:, 1, 1] = x[:, 3]
-        t2[:, 2, 2] = x[:, 3]
-        t3 = torch.zeros((x.size(0), 3, 3))
-        t3[:, 0, 0] = x[:, 4]
-        t3[:, 1, 1] = x[:, 5]
-        t3[:, 2, 2] = x[:, 5]
-        t4 = torch.zeros((x.size(0), 3, 3))
-        t4[:, 0, 0] = x[:, 6]
-        t4[:, 1, 1] = x[:, 7]
-        t4[:, 2, 2] = x[:, 7]
-        t5 = torch.zeros((x.size(0), 3, 3))
-        t5[:, 0, 0] = x[:, 8]
-        t5[:, 1, 1] = x[:, 9]
-        t5[:, 2, 2] = x[:, 9]
-        t6 = torch.zeros((x.size(0), 3, 3))
-        t6[:, 0, 0] = x[:, 10]
-        t6[:, 1, 1] = x[:, 11]
-        t6[:, 2, 2] = x[:, 11]
-        return t1, t2, t3, t4, t5, t6
-
-    def _get_polarizability_vectors(self, x: Tensor) -> Tensor:
-        """X should have size (_,3,3)."""
-        indices = torch.tensor([[0, 0], [1, 1], [2, 2], [0, 1], [0, 2], [1, 2]]).T
-        return x[:, indices[0], indices[1]]
+        reset(self._to_polarizability_embedding)
 
     def _batch_graph(
         self, lattice: Tensor, positions: Tensor
     ) -> tuple[Tensor, Tensor, Tensor]:
-        """Generate edge indexes, unit vectors, and changes in distance.
+        """Generate edge indexes, unit vectors, and edge distances for a batch.
 
         Parameters
         ----------
         lattice
-            Å | Tensor with size [S,3,3] where S is the number of samples.
+            | (Å) Tensor with size [S,3,3] where S is the number of samples.
         positions
-            Unitless | Tensor with size [S,N,3] where N is the number of atoms.
-        cutoff
-            Å | Edge cutoff distance.
+            | (fractional) Tensor with size [S,N,3] where N is the number of atoms.
 
         Returns
         -------
         :
-            3-tuple.
-            First element is edge indexes, a tensor of size [3,X] where X is the number
-            of edges. This tensor defines S non-interconnected graphs making up a
-            batch. The first row defines the graph index. The second and third rows
-            define the actual edge indexes used by ``triplet``. Second element is
-            cartesian unit vectors, a tensor of size [X,3]. Third element is distances,
-            a tensor of size [X,1].
+            3-tuple:
+            0. | edge indexes --
+               | 2D Tensor of size [3,E] where E is the number of edges. The first
+               | element are the graph indexes, while the remaining two elements are
+               | edge indexes.
+            #. | unit vectors --
+               | (Å) 2D Tensor with size [E,3].
+            #. | distances --
+               | (Å) 1D Tensor with size [E,].
 
         """
         num_samples = lattice.size(0)
@@ -475,55 +567,6 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
             cart_displacement, edge_indexes, cart_distance_matrix, num_atoms
         )
 
-    def _get_batch_triplets(
-        self,
-        batch_size: int,
-    ) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor, Tensor, Tensor]:
-        """We may be able to cache these."""
-        if batch_size == self._cached_batch_size:
-            return (
-                self._cached_i,
-                self._cached_j,
-                self._cached_index_i,
-                self._cached_index_j,
-                self._cached_index_k,
-                self._cached_index_ji,
-                self._cached_index_kj,
-            )
-
-        i = self._ref_i.repeat(batch_size)
-        j = self._ref_j.repeat(batch_size)
-        index_i = self._ref_index_i.repeat(batch_size)
-        index_j = self._ref_index_j.repeat(batch_size)
-        index_k = self._ref_index_k.repeat(batch_size)
-        index_ji = self._ref_index_ji.repeat(batch_size)
-        index_kj = self._ref_index_kj.repeat(batch_size)
-
-        batch_indexes = torch.tensor([range(batch_size)]).repeat_interleave(
-            self._num_edges, dim=1
-        )[0]
-        for index in [i, j]:
-            index += batch_indexes * self._num_nodes
-
-        batch_indexes = torch.tensor([range(batch_size)]).repeat_interleave(
-            self._num_triplets, dim=1
-        )[0]
-        for index in [index_i, index_j, index_k]:
-            index += batch_indexes * self._num_nodes
-        for index in [index_ji, index_kj]:
-            index += batch_indexes * self._num_edges
-
-        self._cached_i = i
-        self._cached_j = j
-        self._cached_index_i = index_i
-        self._cached_index_j = index_j
-        self._cached_index_k = index_k
-        self._cached_index_ji = index_ji
-        self._cached_index_kj = index_kj
-        self._cached_batch_size = batch_size
-
-        return i, j, index_i, index_j, index_k, index_ji, index_kj
-
     def forward(  # pylint: disable=too-many-locals
         self,
         lattice: Tensor,
@@ -535,77 +578,35 @@ class PotGNN(Module):  # pylint: disable = too-many-instance-attributes
         Parameters
         ----------
         lattice
-            Å | Tensor with size [S,3,3] where S is the number of samples.
+            | (Å) 3D tensor with size [S,3,3] where S is the number of samples.
         atomic_numbers
-            Tensor with size [S,N] where N is the number of atoms.
+            | Tensor with size [S,N] where N is the number of atoms.
         positions
-            Unitless | Tensor with size [S,N,3].
+            | (fractional) Tensor with size [S,N,3].
 
         Returns
         -------
         :
-            Polarizability tensors with size [S,6]. Polarizability is expressed in
-            vector form. To convert into tensor form, see
+            Polarizability vectors with size [S,6]. To convert into tensor form, see
             :func:`polarizability_vectors_to_tensors`.
 
         """
-        edge_index, unit_vec, dist = self._batch_graph(lattice, positions)
+        edge_index, unit_vector, distance = self._batch_graph(lattice, positions)
         atom_types = self._convert_to_atom_type(atomic_numbers).flatten()
-        i, j, index_i, index_j, index_k, index_ji, index_kj = self._get_batch_triplets(
-            batch_size=lattice.size(0)
-        )
-
-        # Embedding blocks:
         node_emb = self._node_embedding(atom_types)
-        edge_emb = self._edge_embedding(dist)
+        edge_emb = self._edge_embedding(distance)
 
         # Message passing blocks:
+        triplets = self._batch_triplets.get_triplets(batch_size=lattice.size(0))
         for node_block, edge_block in zip(self._node_blocks, self._edge_blocks):
-            node_emb = node_block(node_emb, edge_emb, i)
-            edge_emb = edge_block(
-                node_emb,
-                edge_emb,
-                i,
-                j,
-                index_i,
-                index_j,
-                index_k,
-                index_ji,
-                index_kj,
-            )
+            node_emb = node_block(node_emb, edge_emb, triplets[0])
+            edge_emb = edge_block(node_emb, edge_emb, *triplets)
 
-        # Polarizability prediction block:
-        edge_polarizability = self._polarizability_predictor(edge_emb)
-
-        t1, t2, t3, t4, t5, t6 = self._get_edge_polarizability_tensor(
-            edge_polarizability
+        # Get edge polarizabilities.
+        polarizability_emb = self._to_polarizability_embedding(edge_emb)
+        edge_polarizability = _get_edge_polarizability_vectors(
+            polarizability_emb, unit_vector
         )
-        rotation = rn_torch_utils.get_rotations(unit_vec)
-        inv_rotation = torch.linalg.inv(rotation)
-
-        t1 = rotation @ t1 @ inv_rotation
-        t2 = rotation @ t2 @ inv_rotation
-        t3 = rotation @ t3 @ inv_rotation
-        t4 = rotation @ t4 @ inv_rotation
-        t5 = rotation @ t5 @ inv_rotation
-        t6 = rotation @ t6 @ inv_rotation
-
-        mask_1 = torch.tensor([[0, 1, 0], [1, 0, 0], [0, 0, 0]])
-        mask_2 = torch.tensor([[0, 0, 1], [0, 0, 0], [1, 0, 0]])
-        mask_3 = torch.tensor([[0, 0, 0], [0, 0, 1], [0, 1, 0]])
-        mask_4 = torch.tensor([[1, 0, 0], [0, 0, 0], [0, 0, 0]])
-        mask_5 = torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
-        mask_6 = torch.tensor([[0, 0, 0], [0, 0, 0], [0, 0, 1]])
-
-        edge_polarizability = (
-            t1 * mask_1
-            + t2 * mask_2
-            + t3 * mask_3
-            + t4 * mask_4
-            + t5 * mask_5
-            + t6 * mask_6
-        )
-        edge_polarizability = self._get_polarizability_vectors(edge_polarizability)
 
         # Isolate polarizabilities from batch graphs.
         polarizability = torch.zeros((positions.size(0), 6))

@@ -72,7 +72,7 @@ def test_radius_graph_pbc() -> None:
 def test_batch_polarizability(poscar_ref_structure_fixture: ReferenceStructure) -> None:
     """Test of batch functions for forward pass (normal)."""
     ref_structure = poscar_ref_structure_fixture
-    model = PotGNN(ref_structure, 5, 5, 5, 5)
+    model = PotGNN(ref_structure, 5, 5, 5, 5, 0, 5)
     model.eval()
 
     for batch_size in range(1, 4):
@@ -124,7 +124,7 @@ def test_gpu(poscar_ref_structure_fixture: ReferenceStructure) -> None:
         return
 
     torch.set_default_device(device)  # type: ignore
-    model = PotGNN(ref_structure, 5, 5, 5, 5)
+    model = PotGNN(ref_structure, 5, 5, 5, 5, 0, 5)
     model.eval()
 
     for batch_size in range(1, 4):
