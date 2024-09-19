@@ -451,8 +451,8 @@ class PotGNN(
             raise ValueError(f"invalid size_edge_embedding: {size_edge_embedding} <= 0")
         if num_message_passes <= 0:
             raise ValueError(f"invalid num_message_passes: {num_message_passes} <= 0")
-        if gaussian_filter_start <= 0:
-            inequality = f"{gaussian_filter_start} <= 0"
+        if gaussian_filter_start < 0:
+            inequality = f"{gaussian_filter_start} < 0"
             raise ValueError(f"invalid gaussian_filter_start: {inequality}")
         if gaussian_filter_end <= gaussian_filter_start:
             inequality = f"{gaussian_filter_end} <= gaussian_filter_start"

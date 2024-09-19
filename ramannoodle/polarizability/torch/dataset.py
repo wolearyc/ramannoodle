@@ -185,7 +185,7 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         :
             2D array with shape (3,3).
         """
-        return self._polarizabilities.mean(0, keepdim=True).clone().numpy()
+        return self._polarizabilities.mean(0).clone().numpy()
 
     @property
     def stddev_polarizability(self) -> NDArray[np.float64]:
@@ -196,7 +196,7 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         :
             2D array with shape (3,3).
         """
-        result = self._polarizabilities.std(0, unbiased=False, keepdim=True)
+        result = self._polarizabilities.std(0, unbiased=False)
         return result.clone().numpy()
 
     def scale_polarizabilities(
