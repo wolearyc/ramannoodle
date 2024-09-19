@@ -126,20 +126,20 @@ def _read_polarizability_dataset(
         raise get_torch_missing_error()
     filepaths = pathify_as_list(filepaths)
 
-    lattices: list[NDArray[np.float64]] = []
-    atomic_numbers_list: list[list[int]] = []
+    lattice = np.zeros((3, 3))
+    atomic_numbers: list[int] = []
     positions_list: list[NDArray[np.float64]] = []
     polarizabilities: list[NDArray[np.float64]] = []
     for file_index, filepath in tqdm(list(enumerate(filepaths)), unit=" files"):
-        lattice, atomic_numbers, positions, polarizability = (
+        read_lattice, read_atomic_numbers, positions, polarizability = (
             read_structure_and_polarizability_fn(filepath)
         )
         if file_index != 0:
-            if not np.isclose(lattices[0], lattice, atol=1e-5).all():
+            if not np.isclose(lattice, read_lattice, atol=1e-5).all():
                 raise IncompatibleStructureException(
                     f"incompatible lattice: {filepath}"
                 )
-            if atomic_numbers_list[0] != atomic_numbers:
+            if atomic_numbers != read_atomic_numbers:
                 raise IncompatibleStructureException(
                     f"incompatible atomic numbers: {filepath}"
                 )
@@ -147,14 +147,14 @@ def _read_polarizability_dataset(
                 raise IncompatibleStructureException(
                     f"incompatible atomic positions: {filepath}"
                 )
-        lattices.append(lattice)
-        atomic_numbers_list.append(atomic_numbers)
+        lattice = read_lattice
+        atomic_numbers = read_atomic_numbers
         positions_list.append(positions)
         polarizabilities.append(polarizability)
 
     return PolarizabilityDataset(
-        np.array(lattices),
-        atomic_numbers_list,
+        lattice,
+        atomic_numbers,
         np.array(positions_list),
         np.array(polarizabilities),
         scale_mode="standard",

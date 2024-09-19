@@ -1,8 +1,14 @@
 """Testing for PyTorch dataset."""
 
+from typing import Type
+
+import numpy as np
+from numpy.typing import NDArray
+
 import pytest
 
 import ramannoodle.io.generic as generic_io
+from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
 
 
 @pytest.mark.parametrize(
@@ -28,3 +34,43 @@ def test_load_polarizability_dataset(
         assert len(dataset) == len(filepaths)
     else:
         assert len(dataset) == 1
+
+    _ = dataset.atomic_numbers
+    _ = dataset.mean_polarizability
+    _ = dataset.num_atoms
+    _ = dataset.num_samples
+    _ = dataset.polarizabilities
+    _ = dataset.positions
+
+
+@pytest.mark.parametrize(
+    "lattice, atomic_numbers, positions, polarizabilities, scale_mode, exception_type,"
+    "in_reason",
+    [
+        (
+            np.zeros((3, 3)),
+            [1, 2],
+            np.random.random((2, 2, 3)),
+            np.random.random((2, 3, 3)),
+            "invalid_scale_mode",
+            ValueError,
+            "unsupported scale mode: invalid_scale_mode",
+        ),
+    ],
+)
+def test_polarizability_dataset_exception(  # pylint: disable=too-many-arguments
+    lattice: NDArray[np.float64],
+    atomic_numbers: list[int],
+    positions: NDArray[np.float64],
+    polarizabilities: NDArray[np.float64],
+    scale_mode: str,
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test polarizability dataset (exception)."""
+    with pytest.raises(exception_type) as error:
+        PolarizabilityDataset(
+            lattice, atomic_numbers, positions, polarizabilities, scale_mode
+        )
+
+    assert in_reason in str(error.value)
