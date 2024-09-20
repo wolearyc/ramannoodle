@@ -28,27 +28,7 @@ def polarizability_vectors_to_tensors(polarizability_vectors: Tensor) -> Tensor:
     :
         3D tensor with size [S,3,3].
     """
-    indices = torch.tensor(
-        [
-            [0, 3, 4],
-            [3, 1, 5],
-            [4, 5, 2],
-        ]
-    )
-    try:
-        return polarizability_vectors[:, indices]
-    except IndexError as exc:
-        raise get_tensor_size_error(
-            "polarizability_vectors", polarizability_vectors, "[_,6]"
-        ) from exc
-    except TypeError as exc:
-        raise get_type_error(
-            "polarizability_vectors", polarizability_vectors, "Tensor"
-        ) from exc
-
-
-def get_polarizability_tensors(polarizability_vectors: Tensor) -> Tensor:
-    """X should have size (_,6)."""
+    verify_tensor_size("polarizability_vectors", polarizability_vectors, (None, 6))
     indices = torch.tensor(
         [
             [0, 3, 4],
@@ -59,8 +39,21 @@ def get_polarizability_tensors(polarizability_vectors: Tensor) -> Tensor:
     return polarizability_vectors[:, indices]
 
 
-def get_polarizability_vectors(polarizability_tensors: Tensor) -> Tensor:
-    """X should have size (_,3,3)."""
+def polarizability_tensors_to_vectors(polarizability_tensors: Tensor) -> Tensor:
+    """Convert polarizability tensors to vectors.
+
+    Parameters
+    ----------
+    polarizability_tensors
+        | 3D tensor with size [S,3,3] where S is the number of samples.
+
+    Returns
+    -------
+    :
+        2D tensor with size [S,6].
+
+    """
+    verify_tensor_size("polarizability_tensors", polarizability_tensors, (None, 3, 3))
     indices = torch.tensor([[0, 0], [1, 1], [2, 2], [0, 1], [0, 2], [1, 2]]).T
     return polarizability_tensors[:, indices[0], indices[1]]
 

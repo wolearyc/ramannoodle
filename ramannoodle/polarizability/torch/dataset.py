@@ -221,8 +221,8 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         scaled = self._polarizabilities.detach().clone()
         scaled = scaled - torch.tensor(mean)
         scaled /= torch.tensor(stddev)
-        self._scaled_polarizabilities = rn_torch_utils.get_polarizability_vectors(
-            scaled
+        self._scaled_polarizabilities = (
+            rn_torch_utils.polarizability_tensors_to_vectors(scaled)
         )
 
     def __len__(self) -> int:

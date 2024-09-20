@@ -11,7 +11,7 @@ from ramannoodle.polarizability.torch.gnn import PotGNN
 from ramannoodle.polarizability.torch.utils import (
     _radius_graph_pbc,
     get_rotations,
-    get_polarizability_tensors,
+    polarizability_vectors_to_tensors,
 )
 
 # import ramannoodle.io.vasp as vasp_io
@@ -173,7 +173,7 @@ def test_calc_polarizabilities(
         batch_positions = torch.randn(batch_size, num_atoms, 3)
 
         forward = model.forward(batch_lattices, batch_atomic_numbers, batch_positions)
-        forward = get_polarizability_tensors(forward.detach().clone()).numpy()
+        forward = polarizability_vectors_to_tensors(forward.detach().clone()).numpy()
         calc = model.calc_polarizabilities(batch_positions.detach().clone().numpy())
 
         assert np.allclose(forward, calc)

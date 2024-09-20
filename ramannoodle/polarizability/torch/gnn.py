@@ -403,7 +403,7 @@ def _get_edge_polarizability_vectors(
         + a5 * torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
         + a6 * torch.tensor([[0, 0, 0], [0, 0, 0], [0, 0, 1]])
     )
-    return rn_torch_utils.get_polarizability_vectors(edge_polarizability)
+    return rn_torch_utils.polarizability_tensors_to_vectors(edge_polarizability)
 
 
 class PotGNN(
@@ -676,6 +676,8 @@ class PotGNN(
             atomic_numbers,
             torch.tensor(positions_batch).type(default_type),
         )
-        polarizability = rn_torch_utils.get_polarizability_tensors(polarizability)
+        polarizability = rn_torch_utils.polarizability_vectors_to_tensors(
+            polarizability
+        )
 
         return polarizability.detach().clone().numpy()
