@@ -43,8 +43,8 @@ def test_read_positions_and_polarizability(
         path_fixture, file_format="vasprun.xml"
     )
 
-    assert np.isclose(positions[-1], known_last_positions).all()
-    assert np.isclose(polarizability, known_polarizability).all()
+    assert np.allclose(positions[-1], known_last_positions)
+    assert np.allclose(polarizability, known_polarizability)
 
 
 @pytest.mark.parametrize(
@@ -64,7 +64,7 @@ def test_read_positions(
     """Test read_positions (normal)."""
     positions = generic_io.read_positions(path_fixture, file_format="vasprun.xml")
 
-    assert np.isclose(positions[-1], known_last_positions).all()
+    assert np.allclose(positions[-1], known_last_positions)
 
 
 @pytest.mark.parametrize(
@@ -95,7 +95,7 @@ def test_read_ref_structure(
     )
 
     assert ref_structure.atomic_numbers == known_atomic_numbers
-    assert np.isclose(ref_structure.lattice, known_lattice).all()
+    assert np.allclose(ref_structure.lattice, known_lattice)
 
 
 @pytest.mark.parametrize(
@@ -119,7 +119,7 @@ def test_read_trajectory(
     """Test read_ref_structure (normal)."""
     trajectory = generic_io.read_trajectory(path_fixture, file_format="vasprun.xml")
 
-    assert np.isclose(trajectory.positions_ts[-1][-1], known_final_position).all()
+    assert np.allclose(trajectory.positions_ts[-1][-1], known_final_position)
     assert len(trajectory) == known_trajectory_length
     assert np.isclose(trajectory.timestep, known_timestep)
 
@@ -146,8 +146,8 @@ def test_read_phonons(
 
     assert len(phonons.wavenumbers) == len(phonons.displacements)
     assert len(phonons.wavenumbers) == degrees_of_freedom
-    assert np.isclose(phonons.wavenumbers[0:5], known_wavenumbers).all()
-    assert np.isclose(phonons.displacements[-1][-1], known_last_displacement).all()
+    assert np.allclose(phonons.wavenumbers[0:5], known_wavenumbers)
+    assert np.allclose(phonons.displacements[-1][-1], known_last_displacement)
 
 
 @pytest.mark.parametrize(

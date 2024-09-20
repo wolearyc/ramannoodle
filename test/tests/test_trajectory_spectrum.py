@@ -88,8 +88,8 @@ def test_spectrum(
         known_wavenumbers = known_spectrum["wavenumbers"]
         known_intensities = known_spectrum["intensities"]
 
-        assert np.isclose(wavenumbers, known_wavenumbers).all()
-        assert np.isclose(intensities, known_intensities, atol=1e-3).all()
+        assert np.allclose(wavenumbers, known_wavenumbers)
+        assert np.allclose(intensities, known_intensities, atol=1e-3)
 
 
 @pytest.mark.parametrize(

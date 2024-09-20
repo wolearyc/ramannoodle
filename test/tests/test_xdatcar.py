@@ -37,5 +37,5 @@ def test_read_write_xdatcar(
         overwrite=True,
     )
     written_trajectory = vasp_io.xdatcar.read_trajectory("test/data/temp", 1.0)
-    assert np.isclose(written_trajectory.positions_ts, trajectory.positions_ts).all()
+    assert np.allclose(written_trajectory.positions_ts, trajectory.positions_ts)
     assert written_trajectory.timestep == trajectory.timestep

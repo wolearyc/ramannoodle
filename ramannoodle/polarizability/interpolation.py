@@ -59,7 +59,7 @@ def find_duplicates(vectors: Iterable[ArrayLike]) -> NDArray | None:
         raise get_type_error("vectors", vectors, "Iterable") from exc
     try:
         for vector_1, vector_2 in combinations:
-            if np.isclose(vector_1, vector_2).all():
+            if np.allclose(vector_1, vector_2):
                 return np.array(vector_1)
         return None
     except TypeError as exc:
@@ -368,12 +368,12 @@ class InterpolationModel(PolarizabilityModel):
             # Warn user if amplitudes don't span zero
             max_amplitude = np.max(interpolation_x)
             min_amplitude = np.min(interpolation_x)
-            if np.isclose(max_amplitude, 0, atol=1e-3).all() or max_amplitude <= 0:
+            if np.allclose(max_amplitude, 0, atol=1e-3) or max_amplitude <= 0:
                 warn(
                     "max amplitude <= 0, when usually it should be > 0",
                     DOFWarning,
                 )
-            if np.isclose(min_amplitude, 0, atol=1e-3).all() or min_amplitude >= 0:
+            if np.allclose(min_amplitude, 0, atol=1e-3) or min_amplitude >= 0:
                 warn(
                     "min amplitude >= 0, when usually it should be < 0",
                     DOFWarning,

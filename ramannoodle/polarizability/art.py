@@ -211,7 +211,7 @@ class ARTModel(InterpolationModel):
         _displacement = displacements[0].copy()
         atom_index = int(np.argmax(np.sum(_displacement**2, axis=1)))
         _displacement[atom_index] = np.zeros(3)
-        if not np.isclose(_displacement, 0.0, atol=1e-6).all():
+        if not np.allclose(_displacement, 0.0, atol=1e-6):
             raise InvalidDOFException("multiple atoms displaced simultaneously")
 
         # Checks displacement
@@ -288,7 +288,7 @@ class ARTModel(InterpolationModel):
         for atom_index in atom_indexes:
             for index, basis_vector in enumerate(self._cart_basis_vectors):
                 direction = basis_vector[atom_index]
-                if not np.isclose(direction, 0, atol=1e-5).all():
+                if not np.allclose(direction, 0, atol=1e-5):
                     dof_indexes.append(index)
         return dof_indexes
 

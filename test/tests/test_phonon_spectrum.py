@@ -38,7 +38,7 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
             )
         )
         model_polarizability = model.calc_polarizabilities(np.array([positions]))[0]
-        assert np.isclose(model_polarizability, known_polarizability, atol=1e-4).all()
+        assert np.allclose(model_polarizability, known_polarizability, atol=1e-4)
 
 
 @pytest.mark.parametrize(
@@ -100,8 +100,8 @@ def test_interpolation_spectrum(
         known_wavenumbers = known_spectrum["wavenumbers"]
         known_intensities = known_spectrum["intensities"]
 
-        assert np.isclose(wavenumbers, known_wavenumbers).all()
-        assert np.isclose(intensities, known_intensities, atol=1e-4).all()
+        assert np.allclose(wavenumbers, known_wavenumbers)
+        assert np.allclose(intensities, known_intensities, atol=1e-4)
 
 
 @pytest.mark.parametrize(
@@ -157,8 +157,8 @@ def test_art_spectrum(
         known_wavenumbers = known_spectrum["wavenumbers"]
         known_intensities = known_spectrum["intensities"]
 
-        assert np.isclose(wavenumbers, known_wavenumbers).all()
-        assert np.isclose(intensities, known_intensities, atol=1e-4).all()
+        assert np.allclose(wavenumbers, known_wavenumbers)
+        assert np.allclose(intensities, known_intensities, atol=1e-4)
 
 
 @pytest.mark.parametrize(
@@ -232,8 +232,8 @@ def test_art_masked_spectrum(
         known_wavenumbers = known_spectrum["wavenumbers"]
         known_intensities = known_spectrum["intensities"]
 
-        assert np.isclose(wavenumbers, known_wavenumbers).all()
-        assert np.isclose(intensities, known_intensities, atol=1e-4).all()
+        assert np.allclose(wavenumbers, known_wavenumbers)
+        assert np.allclose(intensities, known_intensities, atol=1e-4)
 
 
 @pytest.mark.parametrize(
@@ -267,8 +267,8 @@ def test_convolve_intensities(
         with np.load(known_gaussian_spectrum_path) as known_spectrum:
             known_wavenumbers = known_spectrum["wavenumbers"]
             known_intensities = known_spectrum["intensities"]
-            assert np.isclose(gaussian_wavenumbers, known_wavenumbers).all()
-            assert np.isclose(gaussian_intensities, known_intensities).all()
+            assert np.allclose(gaussian_wavenumbers, known_wavenumbers)
+            assert np.allclose(gaussian_intensities, known_intensities)
 
         lorentzian_wavenumbers, lorentzian_intensities = convolve_spectrum(
             wavenumbers, intensities, "lorentzian"
@@ -281,8 +281,8 @@ def test_convolve_intensities(
         with np.load(known_lorentzian_spectrum_path) as known_spectrum:
             known_wavenumbers = known_spectrum["wavenumbers"]
             known_intensities = known_spectrum["intensities"]
-            assert np.isclose(lorentzian_wavenumbers, known_wavenumbers).all()
-            assert np.isclose(lorentzian_intensities, known_intensities).all()
+            assert np.allclose(lorentzian_wavenumbers, known_wavenumbers)
+            assert np.allclose(lorentzian_intensities, known_intensities)
 
 
 @pytest.mark.parametrize(

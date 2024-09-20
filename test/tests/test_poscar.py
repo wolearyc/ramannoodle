@@ -92,9 +92,9 @@ def test_write_read_poscar(
     reference_structure = ramannoodle.io.generic.read_ref_structure(
         "test/data/temp", file_format="poscar"
     )
-    assert np.isclose(reference_structure._lattice, lattice).all()
-    assert np.isclose(reference_structure._atomic_numbers, atomic_numbers).all()
-    assert np.isclose(reference_structure.positions, positions).all()
+    assert np.allclose(reference_structure._lattice, lattice)
+    assert np.allclose(reference_structure._atomic_numbers, atomic_numbers)
+    assert np.allclose(reference_structure.positions, positions)
 
 
 @pytest.mark.parametrize(
@@ -166,8 +166,8 @@ def test_read_cart_poscar(  # pylint: disable=too-many-arguments
     ref_structure = vasp_io.poscar.read_ref_structure(cart_poscar_path)
     known_ref_structure = vasp_io.poscar.read_ref_structure(ref_frac_poscar_path)
 
-    assert np.isclose(ref_structure.lattice, known_ref_structure.lattice).all()
-    assert np.isclose(ref_structure.positions, known_ref_structure.positions).all()
+    assert np.allclose(ref_structure.lattice, known_ref_structure.lattice)
+    assert np.allclose(ref_structure.positions, known_ref_structure.positions)
 
 
 @pytest.mark.parametrize(

@@ -36,7 +36,7 @@ def are_collinear(vector_1: NDArray[np.float64], vector_2: NDArray[np.float64]) 
         raise ValueError(
             f"vector_1 and vector_2 have different lengths: {length_expr}"
         ) from exc
-    return bool(np.isclose(dot_product, 1).all() or np.isclose(dot_product, -1).all())
+    return bool(np.allclose(dot_product, 1) or np.isclose(dot_product, -1))
 
 
 def is_orthogonal_to_all(
@@ -69,7 +69,7 @@ def is_orthogonal_to_all(
         except TypeError as exc:
             raise get_type_error(f"vectors[{index}]", vector_2, "ndarray") from exc
 
-        if not np.isclose(np.dot(vector_1.flatten(), vector_2.flatten()) + 1, 1).all():
+        if not np.allclose(np.dot(vector_1.flatten(), vector_2.flatten()) + 1, 1):
             return index
 
     return -1

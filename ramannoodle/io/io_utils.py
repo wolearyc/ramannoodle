@@ -135,7 +135,7 @@ def _read_polarizability_dataset(
             read_structure_and_polarizability_fn(filepath)
         )
         if file_index != 0:
-            if not np.isclose(lattice, read_lattice, atol=1e-5).all():
+            if not np.allclose(lattice, read_lattice, atol=1e-5):
                 raise IncompatibleStructureException(
                     f"incompatible lattice: {filepath}"
                 )

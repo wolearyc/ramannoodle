@@ -46,15 +46,15 @@ def test_read_phonons_from_outcar(
 
     known_degrees_of_freedom = known_num_atoms * 3
     assert phonons.wavenumbers.shape == (known_degrees_of_freedom,)
-    assert np.isclose(phonons.wavenumbers[0:4], known_wavenumbers).all()
+    assert np.allclose(phonons.wavenumbers[0:4], known_wavenumbers)
     assert phonons.displacements.shape == (
         known_degrees_of_freedom,
         known_num_atoms,
         3,
     )
-    assert np.isclose(phonons.displacements[0, 0], known_first_displacement).all()
+    assert np.allclose(phonons.displacements[0, 0], known_first_displacement)
     print(phonons.displacements[-1, -1])
-    assert np.isclose(phonons.displacements[-1, -1], known_last_displacement).all()
+    assert np.allclose(phonons.displacements[-1, -1], known_last_displacement)
 
 
 @pytest.mark.parametrize(
@@ -91,4 +91,4 @@ def test_read_trajectory_from_outcar(
     """Test read_trajectory for outcar (normal)."""
     trajectory = generic_io.read_trajectory(path_fixture, file_format="outcar")
     assert len(trajectory) == trajectory_length
-    assert np.isclose(last_position, trajectory[-1][-1]).all()
+    assert np.allclose(last_position, trajectory[-1][-1])

@@ -193,7 +193,7 @@ def test_get_positions_permutation_matrix(
 )
 def test_apply_pbc(positions: NDArray[np.float64], known: NDArray[np.float64]) -> None:
     """Test apply_pbc (normal)."""
-    assert np.isclose(apply_pbc(positions), known).all()
+    assert np.allclose(apply_pbc(positions), known)
 
 
 @pytest.mark.parametrize(
@@ -229,7 +229,7 @@ def test_apply_pbc_displacement(
     displacement: NDArray[np.float64], known: NDArray[np.float64]
 ) -> None:
     """Test test_apply_pbc_displacement (normal)."""
-    assert np.isclose(apply_pbc_displacement(displacement), known).all()
+    assert np.allclose(apply_pbc_displacement(displacement), known)
 
 
 @pytest.mark.parametrize(

@@ -207,7 +207,7 @@ def test_calc_polarizabilities(
 #     for rotation in ref_structure._symmetry_dict["rotations"]:
 #         rotated_polarizability = np.linalg.inv(rotation) @ polarizability @ rotation
 
-#         assert np.isclose(polarizability, rotated_polarizability, atol=1e-5).all()
+#         assert np.allclose(polarizability, rotated_polarizability, atol=1e-5)
 
 
 # def test_symmetry_displaced() -> None:
