@@ -158,10 +158,10 @@ def test_calc_polarizabilities(
 ) -> None:
     """Test of calc_polarizabilities (normal)."""
     ref_structure = poscar_ref_structure_fixture
-    model = PotGNN(ref_structure, 5, 5, 5, 5, 0, 5)
+    model = PotGNN(ref_structure, 2, 5, 5, 5, 0, 5)
     model.eval()
 
-    for batch_size in range(1, 4):
+    for batch_size in [50, 100, 200]:
 
         # Generate random data.
         num_atoms = len(ref_structure.atomic_numbers)

@@ -7,6 +7,8 @@ import typing
 import numpy as np
 from numpy.typing import NDArray
 
+from tqdm import tqdm
+
 from ramannoodle.structure.reference import ReferenceStructure
 from ramannoodle.exceptions import (
     get_torch_missing_error,
@@ -662,22 +664,32 @@ class PotGNN(
             "positions_batch", positions_batch, (None, self._ref_structure.num_atoms, 3)
         )
         self.eval()
-        batch_size = positions_batch.shape[0]
-        lattice = torch.tensor(self._ref_structure.lattice)
-        lattice = lattice.unsqueeze(0).expand((batch_size, -1, -1))
-        atomic_numbers = torch.tensor(
-            self._ref_structure.atomic_numbers, dtype=torch.int
-        )
-        atomic_numbers = atomic_numbers.unsqueeze(0).expand((batch_size, -1))
 
-        default_type = torch.get_default_dtype()
-        polarizability = self.forward(
-            lattice.type(default_type),
-            atomic_numbers,
-            torch.tensor(positions_batch).type(default_type),
-        )
-        polarizability = rn_torch_utils.polarizability_vectors_to_tensors(
-            polarizability
-        )
+        polarizabilities = torch.zeros((positions_batch.shape[0], 3, 3))
+        for subbatch_index, positions_subbatch in tqdm(
+            enumerate(rn_torch_utils.batch_positions(positions_batch, batch_size=100))
+        ):
+            subbatch_size = positions_subbatch.shape[0]
 
-        return polarizability.detach().clone().numpy()
+            lattice = torch.tensor(self._ref_structure.lattice)
+            lattice = lattice.unsqueeze(0).expand((subbatch_size, -1, -1))
+            atomic_numbers = torch.tensor(
+                self._ref_structure.atomic_numbers, dtype=torch.int
+            )
+            atomic_numbers = atomic_numbers.unsqueeze(0).expand((subbatch_size, -1))
+
+            default_type = torch.get_default_dtype()
+            polarizability = self.forward(
+                lattice.type(default_type),
+                atomic_numbers,
+                torch.tensor(positions_subbatch).type(default_type),
+            )
+            polarizability = rn_torch_utils.polarizability_vectors_to_tensors(
+                polarizability
+            )
+
+            start_index = subbatch_index * subbatch_size
+            end_index = start_index + positions_subbatch.shape[0]
+            polarizabilities[start_index:end_index] = polarizability.detach()
+
+        return polarizabilities.detach().numpy()

@@ -1,8 +1,15 @@
 """Utility functions for PyTorch models."""
 
-from typing import Sequence
+from typing import Sequence, Generator
 
-from ramannoodle.exceptions import get_type_error, get_torch_missing_error
+import numpy as np
+from numpy.typing import NDArray
+
+from ramannoodle.exceptions import (
+    get_type_error,
+    get_torch_missing_error,
+    verify_ndarray_shape,
+)
 
 try:
     import torch
@@ -316,3 +323,27 @@ class BatchTriplets:
             self._cached_batch_size = batch_size
 
         return self._cached_triplets
+
+
+def batch_positions(
+    positions: NDArray[np.float64], batch_size: int
+) -> Generator[NDArray[np.float64], None, None]:
+    """Split positions into batches.
+
+    Parameters
+    ----------
+    positions
+        | (fractional) 3D array with shape (S,N,3) where S is the number of samples
+        | and N is the number of atoms.
+    batch_size
+        | Split positions into batches of size ``batch_size``.
+
+    Yields
+    ------
+    :
+        3D array with shape (batch_size,N,3).
+
+    """
+    verify_ndarray_shape("positions", positions, (None, None, 3))
+    for batch_index in range(0, positions.shape[0], batch_size):
+        yield positions[batch_index : min(batch_index + batch_size, positions.shape[0])]

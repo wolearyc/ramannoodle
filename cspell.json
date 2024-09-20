@@ -71,6 +71,7 @@
         "schnet",
         "Softplus",
         "spglib",
+        "subbatch",
         "symprec",
         "tablefmt",
         "timestep",
