@@ -433,7 +433,7 @@ class PotGNN(
         | (Å) Upper bound of the Gaussian filter used in initial edge embedding.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments,too-many-instance-attributes
+    def __init__(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         ref_structure: ReferenceStructure,
         cutoff: float,
@@ -442,6 +442,8 @@ class PotGNN(
         num_message_passes: int,
         gaussian_filter_start: float,
         gaussian_filter_end: float,
+        mean_polarizability: NDArray[np.float64],
+        stddev_polarizability: NDArray[np.float64],
     ):
         super().__init__()
         # Validate parameters
@@ -459,9 +461,13 @@ class PotGNN(
         if gaussian_filter_end <= gaussian_filter_start:
             inequality = f"{gaussian_filter_end} <= gaussian_filter_start"
             raise ValueError(f"invalid gaussian_filter_end: {inequality}")
+        verify_ndarray_shape("mean_polarizability", mean_polarizability, (3, 3))
+        verify_ndarray_shape("stddev_polarizability", stddev_polarizability, (3, 3))
 
         self._ref_structure = ref_structure
         self._cutoff = cutoff
+        self._mean_polarizability = mean_polarizability
+        self._stddev_polarizability = stddev_polarizability
 
         # Set up graph.
         lattice = torch.from_numpy(ref_structure.lattice).unsqueeze(0)
@@ -692,4 +698,6 @@ class PotGNN(
             end_index = start_index + positions_subbatch.shape[0]
             polarizabilities[start_index:end_index] = polarizability.detach()
 
-        return polarizabilities.detach().numpy()
+        result = polarizabilities.detach().numpy() * self._stddev_polarizability
+        result += self._mean_polarizability
+        return result

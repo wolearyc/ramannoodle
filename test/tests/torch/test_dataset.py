@@ -44,17 +44,15 @@ def test_load_polarizability_dataset(
 
 
 @pytest.mark.parametrize(
-    "lattice, atomic_numbers, positions, polarizabilities, scale_mode, exception_type,"
-    "in_reason",
+    "lattice, atomic_numbers, positions, polarizabilities, exception_type,in_reason",
     [
         (
             np.zeros((3, 3)),
             [1, 2],
-            np.random.random((2, 2, 3)),
+            np.random.random((3, 2, 3)),
             np.random.random((2, 3, 3)),
-            "invalid_scale_mode",
             ValueError,
-            "unsupported scale mode: invalid_scale_mode",
+            "polarizabilities has wrong shape: (2,3,3) != (3,3,3)",
         ),
     ],
 )
@@ -63,14 +61,11 @@ def test_polarizability_dataset_exception(  # pylint: disable=too-many-arguments
     atomic_numbers: list[int],
     positions: NDArray[np.float64],
     polarizabilities: NDArray[np.float64],
-    scale_mode: str,
     exception_type: Type[Exception],
     in_reason: str,
 ) -> None:
     """Test polarizability dataset (exception)."""
     with pytest.raises(exception_type) as error:
-        PolarizabilityDataset(
-            lattice, atomic_numbers, positions, polarizabilities, scale_mode
-        )
+        PolarizabilityDataset(lattice, atomic_numbers, positions, polarizabilities)
 
     assert in_reason in str(error.value)

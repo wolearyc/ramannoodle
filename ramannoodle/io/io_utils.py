@@ -157,5 +157,4 @@ def _read_polarizability_dataset(
         atomic_numbers,
         np.array(positions_list),
         np.array(polarizabilities),
-        scale_mode="standard",
     )

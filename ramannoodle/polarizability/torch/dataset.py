@@ -73,7 +73,7 @@ def _scale_and_flatten_polarizabilities(
 class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
     """PyTorch dataset of atomic structures and polarizabilities.
 
-    Polarizabilities are scaled and flattened into 6-vectors containing the
+    Polarizabilities are standard scaled and flattened into 6-vectors containing the
     independent tensor components.
 
     Parameters
@@ -98,7 +98,6 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         atomic_numbers: list[int],
         positions: NDArray[np.float64],
         polarizabilities: NDArray[np.float64],
-        scale_mode: str = "standard",
     ):
         # Validate parameter shapes
         verify_ndarray_shape("lattice", lattice, (3, 3))
@@ -117,7 +116,7 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         self._polarizabilities = torch.tensor(polarizabilities)
 
         _, _, scaled = _scale_and_flatten_polarizabilities(
-            self._polarizabilities, scale_mode=scale_mode
+            self._polarizabilities, scale_mode="standard"
         )
         self._scaled_polarizabilities = scaled.type(default_type)
 
