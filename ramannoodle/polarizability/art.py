@@ -15,7 +15,7 @@ from ramannoodle.exceptions import (
     get_shape_error,
     verify_ndarray_shape,
     InvalidDOFException,
-    UsageError,
+    UserError,
 )
 
 
@@ -88,7 +88,7 @@ class ARTModel(InterpolationModel):
 
         :meta private:
         """
-        raise UsageError("add_dof should not be used; use add_art instead")
+        raise UserError("add_dof should not be used; use add_art instead")
 
     def add_dof_from_files(
         self,
@@ -104,7 +104,7 @@ class ARTModel(InterpolationModel):
 
         :meta private:
         """
-        raise UsageError(
+        raise UserError(
             "add_dof_from_files should not be used; use add_art_from_files instead"
         )
 

@@ -9,7 +9,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ramannoodle.io.io_utils import pathify, _read_polarizability_dataset
-from ramannoodle.exceptions import InvalidFileException, UsageError
+from ramannoodle.exceptions import InvalidFileException, UserError
 from ramannoodle.globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.dynamics.trajectory import Trajectory
@@ -17,7 +17,7 @@ from ramannoodle.structure.reference import ReferenceStructure
 
 try:
     from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
-except UsageError:
+except UserError:
     pass
 
 

@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 import pytest
 
 from ramannoodle.polarizability.art import ARTModel
-from ramannoodle.exceptions import InvalidDOFException, UsageError
+from ramannoodle.exceptions import InvalidDOFException, UserError
 from ramannoodle.structure.reference import ReferenceStructure
 
 # pylint: disable=protected-access
@@ -355,15 +355,15 @@ def test_dummy_art(
     assert "atomic Raman tensors are masked" in repr(model)
     assert len(model.cart_basis_vectors) == known_dof_added
     assert np.isclose(np.linalg.norm(model.cart_basis_vectors[0]), 1)
-    with pytest.raises(UsageError) as err:
+    with pytest.raises(UserError) as err:
         model.add_dof(np.array([]), np.array([]), np.array([]), 1, False)
     assert "add_dof should not be used; use add_art instead" in str(err.value)
-    with pytest.raises(UsageError) as err:
+    with pytest.raises(UserError) as err:
         model.add_dof_from_files(["blah"], "blah", 1)
     assert (
         "add_dof_from_files should not be used; use add_art_from_files instead"
         in str(err.value)
     )
-    with pytest.raises(UsageError) as err:
+    with pytest.raises(UserError) as err:
         model.calc_polarizabilities(np.array([ref_structure.positions]))
     assert "dummy model cannot calculate polarizabilities" in str(err.value)

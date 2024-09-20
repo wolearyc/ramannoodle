@@ -28,7 +28,7 @@ from ramannoodle.exceptions import (
     get_shape_error,
     verify_ndarray_shape,
     DOFWarning,
-    UsageError,
+    UserError,
 )
 import ramannoodle.io.generic as generic_io
 from ramannoodle.io.io_utils import pathify_as_list
@@ -237,7 +237,7 @@ class InterpolationModel(PolarizabilityModel):
                 )
         except ValueError as err:
             if self._is_dummy_model:
-                raise UsageError(
+                raise UserError(
                     "dummy model cannot calculate polarizabilities"
                 ) from err
             raise err

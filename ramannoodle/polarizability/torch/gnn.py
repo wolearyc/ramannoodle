@@ -12,7 +12,7 @@ from tqdm import tqdm
 from ramannoodle.structure.reference import ReferenceStructure
 from ramannoodle.exceptions import (
     get_torch_missing_error,
-    UsageError,
+    UserError,
     verify_ndarray_shape,
 )
 from ramannoodle.polarizability.abstract import PolarizabilityModel
@@ -33,7 +33,7 @@ try:
     from torch_geometric.nn.models.schnet import ShiftedSoftplus
     from torch_geometric.utils import scatter
     import ramannoodle.polarizability.torch.utils as rn_torch_utils
-except (ModuleNotFoundError, UsageError) as exc:
+except (ModuleNotFoundError, UserError) as exc:
     raise get_torch_missing_error() from exc
 
 # pylint: disable=not-callable

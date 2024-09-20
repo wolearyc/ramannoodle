@@ -12,14 +12,14 @@ from ramannoodle.io.io_utils import (
 )
 from ramannoodle.exceptions import InvalidFileException, NoMatchingLineFoundException
 from ramannoodle.globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
-from ramannoodle.exceptions import get_type_error, UsageError
+from ramannoodle.exceptions import get_type_error, UserError
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.dynamics.trajectory import Trajectory
 from ramannoodle.structure.reference import ReferenceStructure
 
 try:
     from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
-except UsageError:
+except UserError:
     pass
 
 

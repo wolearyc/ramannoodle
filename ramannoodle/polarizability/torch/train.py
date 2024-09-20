@@ -5,7 +5,7 @@ from numpy.typing import NDArray
 
 from ramannoodle.exceptions import (  # pylint: disable=ungrouped-imports
     get_torch_missing_error,
-    UsageError,
+    UserError,
 )
 
 try:
@@ -16,7 +16,7 @@ try:
 
     from ramannoodle.polarizability.torch.gnn import PotGNN
     from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
-except (ModuleNotFoundError, UsageError) as exc:
+except (ModuleNotFoundError, UserError) as exc:
     raise get_torch_missing_error() from exc
 
 

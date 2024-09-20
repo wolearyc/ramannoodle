@@ -16,13 +16,13 @@ from numpy.typing import NDArray
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.dynamics.trajectory import Trajectory
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.exceptions import UsageError, get_torch_missing_error
+from ramannoodle.exceptions import UserError, get_torch_missing_error
 import ramannoodle.io.vasp as vasp_io
 
 TORCH_PRESENT = True
 try:
     from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
-except UsageError:
+except UserError:
     TORCH_PRESENT = False
 
 # These  map between file formats and appropriate IO functions.

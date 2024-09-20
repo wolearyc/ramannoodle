@@ -14,14 +14,14 @@ from ramannoodle.exceptions import (
     verify_list_len,
     IncompatibleStructureException,
     get_torch_missing_error,
-    UsageError,
+    UserError,
 )
 from ramannoodle.globals import ATOM_SYMBOLS
 
 TORCH_PRESENT = True
 try:
     from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
-except UsageError:
+except UserError:
     TORCH_PRESENT = False
 
 

@@ -29,7 +29,7 @@ class SymmetryException(Exception):
     """Symmetry operation failed."""
 
 
-class UsageError(Exception):
+class UserError(Exception):
     """The user has done something they shouldn't.
 
     This exception is used sparingly, as (ideally) the structure of the API should
@@ -135,7 +135,7 @@ def verify_positions(name: str, array: NDArray) -> None:
         raise ValueError(f"{name} has coordinates that are not between 0 and 1")
 
 
-def get_torch_missing_error() -> UsageError:
+def get_torch_missing_error() -> UserError:
     """Get error indicating that torch is not installed."""
     required_modules = "'torch', 'torch-scatter', and 'torch-sparse' modules"
-    return UsageError(f"torch functionality requires {required_modules}")
+    return UserError(f"torch functionality requires {required_modules}")
