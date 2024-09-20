@@ -218,12 +218,12 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         verify_ndarray_shape("mean", mean, (3, 3))
         verify_ndarray_shape("mean", stddev, (3, 3))
 
-        _, _, scaled = _scale_and_flatten_polarizabilities(
-            self._polarizabilities, scale_mode="none"
+        scaled = self._polarizabilities.detach().clone()
+        scaled = scaled - torch.tensor(mean)
+        scaled /= torch.tensor(stddev)
+        self._scaled_polarizabilities = rn_torch_utils.get_polarizability_vectors(
+            scaled
         )
-        scaled = self._polarizabilities - torch.tensor(mean)
-        scaled /= stddev
-        self._scaled_polarizabilities = scaled
 
     def __len__(self) -> int:
         """Get number of samples."""
