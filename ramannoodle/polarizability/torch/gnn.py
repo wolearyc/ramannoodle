@@ -672,9 +672,13 @@ class PotGNN(
         self.eval()
 
         polarizabilities = torch.zeros((positions_batch.shape[0], 3, 3))
-        for subbatch_index, positions_subbatch in tqdm(
-            enumerate(rn_torch_utils.batch_positions(positions_batch, batch_size=100))
-        ):
+        positions_subbatchs = rn_torch_utils.batch_positions(
+            positions_batch, batch_size=100
+        )
+        progress_bar = tqdm(total=positions_batch.shape[0], unit=" configs")
+
+        start_index = 0
+        for positions_subbatch in positions_subbatchs:
             subbatch_size = positions_subbatch.shape[0]
 
             lattice = torch.tensor(self._ref_structure.lattice)
@@ -693,10 +697,12 @@ class PotGNN(
             polarizability = rn_torch_utils.polarizability_vectors_to_tensors(
                 polarizability
             )
-
-            start_index = subbatch_index * subbatch_size
-            end_index = start_index + positions_subbatch.shape[0]
+            end_index = start_index + subbatch_size
             polarizabilities[start_index:end_index] = polarizability.detach()
+            progress_bar.update(end_index - start_index)
+            start_index = end_index
+
+        progress_bar.close()
 
         result = polarizabilities.detach().numpy() * self._stddev_polarizability
         result += self._mean_polarizability

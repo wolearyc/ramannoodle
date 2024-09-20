@@ -161,7 +161,7 @@ def test_calc_polarizabilities(
     model = PotGNN(ref_structure, 2, 5, 5, 5, 0, 5, np.zeros((3, 3)), np.ones((3, 3)))
     model.eval()
 
-    for batch_size in [50, 100, 200]:
+    for batch_size in [50, 100, 180]:
 
         # Generate random data.
         num_atoms = len(ref_structure.atomic_numbers)
