@@ -1,4 +1,4 @@
-ramannoodle.polarizability.torch package
+polarizability.torch
 ========================================
 
 Submodules
@@ -12,18 +12,18 @@ ramannoodle.polarizability.torch.dataset module
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.polarizability.torch.dummy\_dataset module
-------------------------------------------------------
-
-.. automodule:: ramannoodle.polarizability.torch.dummy_dataset
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ramannoodle.polarizability.torch.gnn module
 -------------------------------------------
 
 .. automodule:: ramannoodle.polarizability.torch.gnn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ramannoodle.polarizability.torch.train module
+---------------------------------------------
+
+.. automodule:: ramannoodle.polarizability.torch.train
    :members:
    :undoc-members:
    :show-inheritance:

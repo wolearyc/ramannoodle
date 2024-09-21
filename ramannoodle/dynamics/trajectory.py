@@ -1,4 +1,4 @@
-"""Molecular dynamics trajectories."""
+"""Molecular dynamics trajectory."""
 
 from collections.abc import Sequence
 from typing import overload
@@ -22,10 +22,10 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
     Parameters
     ----------
     positions_ts
-        | (fractional) 3D array with shape (S,N,3) where S in the number of
-        | configurations and N is the number of atoms.
+        (fractional) Array with shape (S,N,3) where S in the number of
+        configurations and N is the number of atoms.
     timestep
-        | (fs)
+        (fs)
 
     """
 
@@ -52,14 +52,20 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
         Returns
         -------
         :
-            (fractional) 3D array with shape (S,N,3) where S in the number of
+            (fractional) Array with shape (S,N,3) where S in the number of
             configurations and N is the number of atoms.
         """
         return self._positions_ts.copy()
 
     @property
     def timestep(self) -> float:
-        """Get timestep in fs."""
+        """Get timestep.
+
+        Returns
+        -------
+        :
+            (fs)
+        """
         return self._timestep
 
     def get_raman_spectrum(
@@ -70,7 +76,7 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
         Parameters
         ----------
         polarizability_model
-            | Must be compatible with the trajectory.
+            Must be compatible with the trajectory.
         """
         try:
             polarizability_ts = polarizability_model.calc_polarizabilities(

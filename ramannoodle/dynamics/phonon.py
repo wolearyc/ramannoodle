@@ -1,4 +1,4 @@
-"""Harmonic lattice vibrations aka phonons."""
+"""Harmonic lattice vibrations."""
 
 import numpy as np
 from numpy.typing import NDArray
@@ -21,11 +21,11 @@ class Phonons(Dynamics):
     Parameters
     ----------
     ref_positions
-        | (fractional) 2D array with shape (N,3) where N is the number of atoms.
+        (fractional) Array with shape (N,3) where N is the number of atoms.
     wavenumbers
-        | (cm\ :sup:`-1`) 1D array with shape (M,).
+        (cm\ :sup:`-1`) Array with shape (M,).
     displacements
-        | (fractional) 3D array with shape (M,N,3).
+        (fractional) Array with shape (M,N,3).
     """
 
     def __init__(
@@ -52,7 +52,7 @@ class Phonons(Dynamics):
         Returns
         -------
         :
-            (fractional) 2D array with shape (N,3) where N is the number of atoms.
+            (fractional) Array with shape (N,3) where N is the number of atoms.
         """
         return self._ref_positions.copy()
 
@@ -63,7 +63,7 @@ class Phonons(Dynamics):
         Returns
         -------
         :
-            (cm\ :sup:`-1`) 1D array with shape (M,) where M is the number of phonons.
+            (cm\ :sup:`-1`) Array with shape (M,) where M is the number of phonons.
         """
         return self._wavenumbers.copy()
 
@@ -74,7 +74,7 @@ class Phonons(Dynamics):
         Returns
         -------
         :
-            (fractional) 3D array with shape (M,N,3) where M is the number of phonons
+            (fractional) Array with shape (M,N,3) where M is the number of phonons
             and N is the number of atoms.
         """
         return self._displacements.copy()
@@ -87,7 +87,7 @@ class Phonons(Dynamics):
         Parameters
         ----------
         polarizability_model
-            | Must be compatible with phonons.
+            Must be compatible with phonons.
         """
         raman_tensors = []
         for displacement in self._displacements:

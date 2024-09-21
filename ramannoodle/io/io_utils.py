@@ -118,7 +118,7 @@ def _read_polarizability_dataset(
     ------
     FileNotFoundError
     InvalidFileException
-        File has an unexpected format.
+        Invalid file.
     IncompatibleFileException
         File is incompatible with the dataset.
     """

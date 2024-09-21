@@ -50,7 +50,7 @@ class _GaussianFilter(torch.nn.Module):
     lower_bound
     upper_bound
     steps
-        | Number of steps to take between lower_bound and upper_bound.
+        Number of steps to take between ``lower_bound`` and ``upper_bound``.
     """
 
     def __init__(self, lower_bound: float, upper_bound: float, steps: int):
@@ -65,12 +65,12 @@ class _GaussianFilter(torch.nn.Module):
         Parameters
         ----------
         x
-            | 1D tensor with size [D,]. Typically contains interatomic distances.
+            Tensor with size [D,]. Typically contains interatomic distances.
 
         Returns
         -------
         :
-            2D tensor with size [D,steps].
+            Tensor with size [D,steps].
 
         """
         x = x.view(-1, 1) - self.offset.view(1, -1)
@@ -122,16 +122,16 @@ class _NodeBlock(torch.nn.Module):
         Parameters
         ----------
         node_embedding
-            | 2D tensor with size [N,size_node_embedding] where N is the number of
-            | nodes.
+            Tensor with size [N,size_node_embedding] where N is the number of
+            nodes.
         edge_embedding
-            | 2D tensor with size [E,size_edge_embedding] where E is the number of
-            | edges.
+            Tensor with size [E,size_edge_embedding] where E is the number of
+            edges.
 
         Returns
         -------
         :
-            2D tensor with size [N,size_node_embedding].
+            Tensor with size [N,size_node_embedding].
         """
         c1 = torch.cat([node_embedding[i], edge_embedding], dim=1)
         c1 = self.c1_norm(self.c1_linear(c1))
@@ -203,17 +203,17 @@ class _EdgeBlock(torch.nn.Module):
         Parameters
         ----------
         node_embedding
-            | 2D tensor with size [N,size_node_embedding] where N is the number of
-            | nodes.
+            Tensor with size [N,size_node_embedding] where N is the number of
+            nodes.
         i
-            | Node 1 of edge pairs, a 1D tensor with size [E,].
+            Node 1 of edge pairs, a tensor with size [E,].
         j
-            | Node 2 of edge pairs, a 1D tensor with size [E,].
+            Node 2 of edge pairs, a tensor with size [E,].
 
         Returns
         -------
         :
-            2D tensor with size [E,size_edge_embedding].
+            Tensor with size [E,size_edge_embedding].
         """
         c2 = node_embedding[i] * node_embedding[j]
         c2 = self.c2_norm_1(self.c2_linear(c2))
@@ -237,29 +237,29 @@ class _EdgeBlock(torch.nn.Module):
         Parameters
         ----------
         node_embedding
-            | 2D tensor with size [N,size_node_embedding] where N is the number of
-            | nodes.
+            Tensor with size [N,size_node_embedding] where N is the number of
+            nodes.
         edge_embedding
-            | 2D tensor with size [E,size_edge_embedding] where E is the number of
-            | edges.
+            Tensor with size [E,size_edge_embedding] where E is the number of
+            edges.
         index_i
-            | Node 1 of edge triplets, a 1D tensor with size [T,] where T is the number
-            | of triplets.
+            Node 1 of edge triplets, a tensor with size [T,] where T is the number
+            of triplets.
         index_j
-            | Node 2 of edge triplets, a 1D tensor with size [T,].
+            Node 2 of edge triplets, a tensor with size [T,].
         index_k
-            | Node 3 of edge triplets, a 1D tensor with size [T,].
+            Node 3 of edge triplets, a tensor with size [T,].
         index_ji
-            | Index of (j,i) corresponding to (index_j,index_i), a 1D tensor with size
-            | [T,.]
+            Index of (j,i) corresponding to (index_j,index_i), a tensor with size
+            [T,].
         index_kj
-            | Index of (k,j) corresponding to (index_k,index_j), a 1D tensor with size
-            | [T,.]
+            Index of (k,j) corresponding to (index_k,index_j), a tensor with size
+            [T,].
 
         Returns
         -------
         :
-            2D tensor with size [E,size_edge_embedding].
+            Tensor with size [E,size_edge_embedding].
         """
         c3 = torch.cat(
             [
@@ -301,33 +301,33 @@ class _EdgeBlock(torch.nn.Module):
         Parameters
         ----------
         node_embedding
-            | 2D tensor with size [N,size_node_embedding] where N is the number of
-            | nodes.
+            Tensor with size [N,size_node_embedding] where N is the number of
+            nodes.
         edge_embedding
-            | 2D tensor with size [E,size_edge_embedding] where E is the number of
-            | edges.
+            Tensor with size [E,size_edge_embedding] where E is the number of
+            edges.
         i
-            | Node 1 of edge pairs, a 1D tensor with size [E,].
+            Node 1 of edge pairs, a tensor with size [E,].
         j
-            | Node 2 of edge pairs, a 1D tensor with size [E,].
+            Node 2 of edge pairs, a tensor with size [E,].
         index_i
-            | Node 1 of edge triplets, a 1D tensor with size [T,] where T is the number
-            | of triplets.
+            Node 1 of edge triplets, a tensor with size [T,] where T is the number
+            of triplets.
         index_j
-            | Node 2 of edge triplets, a 1D tensor with size [T,].
+            Node 2 of edge triplets, a tensor with size [T,].
         index_k
-            | Node 3 of edge triplets, a 1D tensor with size [T,].
+            Node 3 of edge triplets, a tensor with size [T,].
         index_ji
-            | Index of (j,i) corresponding to (index_j,index_i), a 1D tensor with size
-            | [T,.]
+            Index of (j,i) corresponding to (index_j,index_i), a tensor with size
+            [T,].
         index_kj
-            | Index of (k,j) corresponding to (index_k,index_j), a 1D tensor with size
-            | [T,.]
+            Index of (k,j) corresponding to (index_k,index_j), a tensor with size
+            [T,].
 
         Returns
         -------
         :
-            2D tensor with size [E,size_edge_embedding].
+            Tensor with size [E,size_edge_embedding].
 
         """
         c2_embedding = self._get_c2_embedding(node_embedding, i, j)
@@ -353,14 +353,14 @@ def _get_edge_polarizability_vectors(
     Parameters
     ----------
     polarizability_embedding
-        | 2D tensor with size [E,12] where E is the number of edges.
+        Tensor with size [E,12] where E is the number of edges.
     unit_vector
-        | (Å) Unit vectors of edges, a 2D tensor with size [E,3].
+        (Å) Unit vectors of edges, a tensor with size [E,3].
 
     Returns
     -------
     :
-        2D tensor with size [E,6].
+        Tensor with size [E,6].
     """
     a1 = torch.zeros((polarizability_embedding.size(0), 3, 3))
     a1[:, 0, 0] = polarizability_embedding[:, 0]
@@ -413,24 +413,33 @@ class PotGNN(
 ):  # pylint: disable=too-many-instance-attributes
     r"""POlarizability Tensor Graph Neural Network (PotGNN).
 
-    GNN architecture was inspired by the "direct force architecture" developed in Park
-    `et al.`;  `npj Computational Materials` (2021)7:73; https://doi.org/10.1038/
-    s41524-021-00543-3. Implementation adapted from ``torch_geometric.nn.models.GNNFF``
+    The architecture was inspired by the "direct force architecture" developed in Park
+    `et al.`;  `npj Computational Materials` (2021)7:73;
+    `doi:10.1038/s41524-021-00543-3 <https://doi.org/10.1038/s41524-021-00543-3>`_.
+    Implementation adapted from ``torch_geometric.nn.models.GNNFF``
     authored by @ken2403 and merged by @rusty1s.
+
+    The architecture of this model is still somewhat in flux. More complete
+    documentation for this model, including a description of the architecture and
+    discussion of design choices, will be available at a later date.
 
     Parameters
     ----------
     ref_structure
-        | Reference structure from which nodes/edges are determined.
+        Reference structure from which nodes/edges are determined.
     cutoff
-        | (Å) Cutoff distance for edges.
+        (Å) Cutoff distance for edges.
     size_node_embedding
     size_edge_embedding
     num_message_passes
     gaussian_filter_start
-        | (Å) Lower bound of the Gaussian filter used in initial edge embedding.
+        (Å) Lower bound of the Gaussian filter used in initial edge embedding.
     gaussian_filter_end
-        | (Å) Upper bound of the Gaussian filter used in initial edge embedding.
+        (Å) Upper bound of the Gaussian filter used in initial edge embedding.
+    mean_polarizability
+        Array with shape (3,3).
+    stddev_polarizability
+        Array with shape (3,3).
     """
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals
@@ -529,7 +538,7 @@ class PotGNN(
         Parameters
         ----------
         atomic_numbers
-            | Tensor with arbitrary shape.
+            Tensor with arbitrary shape.
 
         Returns
         -------
@@ -557,22 +566,20 @@ class PotGNN(
         Parameters
         ----------
         lattice
-            | (Å) Tensor with size [S,3,3] where S is the number of samples.
+            (Å) Tensor with size [S,3,3] where S is the number of samples.
         positions
-            | (fractional) Tensor with size [S,N,3] where N is the number of atoms.
+            (fractional) Tensor with size [S,N,3] where N is the number of atoms.
 
         Returns
         -------
         :
-            3-tuple:
-            0. | edge indexes --
-               | 2D Tensor of size [3,E] where E is the number of edges. The first
-               | element are the graph indexes, while the remaining two elements are
-               | edge indexes.
-            #. | unit vectors --
-               | (Å) 2D Tensor with size [E,3].
-            #. | distances --
-               | (Å) 1D Tensor with size [E,].
+            0.  edge indexes -- Tensor of size [3,E] where E is the number of edges. The
+                first element are the graph indexes, while the remaining two elements
+                are edge indexes.
+
+            #.  unit vectors -- (Å) Tensor with size [E,3].
+
+            #.  distances -- (Å) Tensor with size [E,].
 
         """
         num_samples = lattice.size(0)
@@ -611,11 +618,11 @@ class PotGNN(
         Parameters
         ----------
         lattice
-            | (Å) 3D tensor with size [S,3,3] where S is the number of samples.
+            (Å) Tensor with size [S,3,3] where S is the number of samples.
         atomic_numbers
-            | Tensor with size [S,N] where N is the number of atoms.
+            Tensor with size [S,N] where N is the number of atoms.
         positions
-            | (fractional) Tensor with size [S,N,3].
+            (fractional) Tensor with size [S,N,3].
 
         Returns
         -------
@@ -658,13 +665,13 @@ class PotGNN(
         Parameters
         ----------
         positions_batch
-            | (fractional) 3D array with shape (S,N,3) where S is the number of samples
-            | and N is the number of atoms.
+            (fractional) Array with shape (S,N,3) where S is the number of samples
+            and N is the number of atoms.
 
         Returns
         -------
         :
-            3D array with shape (S,3,3).
+            Array with shape (S,3,3).
         """
         verify_ndarray_shape(
             "positions_batch", positions_batch, (None, self._ref_structure.num_atoms, 3)

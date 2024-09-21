@@ -26,8 +26,9 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
+    "sphinx_autodoc_typehints",
     'nbsphinx',
-    'IPython.sphinxext.ipython_console_highlighting'
+    'IPython.sphinxext.ipython_console_highlighting',
 ]
 autodoc_typehints = 'description'
 nbsphinx_allow_errors = True
@@ -36,6 +37,7 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('http://docs.scipy.org/doc/numpy', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
+    'torch': ('https://pytorch.org/docs/stable/', None),
 }
 
 intersphinx_disabled_domains = ['std']

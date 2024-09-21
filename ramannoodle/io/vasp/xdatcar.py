@@ -30,7 +30,7 @@ def read_positions_ts(
     Returns
     -------
     :
-        (fractional) 2D array with shape (S,N,3) where S is the number of configurations
+        (fractional) Array with shape (S,N,3) where S is the number of configurations
         and N is the number of atoms.
 
     Raises
@@ -68,7 +68,7 @@ def read_trajectory(
     ----------
     filepath
     timestep
-        | (fs)
+        (fs)
 
     Raises
     ------
@@ -94,17 +94,17 @@ def write_trajectory(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        | (Å) 2D array with shape (3,3).
+        (Å) Array with shape (3,3).
     atomic_numbers
-        | 1D list of length N where N is the number of atoms.
+        List of length N where N is the number of atoms.
     positions_ts
-        | (fractional) 3D array with shape (S,N,3) where S is the number of
-        | configurations.
+        (fractional) Array with shape (S,N,3) where S is the number of
+        configurations.
     filepath
     overwrite
-        | Overwrite the file if it exists.
+        Overwrite the file if it exists.
     label
-        | XDATCAR label (first line).
+        XDATCAR label (first line).
     """
     verify_trajectory(lattice, atomic_numbers, positions_ts)
     filepath = pathify(filepath)

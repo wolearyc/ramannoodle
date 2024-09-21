@@ -28,12 +28,12 @@ def polarizability_vectors_to_tensors(polarizability_vectors: Tensor) -> Tensor:
     Parameters
     ----------
     polarizability_vectors
-        | 2D Tensor with size [S,6].
+        Tensor with size [S,6].
 
     Returns
     -------
     :
-        3D tensor with size [S,3,3].
+        Tensor with size [S,3,3].
     """
     verify_tensor_size("polarizability_vectors", polarizability_vectors, (None, 6))
     indices = torch.tensor(
@@ -52,12 +52,12 @@ def polarizability_tensors_to_vectors(polarizability_tensors: Tensor) -> Tensor:
     Parameters
     ----------
     polarizability_tensors
-        | 3D tensor with size [S,3,3] where S is the number of samples.
+        Tensor with size [S,3,3] where S is the number of samples.
 
     Returns
     -------
     :
-        2D tensor with size [S,6].
+        Tensor with size [S,6].
 
     """
     verify_tensor_size("polarizability_tensors", polarizability_tensors, (None, 3, 3))
@@ -73,7 +73,7 @@ def _get_tensor_size_str(size: Sequence[int | None]) -> str:
     Parameters
     ----------
     size
-        | None indicates dimension can be any size.
+        None indicates dimension can be any size.
     """
     result = "["
     for i in size:
@@ -121,12 +121,12 @@ def get_rotations(targets: Tensor) -> Tensor:
     Parameters
     ----------
     targets
-        | 2D tensor with size [S,3]. Vectors do not need to be normalized.
+        Tensor with size [S,3]. Vectors do not need to be normalized.
 
     Returns
     -------
     :
-        3D tensor with size [S,3,3].
+        Tensor with size [S,3,3].
     """
     reference = torch.zeros(targets.size())
     reference[:, 0] = 1
@@ -165,7 +165,10 @@ def get_graph_info(
     cart_distance_matrix: Tensor,
     num_atoms: int,
 ) -> tuple[Tensor, Tensor, Tensor]:
-    """Get information on graph."""
+    """Get information on graph.
+
+    :meta: private
+    """
     cart_unit_vectors = cart_displacement[
         edge_indexes[0], edge_indexes[1], edge_indexes[2]
     ]  # python 3.10 complains if we use the unpacking operator (*)
@@ -189,22 +192,21 @@ def _radius_graph_pbc(
     Parameters
     ----------
     lattice
-        | (Å) 3D tensor with size [S,3,3] where S is the number of samples.
+        (Å) Tensor with size [S,3,3] where S is the number of samples.
     positions
-        | (fractional) 3D tensor with size [S,N,3] where N is the number of atoms.
+        (fractional) Tensor with size [S,N,3] where N is the number of atoms.
     cutoff
-        | Edge cutoff distance.
+        Edge cutoff distance.
 
     Returns
     -------
     :
-        3-tuple.
-        First element is edge indexes, a tensor of size [3,X] where X is the number of
-        edges. This tensor defines S non-interconnected graphs making up a batch. The
-        first row defines the graph index. The second and third rows define the actual
-        edge indexes used by ``triplet``.
-        Second element is cartesian unit vectors, a tensor of size [X,3].
-        Third element is distances, a tensor of side [X,1].
+        0.  edge indexes -- Tensor of size [3,X] where X is the number of edges. This
+            tensor defines S non-interconnected graphs making up a batch. The first row
+            defines the graph index. The second and third rows define the actual edge
+            indexes used by ``triplet``.
+        1.  cartesian unit vectors -- (Å) Tensor with size [X,3].
+        2.  distances -- (Å) Tensor with size [X,1].
 
     """
     num_samples = lattice.size(0)
@@ -272,24 +274,16 @@ class BatchTriplets:
         Returns
         -------
         :
-            7-tuple:
-                0. | i --
-                   | Node 1 of edge pairs, a 1D tensor with size [E,].
-                #. | j --
-                   | Node 2 of edge pairs, a 1D tensor with size [E,].
-                #. | index_i --
-                   | Node 1 of edge triplets, a 1D tensor with size [T,] where T is the
-                   | number of triplets.
-                #. | index_j --
-                   | Node 2 of edge triplets, a 1D tensor with size [T,].
-                #. | index_k --
-                   | Node 3 of edge triplets, a 1D tensor with size [T,].
-                #. | index_ji --
-                   | Index of (j,i) corresponding to (index_j,index_i), a 1D tensor
-                   | with size [T,].
-                #. | index_kj --
-                   | Index of (k,j) corresponding to (index_k,index_j), a 1D tensor
-                   | with size [T,].
+            0.  i -- Node 1 of edge pairs, a tensor with size [E,].
+            #.  j -- Node 2 of edge pairs, a tensor with size [E,].
+            #.  index_i -- Node 1 of edge triplets, a tensor with size [T,] where T is
+                the number of triplets.
+            #.  index_j -- Node 2 of edge triplets, a tensor with size [T,].
+            #.  index_k -- Node 3 of edge triplets, a tensor with size [T,].
+            #.  index_ji -- Index of (j,i) corresponding to (index_j,index_i), a tensor
+                with size [T,].
+            #.  index_kj -- Index of (k,j) corresponding to (index_k,index_j), a tensor
+                with size [T,].
 
         """
         if batch_size != self._cached_batch_size:
@@ -333,15 +327,15 @@ def batch_positions(
     Parameters
     ----------
     positions
-        | (fractional) 3D array with shape (S,N,3) where S is the number of samples
-        | and N is the number of atoms.
+        (fractional) Array with shape (S,N,3) where S is the number of samples
+        and N is the number of atoms.
     batch_size
-        | Split positions into batches of size ``batch_size``.
+        Split positions into batches of size ``batch_size``.
 
     Yields
     ------
     :
-        3D array with shape (batch_size,N,3).
+        Array with shape (batch_size,N,3).
 
     """
     verify_ndarray_shape("positions", positions, (None, None, 3))

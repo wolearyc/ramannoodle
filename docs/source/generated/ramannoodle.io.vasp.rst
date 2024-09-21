@@ -1,4 +1,4 @@
-ramannoodle.io.vasp package
+io.vasp
 ===========================
 
 Submodules

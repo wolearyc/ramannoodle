@@ -3,7 +3,7 @@
 Generic IO functions are somewhat inflexible but are necessary for certain
 functionality. Users are strongly encouraged to use IO functions contained in the
 code-specific subpackages. For example, IO for VASP POSCAR and OUTCAR files can be
-accomplished using :mod:`ramannoodle.io.vasp.poscar` or
+accomplished using :mod:`ramannoodle.io.vasp.poscar` and
 :mod:`ramannoodle.io.vasp.outcar` respectively.
 
 """
@@ -72,7 +72,7 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
     ----------
     filepath
     file_format
-        | Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`).
+        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`).
 
     Returns
     -------
@@ -98,9 +98,9 @@ def read_trajectory(filepath: str | Path, file_format: str) -> Trajectory:
     ----------
     filepath
     file_format
-        | Supports ``"outcar"``, ``"vasprun.xml"``, (see :ref:`Supported formats`).
-        | Use :func:`.vasp.xdatcar.read_trajectory` to read a trajectory from an
-        | XDATCAR.
+        Supports ``"outcar"``, ``"vasprun.xml"``, (see :ref:`Supported formats`).
+        Use :func:`.vasp.xdatcar.read_trajectory` to read a trajectory from an
+        XDATCAR.
 
     Returns
     -------
@@ -133,16 +133,14 @@ def read_positions_and_polarizability(
     ----------
     filepath
     file_format
-        | Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`).
+        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`).
 
     Returns
     -------
     :
-        2-tuple:
-            0. | positions --
-               | (fractional) 2D array with shape (N,3) where N is the number of atoms.
-            #. | polarizability --
-               | (fractional) 2D array with shape (3,3).
+        0.  positions -- (fractional) Array with shape (N,3) where N is the number of
+            atoms.
+        #.  polarizability -- Array with shape (3,3).
 
     Raises
     ------
@@ -167,23 +165,23 @@ def read_structure_and_polarizability(
     ----------
     filepath
     file_format
-        Supports: ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
+        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
 
     Returns
     -------
     :
-        4-tuple, whose first element is the lattice (Å), a 2D array with shape (3,3).
-        The second element is the atomic numbers, a list of length N where N is the
-        number of atoms. The third element is positions, a 2D array with shape (N,3).
-        The fourth element is the polarizability (unitless), a 2D array with shape
-        (3,3).
+        0.  lattice -- (Å) Array with shape (3,3).
+        #.  atomic_numbers -- List of length N where N is the number of atoms.
+        #.  positions -- (fractional) Array with shape (N,3) where N is the number of
+            atoms.
+        #.  polarizability -- Array with shape (3,3).
 
     Raises
     ------
-    InvalidFileException
-        File has unexpected format.
     FileNotFoundError
-        File could not be found.
+        File not found.
+    InvalidFileException
+        Invalid file.
     """
     try:
         return _STRUCTURE_AND_POLARIZABILITY_READERS[file_format](filepath)
@@ -199,9 +197,9 @@ def read_polarizability_dataset(
 
     Parameters
     ----------
-    filepath
+    filepaths
     file_format
-        | Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
+        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
 
     Returns
     -------
@@ -210,8 +208,9 @@ def read_polarizability_dataset(
     Raises
     ------
     FileNotFoundError
+        File not found.
     InvalidFileException
-        File has an unexpected format.
+        Invalid file.
     IncompatibleFileException
         File is incompatible with the dataset.
     """
@@ -233,13 +232,13 @@ def read_positions(
     ----------
     filepath
     file_format
-        | Supports ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"``  (see
-        | :ref:`Supported formats`).
+        Supports ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"``  (see
+        :ref:`Supported formats`).
 
     Returns
     -------
     :
-        Unitless | 2D array with shape (N,3) where N is the number of atoms.
+        (fractional) Array with shape (N,3) where N is the number of atoms.
 
     Raises
     ------
@@ -262,8 +261,8 @@ def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStruc
     ----------
     filepath
     file_format
-        | Supports ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"`` (see
-        | :ref:`Supported formats`).
+        Supports ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"`` (see
+        :ref:`Supported formats`).
 
     Returns
     -------
@@ -297,18 +296,18 @@ def write_structure(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        | (Å) 2D array with shape (3,3).
+        (Å) Array with shape (3,3).
     atomic_numbers
-        | 1D list of length N where N is the number of atoms.
+        List of length N where N is the number of atoms.
     positions
-        | (fractional) 2D array with shape (N,3).
+        (fractional) Array with shape (N,3).
     filepath
     file_format
-        | Supports ``"poscar"`` (see :ref:`Supported formats`).
+        Supports ``"poscar"`` (see :ref:`Supported formats`).
     overwrite
-        | Overwrite the file if it exists.
+        Overwrite the file if it exists.
     label
-        | POSCAR label (first line).
+        POSCAR label (first line).
 
     Raises
     ------
@@ -340,17 +339,17 @@ def write_trajectory(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        | (Å) 2D array with shape (3,3).
+        (Å) Array with shape (3,3).
     atomic_numbers
-        | 1D list of length N where N is the number of atoms.
+        List of length N where N is the number of atoms.
     positions_ts
-        | (fractional) 3D array with shape (S,N,3) where S is the number of
-        | configurations.
+        (fractional) Array with shape (S,N,3) where S is the number of
+        configurations.
     filepath
     file_format
-        | Supports ``"xdatcar"`` (see :ref:`Supported formats`).
+        Supports ``"xdatcar"`` (see :ref:`Supported formats`).
     overwrite
-        | Overwrite the file if it exists.
+        Overwrite the file if it exists.
 
     Raises
     ------

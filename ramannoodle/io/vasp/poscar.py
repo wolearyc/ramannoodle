@@ -132,7 +132,7 @@ def read_positions(
     Returns
     -------
     :
-        (fractional) 2D array with shape (N,3) where N is the number of atoms.
+        (fractional) Array with shape (N,3) where N is the number of atoms.
 
     Raises
     ------
@@ -223,16 +223,16 @@ def write_structure(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        | (Å) 2D array with shape (3,3).
+        (Å) Array with shape (3,3).
     atomic_numbers
-        | 1D list of length N where N is the number of atoms.
+        List of length N where N is the number of atoms.
     positions
-        | (fractional) 2D array with shape (N,3).
+        (fractional) Array with shape (N,3).
     filepath
     overwrite
-        | Overwrite the file if it exists.
+        Overwrite the file if it exists.
     label
-        | POSCAR label (first line).
+        POSCAR label (first line).
     """
     verify_structure(lattice, atomic_numbers, positions)
     filepath = pathify(filepath)

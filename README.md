@@ -8,7 +8,7 @@
 
 ## About
 
-**Ramannoodle** is a Python API for efficiently calculating Raman spectra from first principles calculations. Ramannoodle supports molecular-dynamics- and phonon-based Raman calculations and includes interfaces with VASP.
+**Ramannoodle** is a Python API for efficiently calculating Raman spectra from first principles calculations. Ramannoodle supports molecular-dynamics- and phonon-based Raman calculations. It includes interfaces with VASP but can easily be used with other codes using IO from external libraries, such as [pymatgen](https://pymatgen.org/) or [ase](https://wiki.fysik.dtu.dk/ase/).
 
 Ramannoodle aims to be:
 
@@ -24,20 +24,18 @@ Ramannoodle aims to be:
 
     Ramannoodle is designed to give the user a good understanding of what is being calculated at varying levels of abstraction.
 
-Ramannoodle includes interfaces with:
-
-* VASP
-* phonopy (planned)
-
 ## Installation
 
-Ramannoodle can be installed via pip:
+The base version of ramannoodle can be installed with pip:
 
 ```
 $ pip install ramannoodle
 ```
 
-Due to idiosyncrasies with PyTorch's build system, installing ramannoodle's machine learning modules is slightly more involved. First, PyTorch must be installed ([pip commands](https://pytorch.org/get-started/locally/)). Then, corresponding torch-scatter and torch-sparse packages must be installed. Finally, Ramannoodle can then be installed with the appropriate options.
+Ramannoodle's machine learning modules are implemented with PyTorch. To use these modules:
+1. Install [PyTorch](https://pytorch.org/get-started/locally/).
+2. Install [torch-scatter](https://pypi.org/project/torch-scatter/) and [torch-sparse](https://pypi.org/project/torch-sparse/) corresponding to the PyTorch version/implementation.
+3.  Install ramannoodle using the `torch` options group.
 
 For example, installation on a Linux system using PyTorch 2.4.1 (cpu implementation) is done as follows:
 
@@ -57,10 +55,9 @@ Contributions in the form of bug reports, feature suggestions, and pull requests
 
 ## Citing
 
-coming soon...
+To acknowledge use of ramannoodle, please cite
 
-## Future releases
-
-* **0.4.0** | ML polarizability models
-* **0.5.0** | Advanced spectra analyses
-* **1.0.0** | Official release
+>> **Rapid Characterization of Point Defects in Solid-State Ion Conductors Using Raman Spectroscopy, Machine-Learning Force Fields, and Atomic Raman Tensors** <br>
+ W. O’Leary, M. Grumet, W. Kaiser, T. Bučko, J.L.M. Rupp, D.A. Egger <br>
+ Journal of the American Chemical Society (2024) <br>
+ doi: [10.1021/jacs.4c07812](https://pubs.acs.org/doi/10.1021/jacs.4c07812)

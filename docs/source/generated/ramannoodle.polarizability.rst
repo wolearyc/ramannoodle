@@ -1,5 +1,13 @@
-ramannoodle.polarizability package
+polarizability
 ==================================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ramannoodle.polarizability.torch
 
 Submodules
 ----------

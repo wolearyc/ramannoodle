@@ -1,4 +1,4 @@
-ramannoodle.spectrum package
+spectrum
 ============================
 
 Submodules

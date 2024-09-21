@@ -11,14 +11,14 @@ from ramannoodle.exceptions import (
 
 
 def are_collinear(vector_1: NDArray[np.float64], vector_2: NDArray[np.float64]) -> bool:
-    """Return whether or not two vectors are collinear.
+    """Check whether two vectors are collinear.
 
     Parameters
     ----------
     vector_1
-        | 1D array with shape (M,).
+        Array with shape (M,).
     vector_2
-        | 1D array with shape (M,).
+        Array with shape (M,).
 
     """
     try:
@@ -42,14 +42,14 @@ def are_collinear(vector_1: NDArray[np.float64], vector_2: NDArray[np.float64]) 
 def is_orthogonal_to_all(
     vector_1: NDArray[np.float64], vectors: Iterable[NDArray[np.float64]]
 ) -> int:
-    """Check whether a given vector is orthogonal to a list of others.
+    """Check whether a vector is orthogonal to a list of other vectors.
 
     Parameters
     ----------
     vector_1
-        | 1D array with shape (M,).
+        Array with shape (M,).
     vectors
-        | Iterable containing 1D arrays with shape (M,).
+        Iterable containing arrays with shape (M,).
 
     Returns
     -------
@@ -78,19 +78,19 @@ def is_orthogonal_to_all(
 def is_collinear_with_all(
     vector_1: NDArray[np.float64], vectors: Iterable[NDArray[np.float64]]
 ) -> int:
-    """Check if a given vector is collinear to a list of others.
+    """Check if a vector is collinear to a list of other vectors.
 
     Parameters
     ----------
     vector_1
-        | 1D array with shape (M,).
+        Array with shape (M,).
     vectors
-        | Iterable containing 1D arrays with shape (M,).
+        Iterable containing arrays with shape (M,).
 
     Returns
     -------
     :
-        | First index of non-collinear vector, otherwise -1.
+        First index of non-collinear vector, otherwise -1.
 
     """
     # This implementation could be made more efficient.
@@ -104,14 +104,14 @@ def is_collinear_with_all(
 def is_non_collinear_with_all(
     vector_1: NDArray[np.float64], vectors: Iterable[NDArray[np.float64]]
 ) -> int:
-    """Check if a given vector is non-collinear to a list of others.
+    """Check if a vector is non-collinear to a list of other vectors.
 
     Parameters
     ----------
     vector_1
-        | 1D array with shape (M,).
+        Array with shape (M,).
     vectors
-        | Iterable containing 1D arrays with shape (M,).
+        Iterable containing arrays with shape (M,).
 
     Returns
     -------

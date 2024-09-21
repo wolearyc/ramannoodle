@@ -29,21 +29,17 @@ def _scale_and_flatten_polarizabilities(
     Parameters
     ----------
     polarizabilities
-        | 3D tensor with size [S,3,3] where S is the number of samples.
+        Tensor with size [S,3,3] where S is the number of samples.
     scale_mode
-        | Supports ``"standard"`` (standard scaling), ``"stddev"`` (division by
-        | standard deviation), and ``"none"`` (no scaling).
+        Supports ``"standard"`` (standard scaling), ``"stddev"`` (division by
+        standard deviation), and ``"none"`` (no scaling).
 
     Returns
     -------
     :
-        3-tuple:
-            0. | mean --
-               | Element-wise mean of polarizabilities.
-            #. | standard deviation --
-               | Element-wise standard deviation of polarizabilities.
-            #. | polarizability vectors --
-               | 2D tensor with size [S,6].
+        0.  mean -- Element-wise mean of polarizabilities.
+        #.  standard deviation -- Element-wise standard deviation of polarizabilities.
+        #.  polarizability vectors -- Tensor with size [S,6].
 
     """
     rn_torch_utils.verify_tensor_size(
@@ -79,16 +75,16 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
     Parameters
     ----------
     lattice
-        | (Å) Array with shape (3,3).
+        (Å) Array with shape (3,3).
     atomic_numbers
-        | List of length N where N is the number of atoms.
+        List of length N where N is the number of atoms.
     positions
-        | (fractional) 3D array with shape (S,N,3) where S is the number of samples.
+        (fractional) Array with shape (S,N,3) where S is the number of samples.
     polarizabilities
-        | 3D array with shape (S,3,3).
+        Array with shape (S,3,3).
     scale_mode
-        | Supports ``"standard"`` (standard scaling), ``"stddev"`` (division by
-        | standard deviation), and ``"none"`` (no scaling).
+        Supports ``"standard"`` (standard scaling), ``"stddev"`` (division by
+        standard deviation), and ``"none"`` (no scaling).
 
     """
 
@@ -160,7 +156,7 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         Returns
         -------
         :
-            3D array with shape (S,3,3) where S is the number of samples.
+            Array with shape (S,3,3) where S is the number of samples.
         """
         return self._polarizabilities.detach().clone().numpy()
 
@@ -171,7 +167,7 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         Returns
         -------
         :
-            2D array with shape (S,6) where S is the number of samples.
+            Array with shape (S,6) where S is the number of samples.
         """
         return self._scaled_polarizabilities.detach().clone().numpy()
 
@@ -182,7 +178,7 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         Return
         ------
         :
-            2D array with shape (3,3).
+            Array with shape (3,3).
         """
         return self._polarizabilities.mean(0).clone().numpy()
 
@@ -193,7 +189,7 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         Return
         ------
         :
-            2D array with shape (3,3).
+            Array with shape (3,3).
         """
         result = self._polarizabilities.std(0, unbiased=False)
         return result.clone().numpy()
@@ -209,9 +205,9 @@ class PolarizabilityDataset(Dataset[tuple[Tensor, Tensor, Tensor, Tensor]]):
         Parameters
         ----------
         mean
-            | Array with shape (3,3).
+            Array with shape (3,3).
         stddev
-            | Array with shape (3,3).
+            Array with shape (3,3).
 
         """
         verify_ndarray_shape("mean", mean, (3, 3))

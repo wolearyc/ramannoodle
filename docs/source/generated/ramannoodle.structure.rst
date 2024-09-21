@@ -1,4 +1,4 @@
-ramannoodle.structure package
+structure
 =============================
 
 Submodules

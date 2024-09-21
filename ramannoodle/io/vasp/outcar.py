@@ -318,11 +318,9 @@ def read_positions_and_polarizability(
     Returns
     -------
     :
-        2-tuple:
-            0. | positions --
-               | (fractional) 2D array with shape (N,3) where N is the number of atoms.
-            #. | polarizability --
-               | (fractional) 2D array with shape (3,3).
+        0.  positions -- (fractional) Array with shape (N,3) where N is the number of
+            atoms.
+        #.  polarizability -- Array with shape (3,3).
 
     Raises
     ------
@@ -349,7 +347,7 @@ def read_positions(filepath: str | Path) -> NDArray[np.float64]:
     Returns
     -------
     :
-        (fractional) 2D array with shape (N,3) where N is the number of atoms.
+        (fractional) Array with shape (N,3) where N is the number of atoms.
 
     Raises
     ------
@@ -380,17 +378,18 @@ def read_structure_and_polarizability(
     Returns
     -------
     :
-        4-tuple, whose first element is the lattice (Å), a 2D array with shape (3,3).
-        The second element is the atomic numbers, a list of length N where N is the
-        number of atoms. The third element is positions, a 2D array with shape (N,3).
-        The fourth element is the polarizability (unitless), a 2D array with shape
-        (3,3).
+        0.  lattice -- (Å) Array with shape (3,3).
+        #.  atomic_numbers -- List of length N where N is the number of atoms.
+        #.  positions -- (fractional) Array with shape (N,3) where N is the number of
+            atoms.
+        #.  polarizability -- Array with shape (3,3).
 
     Raises
     ------
     FileNotFoundError
+        File not found.
     InvalidFileException
-        File has an unexpected format.
+        Invalid file.
     """
     filepath = pathify(filepath)
     with open(filepath, "r", encoding="utf-8") as outcar_file:
@@ -418,8 +417,9 @@ def read_polarizability_dataset(
     Raises
     ------
     FileNotFoundError
+        File not found.
     InvalidFileException
-        File has an unexpected format.
+        Invalid file.
     IncompatibleFileException
         File is incompatible with the dataset.
     """

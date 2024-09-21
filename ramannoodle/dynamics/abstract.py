@@ -18,5 +18,5 @@ class Dynamics(ABC):  # pylint: disable=too-few-public-methods
         Parameters
         ----------
         polarizability_model
-            | Must be compatible with the dynamics.
+            Must be compatible with the dynamics.
         """

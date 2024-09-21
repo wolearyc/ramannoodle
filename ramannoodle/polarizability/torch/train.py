@@ -42,10 +42,9 @@ def train_single_epoch(  # pylint: disable=too-many-arguments,too-many-locals
     Returns
     -------
     :
-        0.  | mean training loss --
-        #.  | mean validation loss --
-        #.  | mean variance of predictions on validation set --
-            | Array with shape [6,]
+        0.  mean training loss
+        #.  mean validation loss
+        #.  mean variance of predictions on validation set -- Array with shape [6,]
 
     """
     default_device = torch.get_default_device()

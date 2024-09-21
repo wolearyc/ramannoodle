@@ -10,11 +10,11 @@ class NoMatchingLineFoundException(Exception):
 
 
 class InvalidFileException(Exception):
-    """File cannot be read, likely due to due to invalid or unexpected format."""
+    """File cannot not be read, likely due to due to invalid or unexpected format."""
 
 
 class IncompatibleStructureException(Exception):
-    """Supplied file is incompatible."""
+    """File contains structure that is incompatible with the current operation."""
 
 
 class InvalidDOFException(Exception):
@@ -41,8 +41,7 @@ class UserError(Exception):
 def _shape_string(shape: Sequence[int | None]) -> str:
     """Get a string representing a shape.
 
-    Maps None --> "_", indicating that this element can
-    be anything.
+    Maps None --> "_", indicating that this element can be anything.
     """
     result = "("
     for i in shape:
@@ -109,7 +108,7 @@ def verify_ndarray_shape(
 def verify_list_len(name: str, array: list[Any], length: int | None) -> None:
     """Verify an list's shape.
 
-    We should avoid calling this function whenever possible (EATF).
+    Calling function should be avoided whenever possible (EATF).
 
     :meta private:
 

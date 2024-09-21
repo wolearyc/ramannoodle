@@ -1,4 +1,4 @@
-ramannoodle.dynamics package
+dynamics
 ============================
 
 Submodules
