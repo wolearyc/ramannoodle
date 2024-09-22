@@ -8,7 +8,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 import ramannoodle.io.generic as generic_io
-from ramannoodle.io.io_utils import pathify_as_list
+from ramannoodle.io.utils import pathify_as_list
 
 
 @pytest.mark.parametrize(

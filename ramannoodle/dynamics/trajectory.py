@@ -10,7 +10,7 @@ from ramannoodle.dynamics.abstract import Dynamics
 from ramannoodle.polarizability.abstract import PolarizabilityModel
 from ramannoodle.exceptions import verify_ndarray_shape, get_type_error
 from ramannoodle.spectrum.raman import MDRamanSpectrum
-from ramannoodle.structure.structure_utils import apply_pbc
+from ramannoodle.structure.utils import apply_pbc
 
 
 class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):

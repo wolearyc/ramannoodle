@@ -6,7 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.spectrum.spectrum_utils import calc_signal_spectrum
+from ramannoodle.spectrum.utils import calc_signal_spectrum
 import ramannoodle.io.vasp as vasp_io
 from ramannoodle.structure.reference import ReferenceStructure
 from ramannoodle.polarizability.interpolation import InterpolationModel

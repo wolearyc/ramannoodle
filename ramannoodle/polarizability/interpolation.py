@@ -14,9 +14,9 @@ import numpy as np
 from numpy.typing import NDArray, ArrayLike
 from scipy.interpolate import make_interp_spline, BSpline
 
-from ramannoodle.globals import ANSICOLORS
+from ramannoodle.constants import ANSICOLORS
 from ramannoodle.polarizability.abstract import PolarizabilityModel
-from ramannoodle.structure.structure_utils import calc_displacement
+from ramannoodle.structure.utils import calc_displacement
 from ramannoodle.structure.symmetry_utils import (
     is_orthogonal_to_all,
     is_collinear_with_all,
@@ -31,7 +31,7 @@ from ramannoodle.exceptions import (
     UserError,
 )
 import ramannoodle.io.generic as generic_io
-from ramannoodle.io.io_utils import pathify_as_list
+from ramannoodle.io.utils import pathify_as_list
 
 
 def get_amplitude(

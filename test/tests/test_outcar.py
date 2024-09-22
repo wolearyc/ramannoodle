@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 import pytest
 
 import ramannoodle.io.generic as generic_io
-from ramannoodle.globals import ATOMIC_WEIGHTS
+from ramannoodle.constants import ATOMIC_WEIGHTS
 from ramannoodle.exceptions import InvalidFileException
 
 

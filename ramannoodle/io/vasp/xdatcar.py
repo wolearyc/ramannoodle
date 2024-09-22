@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from ramannoodle.io.io_utils import verify_trajectory, pathify
+from ramannoodle.io.utils import verify_trajectory, pathify
 from ramannoodle.exceptions import InvalidFileException
 from ramannoodle.dynamics.trajectory import Trajectory
 from ramannoodle.io.vasp.poscar import (

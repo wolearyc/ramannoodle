@@ -15,7 +15,7 @@ from ramannoodle.spectrum.raman import (
     get_laser_correction,
 )
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.spectrum.spectrum_utils import convolve_spectrum
+from ramannoodle.spectrum.utils import convolve_spectrum
 
 # pylint: disable=protected-access,too-many-locals
 

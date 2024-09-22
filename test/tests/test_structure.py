@@ -6,7 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.structure.structure_utils import apply_pbc, apply_pbc_displacement
+from ramannoodle.structure.utils import apply_pbc, apply_pbc_displacement
 from ramannoodle.structure.symmetry_utils import (
     is_collinear_with_all,
     is_non_collinear_with_all,

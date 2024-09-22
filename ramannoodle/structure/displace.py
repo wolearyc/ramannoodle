@@ -17,14 +17,14 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.structure.structure_utils import displace_positions
+from ramannoodle.structure.utils import displace_positions
 from ramannoodle.exceptions import (
     get_type_error,
     get_shape_error,
     verify_ndarray_shape,
     verify_list_len,
 )
-from ramannoodle.io.io_utils import pathify_as_list
+from ramannoodle.io.utils import pathify_as_list
 import ramannoodle.io.generic as generic_io
 
 

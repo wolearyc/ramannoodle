@@ -4,10 +4,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ramannoodle.exceptions import get_type_error, verify_ndarray_shape
-from ramannoodle.globals import BOLTZMANN_CONSTANT
+from ramannoodle.constants import BOLTZMANN_CONSTANT
 from ramannoodle.spectrum.abstract import RamanSpectrum
 
-from ramannoodle.spectrum.spectrum_utils import calc_signal_spectrum
+from ramannoodle.spectrum.utils import calc_signal_spectrum
 
 
 def get_bose_einstein_correction(

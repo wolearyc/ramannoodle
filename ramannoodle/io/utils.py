@@ -16,7 +16,7 @@ from ramannoodle.exceptions import (
     get_torch_missing_error,
     UserError,
 )
-from ramannoodle.globals import ATOM_SYMBOLS
+from ramannoodle.constants import ATOM_SYMBOLS
 
 TORCH_PRESENT = True
 try:

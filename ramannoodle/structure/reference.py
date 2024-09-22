@@ -13,13 +13,13 @@ from ramannoodle.exceptions import (
     verify_list_len,
     get_shape_error,
 )
-from ramannoodle.structure.structure_utils import (
+from ramannoodle.structure.utils import (
     displace_positions,
     transform_positions,
     apply_pbc_displacement,
     calc_displacement,
 )
-from ramannoodle.globals import ATOM_SYMBOLS
+from ramannoodle.constants import ATOM_SYMBOLS
 from ramannoodle.structure import symmetry_utils
 
 
