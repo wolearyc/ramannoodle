@@ -3,4 +3,3 @@ ipython==8.26.0
 nbsphinx==0.9.4
 sphinx==8.0.2
 sphinx-autodoc-typehints==2.4.4
-sphinx-rtd-theme==2.0.0
