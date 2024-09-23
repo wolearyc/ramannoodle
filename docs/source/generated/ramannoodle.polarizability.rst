@@ -7,31 +7,31 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   ramannoodle.polarizability.torch
+   ramannoodle.pmodel.torch
 
 Submodules
 ----------
 
-ramannoodle.polarizability.abstract module
+ramannoodle.pmodel.abstract module
 ------------------------------------------
 
-.. automodule:: ramannoodle.polarizability.abstract
+.. automodule:: ramannoodle.pmodel.abstract
    :members:
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.polarizability.art module
+ramannoodle.pmodel.art module
 -------------------------------------
 
-.. automodule:: ramannoodle.polarizability.art
+.. automodule:: ramannoodle.pmodel.art
    :members:
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.polarizability.interpolation module
+ramannoodle.pmodel.interpolation module
 -----------------------------------------------
 
-.. automodule:: ramannoodle.polarizability.interpolation
+.. automodule:: ramannoodle.pmodel.interpolation
    :members:
    :undoc-members:
    :show-inheritance:
@@ -39,7 +39,7 @@ ramannoodle.polarizability.interpolation module
 Module contents
 ---------------
 
-.. automodule:: ramannoodle.polarizability
+.. automodule:: ramannoodle.pmodel
    :members:
    :undoc-members:
    :show-inheritance:

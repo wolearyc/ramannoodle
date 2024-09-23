@@ -6,8 +6,8 @@ import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.polarizability.interpolation import find_duplicates
-from ramannoodle.polarizability.interpolation import InterpolationModel
+from ramannoodle.pmodel.interpolation import find_duplicates
+from ramannoodle.pmodel.interpolation import InterpolationModel
 from ramannoodle.exceptions import InvalidDOFException
 from ramannoodle.structure.reference import ReferenceStructure
 

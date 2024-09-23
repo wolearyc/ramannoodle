@@ -10,7 +10,7 @@ import pytest
 import ramannoodle.io.generic
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.polarizability.art import ARTModel
+from ramannoodle.pmodel.art import ARTModel
 
 
 @pytest.mark.parametrize(

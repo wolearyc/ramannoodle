@@ -9,7 +9,7 @@ Subpackages
 
    ramannoodle.dynamics
    ramannoodle.io
-   ramannoodle.polarizability
+   ramannoodle.pmodel
    ramannoodle.spectrum
    ramannoodle.structure
 

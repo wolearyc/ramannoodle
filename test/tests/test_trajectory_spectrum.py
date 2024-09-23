@@ -9,7 +9,7 @@ import pytest
 from ramannoodle.spectrum.utils import calc_signal_spectrum
 import ramannoodle.io.vasp as vasp_io
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.polarizability.interpolation import InterpolationModel
+from ramannoodle.pmodel.interpolation import InterpolationModel
 
 # pylint: disable=R0801
 

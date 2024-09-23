@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 from tabulate import tabulate
 
 from ramannoodle.constants import ANSICOLORS
-from ramannoodle.polarizability.interpolation import InterpolationModel
+from ramannoodle.pmodel.interpolation import InterpolationModel
 from ramannoodle.exceptions import (
     get_type_error,
     get_shape_error,

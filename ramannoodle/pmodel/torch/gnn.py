@@ -15,7 +15,7 @@ from ramannoodle.exceptions import (
     UserError,
     verify_ndarray_shape,
 )
-from ramannoodle.polarizability.abstract import PolarizabilityModel
+from ramannoodle.pmodel.abstract import PolarizabilityModel
 
 try:
     import torch
@@ -32,7 +32,7 @@ try:
     from torch_geometric.nn.inits import reset
     from torch_geometric.nn.models.schnet import ShiftedSoftplus
     from torch_geometric.utils import scatter
-    import ramannoodle.polarizability.torch.utils as rn_torch_utils
+    import ramannoodle.pmodel.torch.utils as rn_torch_utils
 except (ModuleNotFoundError, UserError) as exc:
     raise get_torch_missing_error() from exc
 

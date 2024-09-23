@@ -7,8 +7,8 @@ import pytest
 import numpy as np
 import torch
 
-from ramannoodle.polarizability.torch.gnn import PotGNN
-from ramannoodle.polarizability.torch.utils import (
+from ramannoodle.pmodel.torch.gnn import PotGNN
+from ramannoodle.pmodel.torch.utils import (
     _radius_graph_pbc,
     get_rotations,
     polarizability_vectors_to_tensors,

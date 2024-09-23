@@ -4,34 +4,34 @@ polarizability.torch
 Submodules
 ----------
 
-ramannoodle.polarizability.torch.dataset module
+ramannoodle.pmodel.torch.dataset module
 -----------------------------------------------
 
-.. automodule:: ramannoodle.polarizability.torch.dataset
+.. automodule:: ramannoodle.pmodel.torch.dataset
    :members:
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.polarizability.torch.gnn module
+ramannoodle.pmodel.torch.gnn module
 -------------------------------------------
 
-.. automodule:: ramannoodle.polarizability.torch.gnn
+.. automodule:: ramannoodle.pmodel.torch.gnn
    :members:
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.polarizability.torch.train module
+ramannoodle.pmodel.torch.train module
 ---------------------------------------------
 
-.. automodule:: ramannoodle.polarizability.torch.train
+.. automodule:: ramannoodle.pmodel.torch.train
    :members:
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.polarizability.torch.utils module
+ramannoodle.pmodel.torch.utils module
 ---------------------------------------------
 
-.. automodule:: ramannoodle.polarizability.torch.utils
+.. automodule:: ramannoodle.pmodel.torch.utils
    :members:
    :undoc-members:
    :show-inheritance:
@@ -39,7 +39,7 @@ ramannoodle.polarizability.torch.utils module
 Module contents
 ---------------
 
-.. automodule:: ramannoodle.polarizability.torch
+.. automodule:: ramannoodle.pmodel.torch
    :members:
    :undoc-members:
    :show-inheritance:

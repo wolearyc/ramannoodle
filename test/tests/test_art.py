@@ -6,7 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.polarizability.art import ARTModel
+from ramannoodle.pmodel.art import ARTModel
 from ramannoodle.exceptions import InvalidDOFException, UserError
 from ramannoodle.structure.reference import ReferenceStructure
 

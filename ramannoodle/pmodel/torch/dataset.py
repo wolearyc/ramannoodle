@@ -13,7 +13,7 @@ try:
     import torch
     from torch import Tensor
     from torch.utils.data import Dataset
-    import ramannoodle.polarizability.torch.utils as rn_torch_utils
+    import ramannoodle.pmodel.torch.utils as rn_torch_utils
 except ModuleNotFoundError as exc:
     raise get_torch_missing_error() from exc
 

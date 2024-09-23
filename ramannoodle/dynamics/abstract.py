@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 
-from ramannoodle.polarizability.abstract import PolarizabilityModel
+from ramannoodle.pmodel.abstract import PolarizabilityModel
 from ramannoodle.spectrum.abstract import RamanSpectrum
 
 

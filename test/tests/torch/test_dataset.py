@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 import pytest
 
 import ramannoodle.io.generic as generic_io
-from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
+from ramannoodle.pmodel.torch.dataset import PolarizabilityDataset
 
 
 @pytest.mark.parametrize(

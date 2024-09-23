@@ -8,8 +8,8 @@ from numpy.typing import NDArray
 import pytest
 
 import ramannoodle.io.generic
-from ramannoodle.polarizability.interpolation import InterpolationModel
-from ramannoodle.polarizability.art import ARTModel
+from ramannoodle.pmodel.interpolation import InterpolationModel
+from ramannoodle.pmodel.art import ARTModel
 from ramannoodle.spectrum.raman import (
     get_bose_einstein_correction,
     get_laser_correction,

@@ -18,7 +18,7 @@ from ramannoodle.dynamics.trajectory import Trajectory
 from ramannoodle.structure.reference import ReferenceStructure
 
 try:
-    from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
+    from ramannoodle.pmodel.torch.dataset import PolarizabilityDataset
 except UserError:
     pass
 

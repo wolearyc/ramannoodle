@@ -20,7 +20,7 @@ from ramannoodle.constants import ATOM_SYMBOLS
 
 TORCH_PRESENT = True
 try:
-    from ramannoodle.polarizability.torch.dataset import PolarizabilityDataset
+    from ramannoodle.pmodel.torch.dataset import PolarizabilityDataset
 except UserError:
     TORCH_PRESENT = False
 
