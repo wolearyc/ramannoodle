@@ -6,8 +6,8 @@ from typing import overload
 import numpy as np
 from numpy.typing import NDArray
 
-from ramannoodle.dynamics.abstract import Dynamics
-from ramannoodle.pmodel.abstract import PolarizabilityModel
+from ramannoodle.abstract import Dynamics
+from ramannoodle.abstract import PolarizabilityModel
 from ramannoodle.exceptions import verify_ndarray_shape, get_type_error
 from ramannoodle.spectrum.raman import MDRamanSpectrum
 from ramannoodle.structure.utils import apply_pbc

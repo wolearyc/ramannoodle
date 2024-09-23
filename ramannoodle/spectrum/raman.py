@@ -5,7 +5,7 @@ from numpy.typing import NDArray
 
 from ramannoodle.exceptions import get_type_error, verify_ndarray_shape
 from ramannoodle.constants import BOLTZMANN_CONSTANT
-from ramannoodle.spectrum.abstract import RamanSpectrum
+from ramannoodle.abstract import RamanSpectrum
 
 from ramannoodle.spectrum.utils import calc_signal_spectrum
 

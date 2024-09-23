@@ -15,7 +15,7 @@ from numpy.typing import NDArray, ArrayLike
 from scipy.interpolate import make_interp_spline, BSpline
 
 from ramannoodle.constants import ANSICOLORS
-from ramannoodle.pmodel.abstract import PolarizabilityModel
+from ramannoodle.abstract import PolarizabilityModel
 from ramannoodle.structure.utils import calc_displacement
 from ramannoodle.structure.symmetry_utils import (
     is_orthogonal_to_all,

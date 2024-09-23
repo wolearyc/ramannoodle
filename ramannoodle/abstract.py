@@ -1,9 +1,32 @@
-"""Abstract spectra."""
+"""Abstract classes."""
 
 from abc import ABC, abstractmethod
 
+
 import numpy as np
 from numpy.typing import NDArray
+
+
+class PolarizabilityModel(ABC):  # pylint: disable=too-few-public-methods
+    """Abstract polarizability model."""
+
+    @abstractmethod
+    def calc_polarizabilities(
+        self, positions_batch: NDArray[np.float64]
+    ) -> NDArray[np.float64]:
+        """Return estimated polarizabilities for a batch of fractional positions.
+
+        Parameters
+        ----------
+        positions_batch
+            (fractional) Array with shape (S,N,3) where S is the number of samples
+            and N is the number of atoms.
+
+        Returns
+        -------
+        :
+            Array with shape (S,3,3).
+        """
 
 
 class RamanSpectrum(ABC):  # pylint: disable=too-few-public-methods
@@ -41,4 +64,20 @@ class RamanSpectrum(ABC):  # pylint: disable=too-few-public-methods
 
             #. intensities -- (arbitrary units) Array with shape (M,).
 
+        """
+
+
+class Dynamics(ABC):  # pylint: disable=too-few-public-methods
+    """Abstract class for atomic dynamics."""
+
+    @abstractmethod
+    def get_raman_spectrum(
+        self, polarizability_model: PolarizabilityModel
+    ) -> RamanSpectrum:
+        """Calculate a raman spectrum using a polarizability model.
+
+        Parameters
+        ----------
+        polarizability_model
+            Must be compatible with the dynamics.
         """

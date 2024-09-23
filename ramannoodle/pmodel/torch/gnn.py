@@ -15,7 +15,7 @@ from ramannoodle.exceptions import (
     UserError,
     verify_ndarray_shape,
 )
-from ramannoodle.pmodel.abstract import PolarizabilityModel
+from ramannoodle.abstract import PolarizabilityModel
 
 try:
     import torch
