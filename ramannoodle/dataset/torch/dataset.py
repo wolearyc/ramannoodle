@@ -13,7 +13,7 @@ try:
     import torch
     from torch import Tensor
     from torch.utils.data import Dataset
-    import ramannoodle.pmodel.torch.utils as rn_torch_utils
+    import ramannoodle.dataset.torch.utils as rn_torch_utils
 except ModuleNotFoundError as exc:
     raise get_torch_missing_error() from exc
 
@@ -42,10 +42,6 @@ def _scale_and_flatten_polarizabilities(
         #.  polarizability vectors -- Tensor with size [S,6].
 
     """
-    rn_torch_utils.verify_tensor_size(
-        "polarizabilities", polarizabilities, [None, 3, 3]
-    )
-
     mean = polarizabilities.mean(0, keepdim=True)
     stddev = polarizabilities.std(0, unbiased=False, keepdim=True)
     if scale_mode == "standard":

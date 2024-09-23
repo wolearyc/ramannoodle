@@ -33,6 +33,11 @@ try:
     from torch_geometric.nn.models.schnet import ShiftedSoftplus
     from torch_geometric.utils import scatter
     import ramannoodle.pmodel.torch.utils as rn_torch_utils
+    from ramannoodle.dataset.torch.utils import (
+        polarizability_vectors_to_tensors,
+        polarizability_tensors_to_vectors,
+    )
+
 except (ModuleNotFoundError, UserError) as exc:
     raise get_torch_missing_error() from exc
 
@@ -405,7 +410,7 @@ def _get_edge_polarizability_vectors(
         + a5 * torch.tensor([[0, 0, 0], [0, 1, 0], [0, 0, 0]])
         + a6 * torch.tensor([[0, 0, 0], [0, 0, 0], [0, 0, 1]])
     )
-    return rn_torch_utils.polarizability_tensors_to_vectors(edge_polarizability)
+    return polarizability_tensors_to_vectors(edge_polarizability)
 
 
 class PotGNN(
@@ -701,9 +706,7 @@ class PotGNN(
                 atomic_numbers,
                 torch.tensor(positions_subbatch).type(default_type),
             )
-            polarizability = rn_torch_utils.polarizability_vectors_to_tensors(
-                polarizability
-            )
+            polarizability = polarizability_vectors_to_tensors(polarizability)
             end_index = start_index + subbatch_size
             polarizabilities[start_index:end_index] = polarizability.detach()
             progress_bar.update(end_index - start_index)

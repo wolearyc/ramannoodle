@@ -21,7 +21,7 @@ import ramannoodle.io.vasp as vasp_io
 
 TORCH_PRESENT = True
 try:
-    from ramannoodle.pmodel.torch.dataset import PolarizabilityDataset
+    from ramannoodle.dataset.torch.dataset import PolarizabilityDataset
 except UserError:
     TORCH_PRESENT = False
 

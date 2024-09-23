@@ -11,8 +11,9 @@ from ramannoodle.pmodel.torch.gnn import PotGNN
 from ramannoodle.pmodel.torch.utils import (
     _radius_graph_pbc,
     get_rotations,
-    polarizability_vectors_to_tensors,
 )
+from ramannoodle.dataset.torch.utils import polarizability_vectors_to_tensors
+
 
 # import ramannoodle.io.vasp as vasp_io
 # from ramannoodle.structure.structure_utils import apply_pbc
