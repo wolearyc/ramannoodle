@@ -2,6 +2,7 @@
 
 from typing import Callable, Type
 from pathlib import Path
+import re
 
 import pytest
 import numpy as np
@@ -81,11 +82,10 @@ def test_generic_write_structure_exception(  # pylint: disable=too-many-argument
     in_reason: str,
 ) -> None:
     """Test generic write_structure (exception)."""
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         generic_io.write_structure(
             lattice, atomic_numbers, positions, "fake/path", file_format, overwrite
         )
-    assert in_reason in str(err.value)
 
 
 @pytest.mark.parametrize(

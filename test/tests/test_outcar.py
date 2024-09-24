@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
@@ -69,9 +70,8 @@ def test_read_phonons_from_outcar_exception(
     path_fixture: Path, exception_type: Type[Exception], in_reason: str
 ) -> None:
     """Test read_phonons for outcar (normal)."""
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         generic_io.read_phonons(path_fixture, file_format="outcar")
-    assert in_reason in str(err.value)
 
 
 @pytest.mark.parametrize(

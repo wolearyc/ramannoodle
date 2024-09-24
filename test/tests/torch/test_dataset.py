@@ -1,6 +1,7 @@
 """Testing for PyTorch dataset."""
 
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
@@ -65,7 +66,5 @@ def test_polarizability_dataset_exception(  # pylint: disable=too-many-arguments
     in_reason: str,
 ) -> None:
     """Test polarizability dataset (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         PolarizabilityDataset(lattice, atomic_numbers, positions, polarizabilities)
-
-    assert in_reason in str(error.value)

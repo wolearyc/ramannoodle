@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
@@ -372,9 +373,8 @@ def test_convolve_intensities_exception(  # pylint: disable=too-many-arguments
     in_reason: str,
 ) -> None:
     """Test convolve_intensities (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         convolve_spectrum(wavenumbers, intensities, function, width, out_wavenumbers)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -407,9 +407,8 @@ def test_get_bose_einstein_correction_exception(
     in_reason: str,
 ) -> None:
     """Test get_bose_einstein_correction (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         get_bose_einstein_correction(wavenumbers, temperature)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -442,6 +441,5 @@ def test_get_laser_correction(
     in_reason: str,
 ) -> None:
     """Test get_laser_correction (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         get_laser_correction(wavenumbers, laser_wavenumber)
-    assert in_reason in str(error.value)

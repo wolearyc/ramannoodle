@@ -1,6 +1,7 @@
 """Testing for ARTModel."""
 
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
@@ -155,11 +156,9 @@ def test_add_art_exception(
     """Test add_art (exception)."""
     ref_structure = outcar_ref_structure_fixture
     model = ARTModel(ref_structure, np.zeros((3, 3)))
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         for atom_index, direction in zip(atom_indexes, cart_directions):
             model.add_art(atom_index, direction, amplitudes, polarizabilities)
-
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -259,10 +258,9 @@ def test_add_art_from_files_exception(
     """Test add_art_from_files (exception)."""
     ref_structure = outcar_ref_structure_fixture
     model = ARTModel(ref_structure, np.zeros((3, 3)))
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         for outcar_files in outcar_file_groups:
             model.add_art_from_files(outcar_files, "outcar")
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(

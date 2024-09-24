@@ -1,6 +1,7 @@
 """Tests for VASP-related functions."""
 
 from typing import TextIO, Type
+import re
 import numpy as np
 from numpy.typing import NDArray
 
@@ -50,9 +51,8 @@ def test_get_atomic_symbol_from_potcar_line_exception(
     in_reason: str,
 ) -> None:
     """Test get_atomic_symbol_from_potcar_line (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._get_atomic_symbol_from_potcar_line(potcar_line)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -97,9 +97,8 @@ def test_read_atomic_symbols_from_outcar_exception(
     in_reason: str,
 ) -> None:
     """Test _read_atomic_symbols_from_outcar (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._read_atomic_symbols(file_fixture)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -148,9 +147,8 @@ def test_read_cart_positions_from_outcar_exception(
     in_reason: str,
 ) -> None:
     """Test _read_cart_positions_from_outcar (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._read_cart_positions(file_fixture, 20)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -199,9 +197,8 @@ def test_read_positions_from_outcar_exception(
     in_reason: str,
 ) -> None:
     """Test _read_positions_from_outcar (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._read_positions(file_fixture, 20)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -252,9 +249,8 @@ def test_read_polarizability_from_outcar_exception(
     in_reason: str,
 ) -> None:
     """Test _read_polarizability_from_outcar (normal)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._read_polarizability(file_fixture)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -313,6 +309,5 @@ def test_read_lattice_from_outcar_exception(
     in_reason: str,
 ) -> None:
     """Test _read_lattice_from_outcar (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._read_lattice(file_fixture)
-    assert in_reason in str(error.value)

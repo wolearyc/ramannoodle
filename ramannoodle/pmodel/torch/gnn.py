@@ -556,7 +556,6 @@ class PotGNN(
     def reset_parameters(self) -> None:
         """Reset model parameters."""
         reset(self._node_embedding)
-        self._edge_embedding.reset_parameters()
         for node_block in self._node_blocks:
             node_block.reset_parameters()
         for edge_block in self._edge_blocks:

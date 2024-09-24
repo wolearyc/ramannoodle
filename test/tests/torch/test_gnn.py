@@ -1,17 +1,23 @@
 """Testing for GNN-based models."""
 
 import os
+from typing import Type
+import re
 
 import pytest
 
 import numpy as np
+from numpy.typing import NDArray
 import torch
+
+import ramannoodle as rn
 
 from ramannoodle.pmodel.torch.gnn import PotGNN
 from ramannoodle.pmodel.torch.utils import (
     _radius_graph_pbc,
     get_rotations,
 )
+from ramannoodle.pmodel.torch.train import train_single_epoch
 from ramannoodle.dataset.torch.utils import polarizability_vectors_to_tensors
 
 
@@ -107,6 +113,13 @@ def test_batch_polarizability(poscar_ref_structure_fixture: ReferenceStructure) 
         assert torch.allclose(batch_polarizability, polarizabilities)
 
 
+def test_reset_parameters() -> None:
+    """Test of reset_parameters (normal)."""
+    ref_structure = rn.io.vasp.poscar.read_ref_structure("test/data/TiO2/POSCAR")
+    model = PotGNN(ref_structure, 5, 5, 5, 5, 0, 5, np.zeros((3, 3)), np.zeros((3, 3)))
+    model.reset_parameters()
+
+
 @pytest.mark.parametrize(
     "poscar_ref_structure_fixture",
     [
@@ -178,6 +191,146 @@ def test_calc_polarizabilities(
         calc = model.calc_polarizabilities(batch_positions.detach().clone().numpy())
 
         assert np.allclose(forward, calc)
+
+
+@pytest.mark.parametrize(
+    "cutoff,size_node_embedding,size_edge_embedding,num_message_passes,"
+    "gaussian_filter_start,gaussian_filter_end,mean_polarizability,"
+    "stddev_polarizability,exception_type,in_reason",
+    [
+        (
+            0,
+            5,
+            5,
+            5,
+            0,
+            5,
+            np.zeros((3, 3)),
+            np.zeros((3, 3)),
+            ValueError,
+            "invalid cutoff: 0 <= 0",
+        ),
+        (
+            5,
+            0,
+            5,
+            5,
+            0,
+            5,
+            np.zeros((3, 3)),
+            np.zeros((3, 3)),
+            ValueError,
+            "invalid size_node_embedding: 0 <= 0",
+        ),
+        (
+            5,
+            5,
+            0,
+            5,
+            0,
+            5,
+            np.zeros((3, 3)),
+            np.zeros((3, 3)),
+            ValueError,
+            "invalid size_edge_embedding: 0 <= 0",
+        ),
+        (
+            5,
+            5,
+            5,
+            0,
+            0,
+            5,
+            np.zeros((3, 3)),
+            np.zeros((3, 3)),
+            ValueError,
+            "invalid num_message_passes: 0 <= 0",
+        ),
+        (
+            5,
+            5,
+            5,
+            5,
+            -1,
+            5,
+            np.zeros((3, 3)),
+            np.zeros((3, 3)),
+            ValueError,
+            "invalid gaussian_filter_start: -1 < 0",
+        ),
+        (
+            5,
+            5,
+            5,
+            5,
+            5,
+            0,
+            np.zeros((3, 3)),
+            np.zeros((3, 3)),
+            ValueError,
+            "invalid gaussian_filter_end: 0 <= gaussian_filter_start",
+        ),
+    ],
+)
+def test_gnn_exception(
+    cutoff: float,
+    size_node_embedding: int,
+    size_edge_embedding: int,
+    num_message_passes: int,
+    gaussian_filter_start: float,
+    gaussian_filter_end: float,
+    mean_polarizability: NDArray[np.float64],
+    stddev_polarizability: NDArray[np.float64],
+    exception_type: Type[Exception],
+    in_reason: str,
+) -> None:
+    """Test gnn (exception)."""
+    ref_structure = rn.io.vasp.poscar.read_ref_structure("test/data/TiO2/POSCAR")
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
+        _ = PotGNN(
+            ref_structure,
+            cutoff,
+            size_node_embedding,
+            size_edge_embedding,
+            num_message_passes,
+            gaussian_filter_start,
+            gaussian_filter_end,
+            mean_polarizability,
+            stddev_polarizability,
+        )
+
+
+def test_train_single_epoch() -> None:
+    """Test train_single_epoch."""
+    ref_structure = rn.io.vasp.poscar.read_ref_structure("test/data/TiO2/POSCAR")
+    model = PotGNN(ref_structure, 2, 5, 14, 2, 0, 5, np.zeros((3, 3)), np.zeros((3, 3)))
+    test_set = rn.io.generic.read_polarizability_dataset(
+        filepaths=[
+            "test/data/TiO2/O43_0.1x_eps_OUTCAR",
+            "test/data/TiO2/O43_0.1y_eps_OUTCAR",
+        ],
+        file_format="outcar",
+    )
+    validation_set = rn.io.generic.read_polarizability_dataset(
+        filepaths=[
+            "test/data/TiO2/O43_m0.1x_eps_OUTCAR",
+            "test/data/TiO2/O43_m0.1y_eps_OUTCAR",
+        ],
+        file_format="outcar",
+    )
+
+    batch_size = 1
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  # type: ignore
+    loss_function = torch.nn.MSELoss()
+
+    _ = train_single_epoch(
+        model,
+        test_set,
+        validation_set,
+        batch_size,
+        optimizer,
+        loss_function,
+    )
 
 
 # @pytest.mark.parametrize(

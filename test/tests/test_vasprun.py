@@ -2,6 +2,7 @@
 
 from typing import Type, Callable
 from pathlib import Path
+import re
 
 import numpy as np
 from numpy.typing import NDArray
@@ -151,7 +152,7 @@ def test_read_phonons(
 
 
 @pytest.mark.parametrize(
-    "read_function, path_fixture, exception_type, reason",
+    "read_function, path_fixture, exception_type, in_reason",
     [
         (
             vasp_io.vasprun.read_positions,
@@ -196,9 +197,8 @@ def test_read_vasprun_exception(
     read_function: Callable[[str | Path], None],
     path_fixture: Path,
     exception_type: Type[Exception],
-    reason: str,
+    in_reason: str,
 ) -> None:
     """Test vasprun read functions (exception)."""
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         read_function(path_fixture)
-    assert reason in str(err.value)

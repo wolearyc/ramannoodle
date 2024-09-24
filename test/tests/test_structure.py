@@ -1,6 +1,7 @@
 """Testing for symmetry-related functions."""
 
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
@@ -65,9 +66,8 @@ def test_are_collinear_exception(
     in_reason: str,
 ) -> None:
     """Test are_collinear (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         are_collinear(vector_1, vector_2)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -208,13 +208,11 @@ def test_apply_pbc_exception(
     in_reason: str,
 ) -> None:
     """Test apply_pbc (exception)."""
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         apply_pbc(positions)
-    assert in_reason in str(err.value)
 
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         apply_pbc_displacement(positions)
-    assert in_reason in str(err.value)
 
 
 @pytest.mark.parametrize(
@@ -273,9 +271,8 @@ def test_ref_structure_exception(
     in_reason: str,
 ) -> None:
     """Test StructuralSymmetry (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         ReferenceStructure(atomic_numbers, lattice, positions)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
