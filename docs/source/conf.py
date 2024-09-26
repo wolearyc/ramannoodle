@@ -57,6 +57,6 @@ html_theme_options = {
     "dark_logo": "logo_dark.png",
     "sidebar_hide_name": True,
 }
-html_extra_path = ["docs/source/robots.txt"]
+html_extra_path = ["robots.txt"]
 
 sys.path.insert(0, os.path.abspath('../../'))
