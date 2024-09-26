@@ -1,6 +1,7 @@
 """Tests for structure displacement functions."""
 
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
@@ -121,7 +122,8 @@ def test_write_displaced_structures(
     ],
     indirect=["outcar_ref_structure_fixture"],
 )
-def test_get_ast_displaced_positions_exception(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def test_get_ast_displaced_positions_exception(
     outcar_ref_structure_fixture: ReferenceStructure,
     atom_index: int,
     cart_direction: NDArray[np.float64],
@@ -130,7 +132,7 @@ def test_get_ast_displaced_positions_exception(  # pylint: disable=too-many-argu
     in_reason: str,
 ) -> None:
     """Test get_ast_displaced_positions (exception)."""
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         amplitudes = np.array([amplitude])
         get_ast_displaced_positions(
             outcar_ref_structure_fixture,
@@ -138,4 +140,3 @@ def test_get_ast_displaced_positions_exception(  # pylint: disable=too-many-argu
             cart_direction,
             amplitudes,
         )
-    assert in_reason in str(err.value)

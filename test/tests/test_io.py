@@ -2,13 +2,14 @@
 
 from typing import Callable, Type
 from pathlib import Path
+import re
 
 import pytest
 import numpy as np
 from numpy.typing import NDArray
 
 import ramannoodle.io.generic as generic_io
-from ramannoodle.io.io_utils import pathify_as_list
+from ramannoodle.io.utils import pathify_as_list
 
 
 @pytest.mark.parametrize(
@@ -71,6 +72,7 @@ def test_generic_read_exception(
         ),
     ],
 )
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def test_generic_write_structure_exception(  # pylint: disable=too-many-arguments
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
@@ -81,11 +83,10 @@ def test_generic_write_structure_exception(  # pylint: disable=too-many-argument
     in_reason: str,
 ) -> None:
     """Test generic write_structure (exception)."""
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         generic_io.write_structure(
             lattice, atomic_numbers, positions, "fake/path", file_format, overwrite
         )
-    assert in_reason in str(err.value)
 
 
 @pytest.mark.parametrize(

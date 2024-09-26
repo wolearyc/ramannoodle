@@ -1,6 +1,7 @@
 """Tests for phonon-related functions."""
 
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
@@ -10,7 +11,7 @@ import pytest
 import ramannoodle.io.generic
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.polarizability.art import ARTModel
+from ramannoodle.pmodel.art import ARTModel
 
 
 @pytest.mark.parametrize(
@@ -47,9 +48,8 @@ def test_phonons_exception(
     in_reason: str,
 ) -> None:
     """Test phonon construction (exception)."""
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         Phonons(ref_positions, wavenumbers, displacements)
-    assert in_reason in str(err.value)
 
 
 @pytest.mark.parametrize(

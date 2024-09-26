@@ -10,7 +10,11 @@ class NoMatchingLineFoundException(Exception):
 
 
 class InvalidFileException(Exception):
-    """File cannot be read, likely due to due to invalid or unexpected format."""
+    """File cannot not be read, likely due to due to invalid or unexpected format."""
+
+
+class IncompatibleStructureException(Exception):
+    """File contains structure that is incompatible with the current operation."""
 
 
 class InvalidDOFException(Exception):
@@ -25,7 +29,7 @@ class SymmetryException(Exception):
     """Symmetry operation failed."""
 
 
-class UsageError(Exception):
+class UserError(Exception):
     """The user has done something they shouldn't.
 
     This exception is used sparingly, as (ideally) the structure of the API should
@@ -37,8 +41,7 @@ class UsageError(Exception):
 def _shape_string(shape: Sequence[int | None]) -> str:
     """Get a string representing a shape.
 
-    Maps None --> "_", indicating that this element can
-    be anything.
+    Maps None --> "_", indicating that this element can be anything.
     """
     result = "("
     for i in shape:
@@ -105,7 +108,7 @@ def verify_ndarray_shape(
 def verify_list_len(name: str, array: list[Any], length: int | None) -> None:
     """Verify an list's shape.
 
-    We should avoid calling this function whenever possible (EATF).
+    Calling function should be avoided whenever possible (EATF).
 
     :meta private:
 
@@ -129,3 +132,9 @@ def verify_positions(name: str, array: NDArray) -> None:
     verify_ndarray_shape(name, array, (None, 3))
     if (0 > array).any() or (array > 1.0).any():
         raise ValueError(f"{name} has coordinates that are not between 0 and 1")
+
+
+def get_torch_missing_error() -> UserError:
+    """Get error indicating that torch is not installed."""
+    required_modules = "'torch', 'torch-scatter', and 'torch-sparse' modules"
+    return UserError(f"torch functionality requires {required_modules}")

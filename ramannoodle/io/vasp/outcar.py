@@ -5,14 +5,22 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-
-from ramannoodle.io.io_utils import _skip_file_until_line_contains, pathify
+from ramannoodle.io.utils import (
+    _skip_file_until_line_contains,
+    pathify,
+    _read_polarizability_dataset,
+)
 from ramannoodle.exceptions import InvalidFileException, NoMatchingLineFoundException
-from ramannoodle.globals import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
-from ramannoodle.exceptions import get_type_error
+from ramannoodle.constants import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
+from ramannoodle.exceptions import get_type_error, UserError
 from ramannoodle.dynamics.phonon import Phonons
 from ramannoodle.dynamics.trajectory import Trajectory
 from ramannoodle.structure.reference import ReferenceStructure
+
+try:
+    from ramannoodle.dataset.torch.dataset import PolarizabilityDataset
+except UserError:
+    pass
 
 
 # Utilities for OUTCAR. Warning: some of these functions partially read files.
@@ -310,11 +318,9 @@ def read_positions_and_polarizability(
     Returns
     -------
     :
-        2-tuple:
-            0. | positions --
-               | (fractional) 2D array with shape (N,3) where N is the number of atoms.
-            #. | polarizability --
-               | (fractional) 2D array with shape (3,3).
+        0.  positions -- (fractional) Array with shape (N,3) where N is the number of
+            atoms.
+        #.  polarizability -- Array with shape (3,3).
 
     Raises
     ------
@@ -324,9 +330,10 @@ def read_positions_and_polarizability(
         Invalid file.
     """
     filepath = pathify(filepath)
-    with open(filepath, "r", encoding="utf-8") as file:
-        positions = read_positions(filepath)
-        polarizability = _read_polarizability(file)
+    with open(filepath, "r", encoding="utf-8") as outcar_file:
+        num_atoms = len(_read_atomic_symbols(outcar_file))
+        positions = _read_positions(outcar_file, num_atoms)
+        polarizability = _read_polarizability(outcar_file)
         return positions, polarizability
 
 
@@ -340,7 +347,7 @@ def read_positions(filepath: str | Path) -> NDArray[np.float64]:
     Returns
     -------
     :
-        (fractional) 2D array with shape (N,3) where N is the number of atoms.
+        (fractional) Array with shape (N,3) where N is the number of atoms.
 
     Raises
     ------
@@ -354,6 +361,69 @@ def read_positions(filepath: str | Path) -> NDArray[np.float64]:
         num_atoms = len(_read_atomic_symbols(file))
         positions = _read_positions(file, num_atoms)
         return positions
+
+
+def read_structure_and_polarizability(
+    filepath: str | Path,
+) -> tuple[NDArray[np.float64], list[int], NDArray[np.float64], NDArray[np.float64]]:
+    """Read lattice, fractional positions, atomic numbers, polarizability from OUTCAR.
+
+    The polarizability returned by VASP is, in fact, a dielectric tensor. However,
+    this is inconsequential to the calculation of Raman spectra.
+
+    Parameters
+    ----------
+    filepath
+
+    Returns
+    -------
+    :
+        0.  lattice -- (Å) Array with shape (3,3).
+        #.  atomic_numbers -- List of length N where N is the number of atoms.
+        #.  positions -- (fractional) Array with shape (N,3) where N is the number of
+            atoms.
+        #.  polarizability -- Array with shape (3,3).
+
+    Raises
+    ------
+    FileNotFoundError
+        File not found.
+    InvalidFileException
+        Invalid file.
+    """
+    filepath = pathify(filepath)
+    with open(filepath, "r", encoding="utf-8") as outcar_file:
+        atomic_symbols = _read_atomic_symbols(outcar_file)
+        atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
+        lattice = _read_lattice(outcar_file)
+        positions = _read_positions(outcar_file, len(atomic_numbers))
+        polarizability = _read_polarizability(outcar_file)
+        return lattice, atomic_numbers, positions, polarizability
+
+
+def read_polarizability_dataset(
+    filepaths: str | Path | list[str] | list[Path],
+) -> "PolarizabilityDataset":
+    """Read polarizability dataset from OUTCAR files.
+
+    Parameters
+    ----------
+    filepaths
+
+    Returns
+    -------
+    :
+
+    Raises
+    ------
+    FileNotFoundError
+        File not found.
+    InvalidFileException
+        Invalid file.
+    IncompatibleFileException
+        File is incompatible with the dataset.
+    """
+    return _read_polarizability_dataset(filepaths, read_structure_and_polarizability)
 
 
 def read_ref_structure(filepath: str | Path) -> ReferenceStructure:

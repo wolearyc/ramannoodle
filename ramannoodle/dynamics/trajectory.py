@@ -1,4 +1,4 @@
-"""Molecular dynamics trajectories."""
+"""Molecular dynamics trajectory."""
 
 from collections.abc import Sequence
 from typing import overload
@@ -6,11 +6,11 @@ from typing import overload
 import numpy as np
 from numpy.typing import NDArray
 
-from ramannoodle.dynamics.abstract import Dynamics
-from ramannoodle.polarizability.abstract import PolarizabilityModel
+from ramannoodle.abstract import Dynamics
+from ramannoodle.abstract import PolarizabilityModel
 from ramannoodle.exceptions import verify_ndarray_shape, get_type_error
 from ramannoodle.spectrum.raman import MDRamanSpectrum
-from ramannoodle.structure.structure_utils import apply_pbc
+from ramannoodle.structure.utils import apply_pbc
 
 
 class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
@@ -22,10 +22,10 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
     Parameters
     ----------
     positions_ts
-        | (fractional) 3D array with shape (S,N,3) where S in the number of
-        | configurations and N is the number of atoms.
+        (fractional) Array with shape (S,N,3) where S in the number of
+        configurations and N is the number of atoms.
     timestep
-        | (fs)
+        (fs)
 
     """
 
@@ -52,14 +52,20 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
         Returns
         -------
         :
-            (fractional) 3D array with shape (S,N,3) where S in the number of
+            (fractional) Array with shape (S,N,3) where S in the number of
             configurations and N is the number of atoms.
         """
         return self._positions_ts.copy()
 
     @property
     def timestep(self) -> float:
-        """Get timestep in fs."""
+        """Get timestep.
+
+        Returns
+        -------
+        :
+            (fs)
+        """
         return self._timestep
 
     def get_raman_spectrum(
@@ -70,7 +76,7 @@ class Trajectory(Dynamics, Sequence[NDArray[np.float64]]):
         Parameters
         ----------
         polarizability_model
-            | Must be compatible with the trajectory.
+            Must be compatible with the trajectory.
         """
         try:
             polarizability_ts = polarizability_model.calc_polarizabilities(

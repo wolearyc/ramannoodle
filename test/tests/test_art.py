@@ -1,13 +1,14 @@
 """Testing for ARTModel."""
 
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.polarizability.art import ARTModel
-from ramannoodle.exceptions import InvalidDOFException, UsageError
+from ramannoodle.pmodel.art import ARTModel
+from ramannoodle.exceptions import InvalidDOFException, UserError
 from ramannoodle.structure.reference import ReferenceStructure
 
 # pylint: disable=protected-access
@@ -143,6 +144,7 @@ def test_add_art(
     ],
     indirect=["outcar_ref_structure_fixture"],
 )
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def test_add_art_exception(
     outcar_ref_structure_fixture: ReferenceStructure,
     atom_indexes: list[int],
@@ -155,11 +157,9 @@ def test_add_art_exception(
     """Test add_art (exception)."""
     ref_structure = outcar_ref_structure_fixture
     model = ARTModel(ref_structure, np.zeros((3, 3)))
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         for atom_index, direction in zip(atom_indexes, cart_directions):
             model.add_art(atom_index, direction, amplitudes, polarizabilities)
-
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -259,10 +259,9 @@ def test_add_art_from_files_exception(
     """Test add_art_from_files (exception)."""
     ref_structure = outcar_ref_structure_fixture
     model = ARTModel(ref_structure, np.zeros((3, 3)))
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         for outcar_files in outcar_file_groups:
             model.add_art_from_files(outcar_files, "outcar")
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -292,6 +291,7 @@ def test_add_art_from_files_exception(
     ],
     indirect=["outcar_ref_structure_fixture"],
 )
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def test_get_specification_tuples(
     outcar_ref_structure_fixture: ReferenceStructure,
     atom_index: int,
@@ -355,15 +355,15 @@ def test_dummy_art(
     assert "atomic Raman tensors are masked" in repr(model)
     assert len(model.cart_basis_vectors) == known_dof_added
     assert np.isclose(np.linalg.norm(model.cart_basis_vectors[0]), 1)
-    with pytest.raises(UsageError) as err:
+    with pytest.raises(UserError) as err:
         model.add_dof(np.array([]), np.array([]), np.array([]), 1, False)
     assert "add_dof should not be used; use add_art instead" in str(err.value)
-    with pytest.raises(UsageError) as err:
+    with pytest.raises(UserError) as err:
         model.add_dof_from_files(["blah"], "blah", 1)
     assert (
         "add_dof_from_files should not be used; use add_art_from_files instead"
         in str(err.value)
     )
-    with pytest.raises(UsageError) as err:
+    with pytest.raises(UserError) as err:
         model.calc_polarizabilities(np.array([ref_structure.positions]))
     assert "dummy model cannot calculate polarizabilities" in str(err.value)

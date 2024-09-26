@@ -6,9 +6,9 @@ from typing import TextIO
 import numpy as np
 from numpy.typing import NDArray
 
-from ramannoodle.io.io_utils import verify_structure, pathify
+from ramannoodle.io.utils import verify_structure, pathify
 from ramannoodle.exceptions import InvalidFileException
-from ramannoodle.globals import ATOM_SYMBOLS, ATOMIC_NUMBERS
+from ramannoodle.constants import ATOM_SYMBOLS, ATOMIC_NUMBERS
 from ramannoodle.structure.reference import ReferenceStructure
 from ramannoodle.io.vasp.outcar import _get_lattice_vector_from_outcar_line
 
@@ -132,7 +132,7 @@ def read_positions(
     Returns
     -------
     :
-        (fractional) 2D array with shape (N,3) where N is the number of atoms.
+        (fractional) Array with shape (N,3) where N is the number of atoms.
 
     Raises
     ------
@@ -210,7 +210,8 @@ def _get_positions_str(positions: NDArray[np.float64]) -> str:
     return result
 
 
-def write_structure(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def write_structure(
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
     positions: NDArray[np.float64],
@@ -223,16 +224,16 @@ def write_structure(  # pylint: disable=too-many-arguments
     Parameters
     ----------
     lattice
-        | (Å) 2D array with shape (3,3).
+        (Å) Array with shape (3,3).
     atomic_numbers
-        | 1D list of length N where N is the number of atoms.
+        List of length N where N is the number of atoms.
     positions
-        | (fractional) 2D array with shape (N,3).
+        (fractional) Array with shape (N,3).
     filepath
     overwrite
-        | Overwrite the file if it exists.
+        Overwrite the file if it exists.
     label
-        | POSCAR label (first line).
+        POSCAR label (first line).
     """
     verify_structure(lattice, atomic_numbers, positions)
     filepath = pathify(filepath)

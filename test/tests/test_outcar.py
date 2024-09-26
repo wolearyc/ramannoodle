@@ -2,13 +2,14 @@
 
 from pathlib import Path
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
 import pytest
 
 import ramannoodle.io.generic as generic_io
-from ramannoodle.globals import ATOMIC_WEIGHTS
+from ramannoodle.constants import ATOMIC_WEIGHTS
 from ramannoodle.exceptions import InvalidFileException
 
 
@@ -46,15 +47,15 @@ def test_read_phonons_from_outcar(
 
     known_degrees_of_freedom = known_num_atoms * 3
     assert phonons.wavenumbers.shape == (known_degrees_of_freedom,)
-    assert np.isclose(phonons.wavenumbers[0:4], known_wavenumbers).all()
+    assert np.allclose(phonons.wavenumbers[0:4], known_wavenumbers)
     assert phonons.displacements.shape == (
         known_degrees_of_freedom,
         known_num_atoms,
         3,
     )
-    assert np.isclose(phonons.displacements[0, 0], known_first_displacement).all()
+    assert np.allclose(phonons.displacements[0, 0], known_first_displacement)
     print(phonons.displacements[-1, -1])
-    assert np.isclose(phonons.displacements[-1, -1], known_last_displacement).all()
+    assert np.allclose(phonons.displacements[-1, -1], known_last_displacement)
 
 
 @pytest.mark.parametrize(
@@ -69,9 +70,8 @@ def test_read_phonons_from_outcar_exception(
     path_fixture: Path, exception_type: Type[Exception], in_reason: str
 ) -> None:
     """Test read_phonons for outcar (normal)."""
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         generic_io.read_phonons(path_fixture, file_format="outcar")
-    assert in_reason in str(err.value)
 
 
 @pytest.mark.parametrize(
@@ -91,4 +91,4 @@ def test_read_trajectory_from_outcar(
     """Test read_trajectory for outcar (normal)."""
     trajectory = generic_io.read_trajectory(path_fixture, file_format="outcar")
     assert len(trajectory) == trajectory_length
-    assert np.isclose(last_position, trajectory[-1][-1]).all()
+    assert np.allclose(last_position, trajectory[-1][-1])

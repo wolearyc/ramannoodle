@@ -1,12 +1,13 @@
 """Testing for symmetry-related functions."""
 
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.structure.structure_utils import apply_pbc, apply_pbc_displacement
+from ramannoodle.structure.utils import apply_pbc, apply_pbc_displacement
 from ramannoodle.structure.symmetry_utils import (
     is_collinear_with_all,
     is_non_collinear_with_all,
@@ -65,9 +66,8 @@ def test_are_collinear_exception(
     in_reason: str,
 ) -> None:
     """Test are_collinear (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         are_collinear(vector_1, vector_2)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -193,7 +193,7 @@ def test_get_positions_permutation_matrix(
 )
 def test_apply_pbc(positions: NDArray[np.float64], known: NDArray[np.float64]) -> None:
     """Test apply_pbc (normal)."""
-    assert np.isclose(apply_pbc(positions), known).all()
+    assert np.allclose(apply_pbc(positions), known)
 
 
 @pytest.mark.parametrize(
@@ -208,13 +208,11 @@ def test_apply_pbc_exception(
     in_reason: str,
 ) -> None:
     """Test apply_pbc (exception)."""
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         apply_pbc(positions)
-    assert in_reason in str(err.value)
 
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         apply_pbc_displacement(positions)
-    assert in_reason in str(err.value)
 
 
 @pytest.mark.parametrize(
@@ -229,7 +227,7 @@ def test_apply_pbc_displacement(
     displacement: NDArray[np.float64], known: NDArray[np.float64]
 ) -> None:
     """Test test_apply_pbc_displacement (normal)."""
-    assert np.isclose(apply_pbc_displacement(displacement), known).all()
+    assert np.allclose(apply_pbc_displacement(displacement), known)
 
 
 @pytest.mark.parametrize(
@@ -273,9 +271,8 @@ def test_ref_structure_exception(
     in_reason: str,
 ) -> None:
     """Test StructuralSymmetry (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         ReferenceStructure(atomic_numbers, lattice, positions)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(

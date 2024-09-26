@@ -14,9 +14,9 @@ import numpy as np
 from numpy.typing import NDArray, ArrayLike
 from scipy.interpolate import make_interp_spline, BSpline
 
-from ramannoodle.globals import ANSICOLORS
-from ramannoodle.polarizability.abstract import PolarizabilityModel
-from ramannoodle.structure.structure_utils import calc_displacement
+from ramannoodle.constants import ANSICOLORS
+from ramannoodle.abstract import PolarizabilityModel
+from ramannoodle.structure.utils import calc_displacement
 from ramannoodle.structure.symmetry_utils import (
     is_orthogonal_to_all,
     is_collinear_with_all,
@@ -28,10 +28,10 @@ from ramannoodle.exceptions import (
     get_shape_error,
     verify_ndarray_shape,
     DOFWarning,
-    UsageError,
+    UserError,
 )
 import ramannoodle.io.generic as generic_io
-from ramannoodle.io.io_utils import pathify_as_list
+from ramannoodle.io.utils import pathify_as_list
 
 
 def get_amplitude(
@@ -59,7 +59,7 @@ def find_duplicates(vectors: Iterable[ArrayLike]) -> NDArray | None:
         raise get_type_error("vectors", vectors, "Iterable") from exc
     try:
         for vector_1, vector_2 in combinations:
-            if np.isclose(vector_1, vector_2).all():
+            if np.allclose(vector_1, vector_2):
                 return np.array(vector_1)
         return None
     except TypeError as exc:
@@ -81,9 +81,9 @@ class InterpolationModel(PolarizabilityModel):
     Parameters
     ----------
     ref_structure
-        | Reference structure on which to base the model.
+        Reference structure on which to base the model.
     ref_polarizability
-        | 2D array with shape (3,3) with polarizability of the reference structure.
+        Array with shape (3,3) with polarizability of the reference structure.
     is_dummy_model
 
     """
@@ -117,7 +117,7 @@ class InterpolationModel(PolarizabilityModel):
         Returns
         -------
         :
-            2D array with shape (3,3).
+            Array with shape (3,3).
         """
         return self._ref_polarizability.copy()
 
@@ -133,7 +133,7 @@ class InterpolationModel(PolarizabilityModel):
         Returns
         -------
         :
-            (Å) List of length J containing 2D arrays with shape (N,3) where J is the
+            (Å) List of length J containing arrays with shape (N,3) where J is the
             number of specified degrees of freedom and N is the number of atoms.
 
         """
@@ -157,7 +157,7 @@ class InterpolationModel(PolarizabilityModel):
         Returns
         -------
         :
-            1D array with shape (J,) where J is the number of specified degrees of
+            Array with shape (J,) where J is the number of specified degrees of
             freedom.
         """
         return self._mask.copy()
@@ -172,11 +172,9 @@ class InterpolationModel(PolarizabilityModel):
         Parameters
         ----------
         mask
-            1D array of size (N,) where N is the number of specified degrees
-            of freedom (DOFs).
-
-            If an element is False, its corresponding DOF will be "masked" and excluded
-            from polarizability calculations.
+            Array with shape (N,) where N is the number of specified degrees
+            of freedom (DOFs). If an element is False, its corresponding DOF will be
+            "masked" and excluded from polarizability calculations.
         """
         verify_ndarray_shape("mask", value, self._mask.shape)
         self._mask = value
@@ -189,17 +187,17 @@ class InterpolationModel(PolarizabilityModel):
         Parameters
         ----------
         positions_batch
-            | (fractional) 3D array with shape (S,N,3) where S is the number of samples
-            | and N is the number of atoms.
+            (fractional) Array with shape (S,N,3) where S is the number of samples
+            and N is the number of atoms.
 
         Returns
         -------
         :
-            3D array with shape (S,3,3).
+            Array with shape (S,3,3).
 
         Raises
         ------
-        UsageError
+        UserError
             Model is a dummy model.
 
         """
@@ -237,7 +235,7 @@ class InterpolationModel(PolarizabilityModel):
                 )
         except ValueError as err:
             if self._is_dummy_model:
-                raise UsageError(
+                raise UserError(
                     "dummy model cannot calculate polarizabilities"
                 ) from err
             raise err
@@ -272,7 +270,11 @@ class InterpolationModel(PolarizabilityModel):
         Returns
         -------
         :
-            3-tuple of the form (basis vectors, interpolation_xs, interpolation_ys)
+            0.  basis vectors -- (Å) List of length J containing arrays with shape (N,3)
+                where J is the number of degrees of freedom and N is the number of
+                atoms.
+            #.  interpolation_xs
+            #.  interpolation_ys
         """
         # Check that the parent displacement is orthogonal to existing basis vectors
         parent_cart_basis_vector = self._ref_structure.get_cart_displacement(
@@ -368,12 +370,12 @@ class InterpolationModel(PolarizabilityModel):
             # Warn user if amplitudes don't span zero
             max_amplitude = np.max(interpolation_x)
             min_amplitude = np.min(interpolation_x)
-            if np.isclose(max_amplitude, 0, atol=1e-3).all() or max_amplitude <= 0:
+            if np.allclose(max_amplitude, 0, atol=1e-3) or max_amplitude <= 0:
                 warn(
                     "max amplitude <= 0, when usually it should be > 0",
                     DOFWarning,
                 )
-            if np.isclose(min_amplitude, 0, atol=1e-3).all() or min_amplitude >= 0:
+            if np.allclose(min_amplitude, 0, atol=1e-3) or min_amplitude >= 0:
                 warn(
                     "min amplitude >= 0, when usually it should be < 0",
                     DOFWarning,
@@ -395,7 +397,8 @@ class InterpolationModel(PolarizabilityModel):
         # FALSE -> not masking, TRUE -> masking
         self._mask = np.append(self._mask, [False] * len(basis_vectors_to_add))
 
-    def add_dof(  # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def add_dof(
         self,
         cart_displacement: NDArray[np.float64],
         amplitudes: NDArray[np.float64],
@@ -414,25 +417,23 @@ class InterpolationModel(PolarizabilityModel):
         Parameters
         ----------
         cart_displacement
-            (Å) 2D array with shape (N,3) where N is the number of atoms.
-
-            Magnitude is arbitrary. Must be orthogonal to all previously added DOFs.
+            (Å) Array with shape (N,3) where N is the number of atoms. The magnitude of
+            the displacement is ignored, only the direction is used. Must be orthogonal
+            to all previously added DOFs.
         amplitudes
-            (Å) 1D array with shape (L,).
-
-            Duplicate amplitudes, either those explicitly provided or those generated
-            by structural symmetries, will raise :class:`.InvalidDOFException`.
+            (Å) Array with shape (L,). Duplicate amplitudes, either those explicitly
+            provided or those generated by structural symmetries, will raise
+            :class:`.InvalidDOFException`.
         polarizabilities
-            3D array with shape (1,3,3) or (2,3,3) containing known
-            polarizabilities for each amplitude.
-
-            If dummy model, this parameter is ignored.
+            Array with shape (1,3,3) or (2,3,3) containing known
+            polarizabilities for each amplitude. If dummy model, this parameter is
+            ignored.
         interpolation_order
-            | Must be less than the number of total number of amplitudes after
-            | symmetry considerations.
+            Must be less than the number of total number of amplitudes after
+            symmetry considerations.
         include_ref_polarizability
-            | Whether to include the references polarizability at 0.0 amplitude in the
-            | interpolation.
+            Whether to include the references polarizability at 0.0 amplitude in the
+            interpolation.
 
         Raises
         ------
@@ -485,9 +486,10 @@ class InterpolationModel(PolarizabilityModel):
         ----------
         filepaths
         file_format
-            Supports ``"outcar"`` and ``"vasprun.xml"`` (see :ref:`Supported formats`).
+            Supports ``"outcar"`` and ``"vasprun.xml"``. If dummy model, supports
+            ``"poscar"`` and ``"xdatcar"`` as well (see :ref:`Supported formats`).
 
-            If dummy model, supports ``"poscar"`` and ``"xdatcar"`` as well.
+
 
         Raises
         ------
@@ -524,18 +526,21 @@ class InterpolationModel(PolarizabilityModel):
         Parameters
         ----------
         filepaths:
-            Supports: "outcar". If dummy model, supports: "outcar", "poscar" (see
-            :ref:`Supported formats`).
+            Supports ``"outcar"``. If dummy model, supports ``"outcar"``, | |
+            ``"poscar"`` (see :ref:`Supported formats`).
 
         Returns
         -------
         :
-            3-tuple with the form (displacements, polarizabilities, basis vector)
+            0.  displacements -- (fractional) Array with shape (J,N,3) where J is the
+                total number of displacements.
+            #.  amplitudes
+            #.  polarizabilities
 
         Raises
         ------
         FileNotFoundError
-            File could not be found.
+            File not found.
         InvalidDOFException
             DOF assembled from supplied files was invalid (see get_dof)
         """

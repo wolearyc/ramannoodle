@@ -2,20 +2,21 @@
 
 from pathlib import Path
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
 import pytest
 
 import ramannoodle.io.generic
-from ramannoodle.polarizability.interpolation import InterpolationModel
-from ramannoodle.polarizability.art import ARTModel
+from ramannoodle.pmodel.interpolation import InterpolationModel
+from ramannoodle.pmodel.art import ARTModel
 from ramannoodle.spectrum.raman import (
     get_bose_einstein_correction,
     get_laser_correction,
 )
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.spectrum.spectrum_utils import convolve_spectrum
+from ramannoodle.spectrum.utils import convolve_spectrum
 
 # pylint: disable=protected-access,too-many-locals
 
@@ -38,7 +39,7 @@ def _validate_polarizabilities(model: InterpolationModel, data_directory: str) -
             )
         )
         model_polarizability = model.calc_polarizabilities(np.array([positions]))[0]
-        assert np.isclose(model_polarizability, known_polarizability, atol=1e-4).all()
+        assert np.allclose(model_polarizability, known_polarizability, atol=1e-4)
 
 
 @pytest.mark.parametrize(
@@ -100,8 +101,8 @@ def test_interpolation_spectrum(
         known_wavenumbers = known_spectrum["wavenumbers"]
         known_intensities = known_spectrum["intensities"]
 
-        assert np.isclose(wavenumbers, known_wavenumbers).all()
-        assert np.isclose(intensities, known_intensities, atol=1e-4).all()
+        assert np.allclose(wavenumbers, known_wavenumbers)
+        assert np.allclose(intensities, known_intensities, atol=1e-4)
 
 
 @pytest.mark.parametrize(
@@ -157,8 +158,8 @@ def test_art_spectrum(
         known_wavenumbers = known_spectrum["wavenumbers"]
         known_intensities = known_spectrum["intensities"]
 
-        assert np.isclose(wavenumbers, known_wavenumbers).all()
-        assert np.isclose(intensities, known_intensities, atol=1e-4).all()
+        assert np.allclose(wavenumbers, known_wavenumbers)
+        assert np.allclose(intensities, known_intensities, atol=1e-4)
 
 
 @pytest.mark.parametrize(
@@ -232,8 +233,8 @@ def test_art_masked_spectrum(
         known_wavenumbers = known_spectrum["wavenumbers"]
         known_intensities = known_spectrum["intensities"]
 
-        assert np.isclose(wavenumbers, known_wavenumbers).all()
-        assert np.isclose(intensities, known_intensities, atol=1e-4).all()
+        assert np.allclose(wavenumbers, known_wavenumbers)
+        assert np.allclose(intensities, known_intensities, atol=1e-4)
 
 
 @pytest.mark.parametrize(
@@ -267,8 +268,8 @@ def test_convolve_intensities(
         with np.load(known_gaussian_spectrum_path) as known_spectrum:
             known_wavenumbers = known_spectrum["wavenumbers"]
             known_intensities = known_spectrum["intensities"]
-            assert np.isclose(gaussian_wavenumbers, known_wavenumbers).all()
-            assert np.isclose(gaussian_intensities, known_intensities).all()
+            assert np.allclose(gaussian_wavenumbers, known_wavenumbers)
+            assert np.allclose(gaussian_intensities, known_intensities)
 
         lorentzian_wavenumbers, lorentzian_intensities = convolve_spectrum(
             wavenumbers, intensities, "lorentzian"
@@ -281,8 +282,8 @@ def test_convolve_intensities(
         with np.load(known_lorentzian_spectrum_path) as known_spectrum:
             known_wavenumbers = known_spectrum["wavenumbers"]
             known_intensities = known_spectrum["intensities"]
-            assert np.isclose(lorentzian_wavenumbers, known_wavenumbers).all()
-            assert np.isclose(lorentzian_intensities, known_intensities).all()
+            assert np.allclose(lorentzian_wavenumbers, known_wavenumbers)
+            assert np.allclose(lorentzian_intensities, known_intensities)
 
 
 @pytest.mark.parametrize(
@@ -362,7 +363,8 @@ def test_convolve_intensities(
         ),
     ],
 )
-def test_convolve_intensities_exception(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def test_convolve_intensities_exception(
     wavenumbers: NDArray[np.float64],
     intensities: NDArray[np.float64],
     function: str,
@@ -372,9 +374,8 @@ def test_convolve_intensities_exception(  # pylint: disable=too-many-arguments
     in_reason: str,
 ) -> None:
     """Test convolve_intensities (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         convolve_spectrum(wavenumbers, intensities, function, width, out_wavenumbers)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -407,9 +408,8 @@ def test_get_bose_einstein_correction_exception(
     in_reason: str,
 ) -> None:
     """Test get_bose_einstein_correction (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         get_bose_einstein_correction(wavenumbers, temperature)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -442,6 +442,5 @@ def test_get_laser_correction(
     in_reason: str,
 ) -> None:
     """Test get_laser_correction (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         get_laser_correction(wavenumbers, laser_wavenumber)
-    assert in_reason in str(error.value)

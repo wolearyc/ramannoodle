@@ -10,27 +10,27 @@ IO operations are implemented in ramannoodle as functions. These are organized i
 
 .. code-block:: python
 
-      import ramannoodle.io.vasp as vasp_io
+      import ramannoodle as rn
 
-      phonons = vasp_io.outcar.read_phonons(...)
-      vasp_io.poscar.write_structure(...)
+      phonons = rn.io.vasp.outcar.read_phonons(...)
+      rn.io.vasp.poscar.write_structure(...)
 
 Ramannoodle also includes generic versions of IO functions in :mod:`ramannoodle.io.generic`. These functions use parameters to specify the desired file format:
 
 .. code-block:: python
 
-      import ramannoodle.io.generic as generic_io
+      import ramannoodle as rn
 
-      phonons = generic_io.read_phonons(..., file_format = "outcar")
-      generic_io.write_structure(..., file_format = "poscar")
+      phonons = rn.io.generic.read_phonons(..., file_format = "outcar")
+      rn.io.generic.write_structure(..., file_format = "poscar")
 
 These generic functions are less flexible than those first mentioned, and therefore these generic functions are best used only when necessary. One such case is loading files directly into polarizability models:
 
 .. code-block:: python
 
-      import ramannoodle.io.generic as generic_io
+      import ramannoodle as rn
 
-      model = InterpolationModel(...)
+      model = rn.pmodel.InterpolationModel(...)
       model.add_dof_from_files(..., file_format = "outcar")
 
 :meth:`.InterpolationModel.add_dof_from_files` and other methods like it rely on these generic methods, as apparent from the ``file_format`` argument.

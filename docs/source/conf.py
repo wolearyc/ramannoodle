@@ -16,7 +16,7 @@ import os
 project = 'ramannoodle'
 copyright = "2023-present, Willis O'Leary"
 author = "Willis O'Leary"
-release = '0.3.0'
+release = '0.4.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -26,8 +26,9 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
+    "sphinx_autodoc_typehints",
     'nbsphinx',
-    'IPython.sphinxext.ipython_console_highlighting'
+    'IPython.sphinxext.ipython_console_highlighting',
 ]
 autodoc_typehints = 'description'
 nbsphinx_allow_errors = True
@@ -36,6 +37,7 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('http://docs.scipy.org/doc/numpy', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
+    'torch': ('https://pytorch.org/docs/stable/', None),
 }
 
 intersphinx_disabled_domains = ['std']
@@ -55,6 +57,6 @@ html_theme_options = {
     "dark_logo": "logo_dark.png",
     "sidebar_hide_name": True,
 }
-html_extra_path = ["docs/source/robots.txt"]
+html_extra_path = ["robots.txt"]
 
 sys.path.insert(0, os.path.abspath('../../'))

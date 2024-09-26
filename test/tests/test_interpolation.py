@@ -1,13 +1,14 @@
 """Testing for InterpolationModel."""
 
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.polarizability.interpolation import find_duplicates
-from ramannoodle.polarizability.interpolation import InterpolationModel
+from ramannoodle.pmodel.interpolation import find_duplicates
+from ramannoodle.pmodel.interpolation import InterpolationModel
 from ramannoodle.exceptions import InvalidDOFException
 from ramannoodle.structure.reference import ReferenceStructure
 
@@ -38,9 +39,8 @@ def test_find_duplicates_exception(
     vectors: NDArray[np.float64], exception_type: Type[Exception], in_reason: str
 ) -> None:
     """Test find_duplicates (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         find_duplicates(vectors)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -165,6 +165,7 @@ def test_add_dof(
     ],
     indirect=["outcar_ref_structure_fixture"],
 )
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def test_add_dof_exception(
     outcar_ref_structure_fixture: ReferenceStructure,
     displaced_atom_indexes: list[list[int]],
@@ -177,7 +178,7 @@ def test_add_dof_exception(
     """Test add_dof (exception)."""
     ref_structure = outcar_ref_structure_fixture
     model = InterpolationModel(ref_structure, np.zeros((3, 3)))
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         for atom_indexes in displaced_atom_indexes:
             for atom_index in atom_indexes:
                 displacement = ref_structure.positions * 0
@@ -185,8 +186,6 @@ def test_add_dof_exception(
                 model.add_dof(
                     displacement, amplitudes, polarizabilities, interpolation_order
                 )
-
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -265,10 +264,9 @@ def test_add_dof_from_files_exception(
     """Test add_dof_from_files (exception)."""
     ref_structure = outcar_ref_structure_fixture
     model = InterpolationModel(ref_structure, np.zeros((3, 3)))
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         for outcar_files in outcar_file_groups:
             model.add_dof_from_files(outcar_files, "outcar", interpolation_order)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(

@@ -21,26 +21,22 @@ def convolve_spectrum(
     Parameters
     ----------
     wavenumbers
-        | (cm\ :sup:`-1`) 1D array with shape (M,).
+        (cm\ :sup:`-1`) Array with shape (M,).
     intensities
-        | (arbitrary units) 1D array with shape (M,).
+        (arbitrary units) Array with shape (M,).
     function
-        | Supports ``"gaussian"`` or ``"lorentzian"``.
+        Supports ``"gaussian"`` or ``"lorentzian"``.
     width
-        | (cm\ :sup:`-1`)
+        (cm\ :sup:`-1`)
     out_wavenumbers
-        (cm\ :sup:`-1`) 1D array with shape (L,) where L is arbitrary.
-
-        If None, ``out_wavenumbers`` is determined automatically.
+        (cm\ :sup:`-1`) Array with shape (L,) where L is arbitrary. If ``None``,
+        ``out_wavenumbers`` is determined automatically.
 
     Returns
     -------
     :
-        2-tuple:
-                0. | wavenumbers (``out_wavenumbers``) --
-                   | (cm\ :sup:`-1`) 1D array with shape (L,).
-                #. | intensities --
-                   | (arbitrary units) 1D array with shape (L,).
+        0.  wavenumbers (``out_wavenumbers``) -- (cm\ :sup:`-1`) Array with shape (L,).
+        #.  intensities -- (arbitrary units) Array with shape (L,).
 
     """
     if out_wavenumbers is None:
@@ -98,7 +94,7 @@ def _calc_autocorrelation(signal: NDArray[np.float64]) -> NDArray[np.float64]:
 
 def calc_signal_spectrum(
     signal: NDArray[np.float64], sampling_rate: float
-) -> NDArray[np.float64]:
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     r"""Calculate a signal's spectrum.
 
     The spectrum is  defined as the positive-frequency Fourier transform of the
@@ -107,18 +103,15 @@ def calc_signal_spectrum(
     Parameters
     ----------
     signal
-        | Array with shape (S,) where S is the number of samples.
+        Array with shape (S,) where S is the number of samples.
     sampling_rate
-        | (fs)
+        (fs)
 
     Returns
     -------
     :
-        2-tuple:
-            0. | wavenumbers --
-               | (cm\ :sup:`-1`) 1D array with shape (ceiling(S / 2),).
-            #. | intensities --
-               | (arbitrary units) 1D array with shape (ceiling(S / 2),).
+        0.  wavenumbers -- (cm\ :sup:`-1`) Array with shape (ceiling(S / 2),).
+        #.  intensities -- (arbitrary units) Array with shape (ceiling(S / 2),).
 
     """
     autocorrelation = _calc_autocorrelation(signal)

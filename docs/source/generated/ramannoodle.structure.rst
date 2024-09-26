@@ -20,18 +20,18 @@ ramannoodle.structure.reference module
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.structure.structure\_utils module
----------------------------------------------
-
-.. automodule:: ramannoodle.structure.structure_utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ramannoodle.structure.symmetry\_utils module
 --------------------------------------------
 
 .. automodule:: ramannoodle.structure.symmetry_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ramannoodle.structure.utils module
+----------------------------------
+
+.. automodule:: ramannoodle.structure.utils
    :members:
    :undoc-members:
    :show-inheritance:

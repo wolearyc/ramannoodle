@@ -9,3 +9,4 @@ Tutorials
    notebooks/full-workflow
    notebooks/molecular-dynamics
    notebooks/masking
+   notebooks/machine-learning

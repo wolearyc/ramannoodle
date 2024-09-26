@@ -1,15 +1,16 @@
 """Testing for spectra."""
 
 from typing import Type
+import re
 
 import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.spectrum.spectrum_utils import calc_signal_spectrum
+from ramannoodle.spectrum.utils import calc_signal_spectrum
 import ramannoodle.io.vasp as vasp_io
 from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.polarizability.interpolation import InterpolationModel
+from ramannoodle.pmodel.interpolation import InterpolationModel
 
 # pylint: disable=R0801
 
@@ -88,12 +89,12 @@ def test_spectrum(
         known_wavenumbers = known_spectrum["wavenumbers"]
         known_intensities = known_spectrum["intensities"]
 
-        assert np.isclose(wavenumbers, known_wavenumbers).all()
-        assert np.isclose(intensities, known_intensities, atol=1e-3).all()
+        assert np.allclose(wavenumbers, known_wavenumbers)
+        assert np.allclose(intensities, known_intensities, atol=1e-3)
 
 
 @pytest.mark.parametrize(
-    "outcar_ref_structure_fixture,timestep,key,exception_type,reason",
+    "outcar_ref_structure_fixture,timestep,key,exception_type,in_reason",
     [
         (
             "test/data/TiO2/phonons_OUTCAR",
@@ -124,17 +125,15 @@ def test_trajectory_exception(
     timestep: float,
     key: int | slice,
     exception_type: Type[Exception],
-    reason: str,
+    in_reason: str,
 ) -> None:
     """Test Trajectory class (exception)."""
     ref_structure = outcar_ref_structure_fixture
     model = InterpolationModel(ref_structure, np.zeros((3, 3)))
 
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         trajectory = vasp_io.xdatcar.read_trajectory(
             "test/data/STO/XDATCAR", timestep=timestep
         )
         trajectory.get_raman_spectrum(model)
         trajectory[key]  # flake8: noqa:W0104 # pylint: disable=pointless-statement
-
-    assert reason in str(err.value)

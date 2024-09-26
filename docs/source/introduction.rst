@@ -3,8 +3,8 @@ Introduction
 
 A chemical system's Raman spectrum reflects the frequencies and amplitudes at which the components of its **polarizability** -- a 3x3 tensor -- fluctuate due to thermal atomic motion. We must answer two questions to calculate a Raman spectrum of a collection of atoms:
 
-1. How do the atoms "jiggle" at finite temperatures?
-2. How does each jiggle modulate polarizability?
+1. How do the atoms vibrate at finite temperatures?
+2. How does each vibration modulate polarizability?
 
 To answer question (1), we often consider the system's vibrational normal modes, i.e., phonons in the case of periodic systems. However, in cases where atomic motion is appreciably anharmonic, the phonon picture misses important features. In these cases, we use molecular dynamics to understand, at least in a statistical sense, exactly how the atoms move as a function of time.
 
@@ -12,23 +12,17 @@ With the atomic dynamics in hand, answering question (2) is conceptually straigh
 
 Unfortunately, the need to calculate so many polarizabilities can make Raman spectrum calculations very computationally costly. These costs can quickly balloon, especially when treating large and/or complex systems. This ultimately makes conventional Raman spectrum calculations impractical for many of the most interesting and technologically relevant materials.
 
-**Ramannoodle's primary purpose is to reduce the computational cost of first principles Raman calculations.** It accomplishes this by providing efficient polarizability models. For example, :class:`~ramannoodle.polarizability.art.ARTModel` and :class:`~ramannoodle.polarizability.interpolation.InterpolationModel` leverage structural symmetries to greatly reduce the number of required first principles polarizability calculations. We hope that current and future versions of this API will make computing Raman spectra simpler and, consequently, make Raman spectroscopy a more powerful characterization tool.
+**Ramannoodle's primary purpose is to reduce the computational cost of first principles Raman calculations.** It accomplishes this by providing efficient polarizability models. For example, :class:`~ramannoodle.pmodel.art.ARTModel` and :class:`~ramannoodle.pmodel.interpolation.InterpolationModel` leverage structural symmetries to greatly reduce the number of required first principles polarizability calculations. We hope that current and future versions of this API will make computing Raman spectra simpler and, consequently, make Raman spectroscopy a more powerful characterization tool.
 
 Installation
 ------------
 
-Ramannoodle can be installed -- as is standard for Python packages -- with pip:
+Please see ramannoodle's `repo <https://github.com/wolearyc/ramannoodle>`_ for up-to-date installation instructions.
 
-.. code-block:: console
+Citing
+------
 
-      $ pip install ramannoodle
-
-So long as your Python environment is configured correctly, you should be good to go:
-
-.. code-block:: python
-
-    import ramannoodle
-    # ...
+Please see ramannoodle's `repo <https://github.com/wolearyc/ramannoodle>`_ for up-to-date citation information.
 
 Modules
 --------
@@ -50,8 +44,8 @@ The following gives an overview of the modules available in ramannoodle.
         :synopsis:
         :no-index:
 
-4. :mod:`ramannoodle.polarizability`
-    .. automodule:: ramannoodle.polarizability
+4. :mod:`ramannoodle.pmodel`
+    .. automodule:: ramannoodle.pmodel
         :synopsis:
         :no-index:
 

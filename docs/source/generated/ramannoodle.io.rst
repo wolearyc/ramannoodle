@@ -20,10 +20,10 @@ ramannoodle.io.generic module
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.io.io\_utils module
--------------------------------
+ramannoodle.io.utils module
+---------------------------
 
-.. automodule:: ramannoodle.io.io_utils
+.. automodule:: ramannoodle.io.utils
    :members:
    :undoc-members:
    :show-inheritance:

@@ -20,14 +20,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install uv
-        uv pip install ${{ matrix.uv-arg }} --system -r requirements.txt
+        uv pip install ${{ matrix.uv-arg }} --system -r deps/dev_requirements.txt
+        uv pip install ${{ matrix.uv-arg }} --system -r deps/requirements.txt
+        uv pip install ${{ matrix.uv-arg }} --system -r deps/torch_geometric_requirements.txt
+        uv pip install ${{ matrix.uv-arg }} --system -r deps/torch_requirements.txt
+        uv pip install ${{ matrix.uv-arg }} --system --no-index -r deps/torch_extra_requirements.txt
     - name: Analyzing the code with pylint
       if: ${{ matrix.os != 'windows-latest' }} # Windows throws strange linting errors
       run: |

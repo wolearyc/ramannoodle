@@ -13,13 +13,13 @@ from ramannoodle.exceptions import (
     verify_list_len,
     get_shape_error,
 )
-from ramannoodle.structure.structure_utils import (
+from ramannoodle.structure.utils import (
     displace_positions,
     transform_positions,
     apply_pbc_displacement,
     calc_displacement,
 )
-from ramannoodle.globals import ATOM_SYMBOLS
+from ramannoodle.constants import ATOM_SYMBOLS
 from ramannoodle.structure import symmetry_utils
 
 
@@ -54,9 +54,9 @@ def _get_positions_permutation_matrix(
     Parameters
     ----------
     reference_positions
-        A 2D array with shape (N,3)
+        (fractional) Array with shape (N,3)
     permuted_positions
-        A 2D array with shape (N,3).
+        (fractional) Array with shape (N,3).
 
     """
     # Compute pairwise distance matrix.
@@ -78,15 +78,15 @@ class ReferenceStructure:
     Parameters
     ----------
     atomic_numbers
-        | List of length N where N is the number of atoms.
+        List of length N where N is the number of atoms.
     lattice
-        | (Å) 2D array with shape (3,3).
+        (Å) Array with shape (3,3).
     positions
-        | (fractional) 2D array with shape (N,3).
+        (fractional) Array with shape (N,3).
     symprec
-        | (Å) Distance tolerance for symmetry search (spglib).
+        (Å) Distance tolerance for symmetry search (spglib).
     angle_tolerance
-        | (°) Angle tolerance for symmetry search (spglib).
+        (°) Angle tolerance for symmetry search (spglib).
 
     Raises
     ------
@@ -95,7 +95,7 @@ class ReferenceStructure:
 
     """
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         atomic_numbers: list[int],
         lattice: NDArray[np.float64],
@@ -141,7 +141,7 @@ class ReferenceStructure:
         Returns
         -------
         :
-            Å | 2D array with shape (3,3).
+            Å | Array with shape (3,3).
         """
         return self._lattice.copy()
 
@@ -152,7 +152,7 @@ class ReferenceStructure:
         Returns
         -------
         :
-            (fractional) 2D array with shape (N,3) where N is the number of atoms.
+            (fractional) Array with shape (N,3) where N is the number of atoms.
         """
         return self._positions.copy()
 
@@ -168,8 +168,7 @@ class ReferenceStructure:
         Returns
         -------
         :
-            dict:
-                | atom index --> list of equivalent atom indexes
+            atom index --> list of equivalent atom indexes
 
         """
         assert self._symmetry_dict is not None
@@ -189,7 +188,7 @@ class ReferenceStructure:
         Parameters
         ----------
         displacement
-            | (fractional) 2D array with shape (N,3) where N is the number of atoms.
+            (fractional) Array with shape (N,3) where N is the number of atoms.
 
         Returns
         -------
@@ -274,12 +273,12 @@ class ReferenceStructure:
         Parameters
         ----------
         displacement
-            | (fractional) Array with shape (...,N,3)  where N is the number of atoms.
+            (fractional) Array with shape (...,N,3)  where N is the number of atoms.
 
         Returns
         -------
         :
-            (Å) | Array with shape (...,N,3).
+            (Å) Array with shape (...,N,3).
         """
         displacement = apply_pbc_displacement(displacement)
 
@@ -291,12 +290,12 @@ class ReferenceStructure:
         Parameters
         ----------
         direction
-            | (fractional) 1D array with shape (3,).
+            (fractional) Array with shape (3,).
 
         Returns
         -------
         :
-            (Å) 1D array with shape (3,).
+            (Å) Array with shape (3,).
         """
         direction = apply_pbc_displacement(direction)
         try:
@@ -312,12 +311,12 @@ class ReferenceStructure:
         Parameters
         ----------
         cart_displacement
-            | (Å) 2D array with shape (N,3) where N is the number of atoms.
+            (Å) Array with shape (N,3) where N is the number of atoms.
 
         Returns
         -------
         :
-            (fractional) 2D array with shape (N,3).
+            (fractional) Array with shape (N,3).
         """
         verify_ndarray_shape("cart_displacement", cart_displacement, (None, 3))
         displacement = (cart_displacement) @ np.linalg.inv(self.lattice)
@@ -331,12 +330,12 @@ class ReferenceStructure:
         Parameters
         ----------
         cart_direction
-            | (Å) 1D array with shape (3,).
+            (Å) Array with shape (3,).
 
         Returns
         -------
         :
-            | (fractional) 1D array with shape (3,).
+            (fractional) Array with shape (3,).
         """
         verify_ndarray_shape("direction", cart_direction, (3,))
         displacement = np.array([cart_direction]) @ np.linalg.inv(self.lattice)
@@ -349,9 +348,8 @@ class ReferenceStructure:
         ----------
         atom_symbols
             If integer or list of integers, specifies atom indexes. If string or list
-            of strings, specifies atom symbols.
-
-            Mixtures of indexes and symbols are allowed.
+            of strings, specifies atom symbols. Mixtures of indexes and symbols are
+            allowed.
         """
         symbols = [ATOM_SYMBOLS[number] for number in self._atomic_numbers]
         indexes = []

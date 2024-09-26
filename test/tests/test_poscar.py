@@ -2,6 +2,7 @@
 
 from typing import Type
 from pathlib import Path
+import re
 
 import numpy as np
 from numpy.typing import NDArray
@@ -92,9 +93,9 @@ def test_write_read_poscar(
     reference_structure = ramannoodle.io.generic.read_ref_structure(
         "test/data/temp", file_format="poscar"
     )
-    assert np.isclose(reference_structure._lattice, lattice).all()
-    assert np.isclose(reference_structure._atomic_numbers, atomic_numbers).all()
-    assert np.isclose(reference_structure.positions, positions).all()
+    assert np.allclose(reference_structure._lattice, lattice)
+    assert np.allclose(reference_structure._atomic_numbers, atomic_numbers)
+    assert np.allclose(reference_structure.positions, positions)
 
 
 @pytest.mark.parametrize(
@@ -138,7 +139,8 @@ def test_write_read_poscar(
         ),
     ],
 )
-def test_write_poscar_exception(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments,too-many-arguments
+def test_write_poscar_exception(
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
     positions: NDArray[np.float64],
@@ -148,11 +150,10 @@ def test_write_poscar_exception(  # pylint: disable=too-many-arguments
     overwrite: bool,
 ) -> None:
     """Test write structure as POSCAR (exception)."""
-    with pytest.raises(exception_type) as err:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         ramannoodle.io.generic.write_structure(
             lattice, atomic_numbers, positions, path, "poscar", overwrite
         )
-    assert in_reason in str(err.value)
 
 
 @pytest.mark.parametrize(
@@ -166,8 +167,8 @@ def test_read_cart_poscar(  # pylint: disable=too-many-arguments
     ref_structure = vasp_io.poscar.read_ref_structure(cart_poscar_path)
     known_ref_structure = vasp_io.poscar.read_ref_structure(ref_frac_poscar_path)
 
-    assert np.isclose(ref_structure.lattice, known_ref_structure.lattice).all()
-    assert np.isclose(ref_structure.positions, known_ref_structure.positions).all()
+    assert np.allclose(ref_structure.lattice, known_ref_structure.lattice)
+    assert np.allclose(ref_structure.positions, known_ref_structure.positions)
 
 
 @pytest.mark.parametrize(
@@ -232,6 +233,5 @@ def test_read_poscar_exception(
     in_reason: str,
 ) -> None:
     """Test poscar reading (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         ramannoodle.io.generic.read_ref_structure(path_fixture, file_format="poscar")
-    assert in_reason in str(error.value)

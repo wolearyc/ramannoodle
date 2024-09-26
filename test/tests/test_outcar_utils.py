@@ -1,6 +1,7 @@
 """Tests for VASP-related functions."""
 
 from typing import TextIO, Type
+import re
 import numpy as np
 from numpy.typing import NDArray
 
@@ -50,9 +51,8 @@ def test_get_atomic_symbol_from_potcar_line_exception(
     in_reason: str,
 ) -> None:
     """Test get_atomic_symbol_from_potcar_line (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._get_atomic_symbol_from_potcar_line(potcar_line)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -97,9 +97,8 @@ def test_read_atomic_symbols_from_outcar_exception(
     in_reason: str,
 ) -> None:
     """Test _read_atomic_symbols_from_outcar (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._read_atomic_symbols(file_fixture)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -122,8 +121,8 @@ def test_read_cart_positions_from_outcar(
     cart_positions = vasp_outcar._read_cart_positions(file_fixture, 135)
 
     assert len(cart_positions) == 135
-    assert np.isclose(cart_positions[0], known_first_position).all()
-    assert np.isclose(cart_positions[-1], known_last_position).all()
+    assert np.allclose(cart_positions[0], known_first_position)
+    assert np.allclose(cart_positions[-1], known_last_position)
 
 
 @pytest.mark.parametrize(
@@ -148,9 +147,8 @@ def test_read_cart_positions_from_outcar_exception(
     in_reason: str,
 ) -> None:
     """Test _read_cart_positions_from_outcar (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._read_cart_positions(file_fixture, 20)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -173,8 +171,8 @@ def test_read_positions_from_outcar(
     positions = vasp_outcar._read_positions(file_fixture, 135)
 
     assert len(positions) == 135
-    assert np.isclose(positions[0], known_first_position).all()
-    assert np.isclose(positions[-1], known_last_position).all()
+    assert np.allclose(positions[0], known_first_position)
+    assert np.allclose(positions[-1], known_last_position)
 
 
 @pytest.mark.parametrize(
@@ -199,9 +197,8 @@ def test_read_positions_from_outcar_exception(
     in_reason: str,
 ) -> None:
     """Test _read_positions_from_outcar (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._read_positions(file_fixture, 20)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -227,7 +224,7 @@ def test_read_polarizability_from_outcar(
     """Test _read_polarizability_from_outcar (normal)."""
     polarizability = vasp_outcar._read_polarizability(file_fixture)
 
-    assert np.isclose(polarizability, known_polarizability).all()
+    assert np.allclose(polarizability, known_polarizability)
 
 
 @pytest.mark.parametrize(
@@ -252,9 +249,8 @@ def test_read_polarizability_from_outcar_exception(
     in_reason: str,
 ) -> None:
     """Test _read_polarizability_from_outcar (normal)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._read_polarizability(file_fixture)
-    assert in_reason in str(error.value)
 
 
 @pytest.mark.parametrize(
@@ -288,7 +284,7 @@ def test_read_lattice_from_outcar(
 ) -> None:
     """Test _read_lattice_from_outcar (normal)."""
     result = vasp_outcar._read_lattice(file_fixture)
-    assert np.isclose(result, known_lattice).all()
+    assert np.allclose(result, known_lattice)
 
 
 @pytest.mark.parametrize(
@@ -313,6 +309,5 @@ def test_read_lattice_from_outcar_exception(
     in_reason: str,
 ) -> None:
     """Test _read_lattice_from_outcar (exception)."""
-    with pytest.raises(exception_type) as error:
+    with pytest.raises(exception_type, match=re.escape(in_reason)):
         vasp_outcar._read_lattice(file_fixture)
-    assert in_reason in str(error.value)
