@@ -1,5 +1,5 @@
-polarizability
-==================================
+ramannoodle.pmodel package
+==========================
 
 Subpackages
 -----------
@@ -12,16 +12,8 @@ Subpackages
 Submodules
 ----------
 
-ramannoodle.pmodel.abstract module
-------------------------------------------
-
-.. automodule:: ramannoodle.pmodel.abstract
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ramannoodle.pmodel.art module
--------------------------------------
+-----------------------------
 
 .. automodule:: ramannoodle.pmodel.art
    :members:
@@ -29,7 +21,7 @@ ramannoodle.pmodel.art module
    :show-inheritance:
 
 ramannoodle.pmodel.interpolation module
------------------------------------------------
+---------------------------------------
 
 .. automodule:: ramannoodle.pmodel.interpolation
    :members:

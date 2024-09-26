@@ -1,16 +1,8 @@
-spectrum
+ramannoodle.spectrum package
 ============================
 
 Submodules
 ----------
-
-ramannoodle.spectrum.abstract module
-------------------------------------
-
-.. automodule:: ramannoodle.spectrum.abstract
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 ramannoodle.spectrum.raman module
 ---------------------------------
@@ -20,10 +12,10 @@ ramannoodle.spectrum.raman module
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.spectrum.spectrum\_utils module
--------------------------------------------
+ramannoodle.spectrum.utils module
+---------------------------------
 
-.. automodule:: ramannoodle.spectrum.spectrum_utils
+.. automodule:: ramannoodle.spectrum.utils
    :members:
    :undoc-members:
    :show-inheritance:

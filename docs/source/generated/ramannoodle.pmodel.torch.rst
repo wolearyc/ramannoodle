@@ -1,19 +1,11 @@
-polarizability.torch
-========================================
+ramannoodle.pmodel.torch package
+================================
 
 Submodules
 ----------
 
-ramannoodle.pmodel.torch.dataset module
------------------------------------------------
-
-.. automodule:: ramannoodle.pmodel.torch.dataset
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ramannoodle.pmodel.torch.gnn module
--------------------------------------------
+-----------------------------------
 
 .. automodule:: ramannoodle.pmodel.torch.gnn
    :members:
@@ -21,7 +13,7 @@ ramannoodle.pmodel.torch.gnn module
    :show-inheritance:
 
 ramannoodle.pmodel.torch.train module
----------------------------------------------
+-------------------------------------
 
 .. automodule:: ramannoodle.pmodel.torch.train
    :members:
@@ -29,7 +21,7 @@ ramannoodle.pmodel.torch.train module
    :show-inheritance:
 
 ramannoodle.pmodel.torch.utils module
----------------------------------------------
+-------------------------------------
 
 .. automodule:: ramannoodle.pmodel.torch.utils
    :members:

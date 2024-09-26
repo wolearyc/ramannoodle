@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   ramannoodle.dataset
    ramannoodle.dynamics
    ramannoodle.io
    ramannoodle.pmodel
@@ -16,18 +17,26 @@ Subpackages
 Submodules
 ----------
 
-ramannoodle.exceptions module
------------------------------
+ramannoodle.abstract module
+---------------------------
 
-.. automodule:: ramannoodle.exceptions
+.. automodule:: ramannoodle.abstract
    :members:
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.globals module
---------------------------
+ramannoodle.constants module
+----------------------------
 
-.. automodule:: ramannoodle.globals
+.. automodule:: ramannoodle.constants
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ramannoodle.exceptions module
+-----------------------------
+
+.. automodule:: ramannoodle.exceptions
    :members:
    :undoc-members:
    :show-inheritance:
