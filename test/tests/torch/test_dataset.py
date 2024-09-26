@@ -57,7 +57,8 @@ def test_load_polarizability_dataset(
         ),
     ],
 )
-def test_polarizability_dataset_exception(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def test_polarizability_dataset_exception(
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
     positions: NDArray[np.float64],

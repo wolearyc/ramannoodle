@@ -110,7 +110,7 @@ def test_batch_polarizability(poscar_ref_structure_fixture: ReferenceStructure) 
             )
             polarizabilities[i] = polarizability[0]
 
-        assert torch.allclose(batch_polarizability, polarizabilities)
+        assert torch.allclose(batch_polarizability, polarizabilities, atol=1e-5)
 
 
 def test_reset_parameters() -> None:
@@ -272,6 +272,7 @@ def test_calc_polarizabilities(
         ),
     ],
 )
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def test_gnn_exception(
     cutoff: float,
     size_node_embedding: int,

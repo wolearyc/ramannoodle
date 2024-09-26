@@ -20,7 +20,8 @@ except (ModuleNotFoundError, UserError) as exc:
     raise get_torch_missing_error() from exc
 
 
-def train_single_epoch(  # pylint: disable=too-many-arguments,too-many-locals
+# pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+def train_single_epoch(
     model: PotGNN,
     training_set: PolarizabilityDataset,
     validation_set: PolarizabilityDataset,

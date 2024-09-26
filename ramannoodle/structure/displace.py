@@ -74,7 +74,8 @@ def get_displaced_positions(
     return positions
 
 
-def write_displaced_structures(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def write_displaced_structures(
     ref_structure: ReferenceStructure,
     cart_displacement: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
@@ -155,7 +156,8 @@ def get_ast_displaced_positions(
     return get_displaced_positions(ref_structure, cart_displacement, amplitudes)
 
 
-def write_ast_displaced_structures(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def write_ast_displaced_structures(
     ref_structure: ReferenceStructure,
     atom_index: int,
     cart_direction: NDArray[np.float64],

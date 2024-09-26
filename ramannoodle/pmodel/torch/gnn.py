@@ -227,7 +227,8 @@ class _EdgeBlock(torch.nn.Module):
         c2_core = c2_core.tanh()
         return typing.cast(Tensor, self.c2_norm_2(c2_filter * c2_core))
 
-    def _get_c3_embedding(  # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def _get_c3_embedding(
         self,
         node_embedding: Tensor,
         edge_embedding: Tensor,
@@ -289,7 +290,8 @@ class _EdgeBlock(torch.nn.Module):
         )
         return typing.cast(Tensor, self.c3_norm_2(c3_emb))
 
-    def forward(  # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def forward(
         self,
         node_embedding: Tensor,
         edge_embedding: Tensor,
@@ -447,7 +449,8 @@ class PotGNN(
         Array with shape (3,3).
     """
 
-    def __init__(  # pylint: disable=too-many-arguments,too-many-locals
+    # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    def __init__(
         self,
         ref_structure: ReferenceStructure,
         cutoff: float,

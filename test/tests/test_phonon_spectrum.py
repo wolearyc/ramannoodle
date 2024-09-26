@@ -363,7 +363,8 @@ def test_convolve_intensities(
         ),
     ],
 )
-def test_convolve_intensities_exception(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def test_convolve_intensities_exception(
     wavenumbers: NDArray[np.float64],
     intensities: NDArray[np.float64],
     function: str,

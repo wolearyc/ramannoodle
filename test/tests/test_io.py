@@ -72,6 +72,7 @@ def test_generic_read_exception(
         ),
     ],
 )
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def test_generic_write_structure_exception(  # pylint: disable=too-many-arguments
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],

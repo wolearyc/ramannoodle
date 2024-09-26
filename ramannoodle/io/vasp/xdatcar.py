@@ -81,7 +81,8 @@ def read_trajectory(
     return Trajectory(positions_ts, timestep)
 
 
-def write_trajectory(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def write_trajectory(
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
     positions_ts: NDArray[np.float64],

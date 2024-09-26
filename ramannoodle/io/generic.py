@@ -283,7 +283,7 @@ def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStruc
         raise ValueError(f"unsupported format: {file_format}") from exc
 
 
-def write_structure(  # pylint: disable=too-many-arguments
+def write_structure(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
     positions: NDArray[np.float64],
@@ -326,7 +326,8 @@ def write_structure(  # pylint: disable=too-many-arguments
         raise ValueError(f"unsupported format: {file_format}") from exc
 
 
-def write_trajectory(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def write_trajectory(
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
     positions_ts: NDArray[np.float64],

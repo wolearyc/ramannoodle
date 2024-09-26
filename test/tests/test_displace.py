@@ -122,7 +122,8 @@ def test_write_displaced_structures(
     ],
     indirect=["outcar_ref_structure_fixture"],
 )
-def test_get_ast_displaced_positions_exception(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def test_get_ast_displaced_positions_exception(
     outcar_ref_structure_fixture: ReferenceStructure,
     atom_index: int,
     cart_direction: NDArray[np.float64],

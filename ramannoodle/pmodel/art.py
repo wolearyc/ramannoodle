@@ -72,6 +72,7 @@ class ARTModel(InterpolationModel):
 
     """
 
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def add_dof(  # pylint: disable=too-many-arguments
         self,
         cart_displacement: NDArray[np.float64],

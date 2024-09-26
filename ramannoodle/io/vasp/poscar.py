@@ -210,7 +210,8 @@ def _get_positions_str(positions: NDArray[np.float64]) -> str:
     return result
 
 
-def write_structure(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def write_structure(
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
     positions: NDArray[np.float64],

@@ -397,7 +397,8 @@ class InterpolationModel(PolarizabilityModel):
         # FALSE -> not masking, TRUE -> masking
         self._mask = np.append(self._mask, [False] * len(basis_vectors_to_add))
 
-    def add_dof(  # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def add_dof(
         self,
         cart_displacement: NDArray[np.float64],
         amplitudes: NDArray[np.float64],

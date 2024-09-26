@@ -33,7 +33,7 @@ class RamanSpectrum(ABC):  # pylint: disable=too-few-public-methods
     """Abstract class for Raman spectra."""
 
     @abstractmethod
-    def measure(  # pylint: disable=too-many-arguments
+    def measure(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         orientation: str | NDArray[np.float64] = "polycrystalline",
         laser_correction: bool = False,

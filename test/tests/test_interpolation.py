@@ -165,6 +165,7 @@ def test_add_dof(
     ],
     indirect=["outcar_ref_structure_fixture"],
 )
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def test_add_dof_exception(
     outcar_ref_structure_fixture: ReferenceStructure,
     displaced_atom_indexes: list[list[int]],

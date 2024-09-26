@@ -144,6 +144,7 @@ def test_add_art(
     ],
     indirect=["outcar_ref_structure_fixture"],
 )
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def test_add_art_exception(
     outcar_ref_structure_fixture: ReferenceStructure,
     atom_indexes: list[int],
@@ -290,6 +291,7 @@ def test_add_art_from_files_exception(
     ],
     indirect=["outcar_ref_structure_fixture"],
 )
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def test_get_specification_tuples(
     outcar_ref_structure_fixture: ReferenceStructure,
     atom_index: int,

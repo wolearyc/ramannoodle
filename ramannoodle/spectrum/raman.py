@@ -118,7 +118,8 @@ class PhononRamanSpectrum(RamanSpectrum):
         """
         return self._raman_tensors.copy()
 
-    def measure(  # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def measure(
         self,
         orientation: str | NDArray[np.float64] = "polycrystalline",
         laser_correction: bool = False,
@@ -236,7 +237,8 @@ class MDRamanSpectrum(RamanSpectrum):
         """
         return self._timestep
 
-    def measure(  # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    def measure(
         self,
         orientation: str | NDArray[np.float64] = "polycrystalline",
         laser_correction: bool = False,

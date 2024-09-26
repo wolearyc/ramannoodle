@@ -139,7 +139,8 @@ def test_write_read_poscar(
         ),
     ],
 )
-def test_write_poscar_exception(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-positional-arguments,too-many-arguments
+def test_write_poscar_exception(
     lattice: NDArray[np.float64],
     atomic_numbers: list[int],
     positions: NDArray[np.float64],
