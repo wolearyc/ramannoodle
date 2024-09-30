@@ -29,6 +29,7 @@ jobs:
         pip install uv
         uv pip install ${{ matrix.uv-arg }} --system -r deps/dev_requirements.txt
         uv pip install ${{ matrix.uv-arg }} --system -r deps/requirements.txt
+        uv pip install ${{ matrix.uv-arg }} --system -r deps/pymatgen_requirements.txt
         uv pip install ${{ matrix.uv-arg }} --system -r deps/torch_geometric_requirements.txt
         uv pip install ${{ matrix.uv-arg }} --system -r deps/torch_requirements.txt
         uv pip install ${{ matrix.uv-arg }} --system --no-index -r deps/torch_extra_requirements.txt
