@@ -45,6 +45,9 @@ torch = [
     "scikit-learn >= 1.4.0;python_version=='3.12' and sys_platform=='win32'", # min working
     "torch_geometric >= 2.3.0", # min working
 ]
+pymatgen = [
+    "pymatgen == 2024.9.17.1",
+]
 
 [project.urls]
 Documentation = "https://ramannoodle.readthedocs.io/en/latest/"
