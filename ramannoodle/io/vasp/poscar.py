@@ -149,6 +149,31 @@ def read_positions(
         return positions
 
 
+def read_structure(
+    filepath: str | Path,
+) -> tuple[NDArray[np.float64], list[int], NDArray[np.float64]]:
+    """Read lattice, atomic numbers, and fractional positions from a VASP POSCAR file.
+
+    Parameters
+    ----------
+    filepath
+
+    Raises
+    ------
+    FileNotFoundError
+        File not found.
+    InvalidFileException
+        Invalid file.
+    """
+    filepath = pathify(filepath)
+    with open(filepath, "r", encoding="utf-8") as file:
+        lattice = _read_lattice(file)
+        atomic_symbols = _read_atomic_symbols(file)
+        atomic_numbers = [ATOMIC_NUMBERS[symbol] for symbol in atomic_symbols]
+        positions = _read_positions(file, lattice, len(atomic_symbols))
+        return lattice, atomic_numbers, positions
+
+
 def read_ref_structure(
     filepath: str | Path,
 ) -> ReferenceStructure:
