@@ -63,7 +63,7 @@ def get_type_error(name: str, value: Any, correct_type: str) -> TypeError:
     return TypeError(f"{name} should have type {correct_type}, not {wrong_type}")
 
 
-def get_shape_error(name: str, array: NDArray, desired_shape: str) -> ValueError:
+def get_shape_error(name: str, array: NDArray[Any], desired_shape: str) -> ValueError:
     """Return ValueError for an ndarray with the wrong shape.
 
     :meta private:
@@ -72,7 +72,7 @@ def get_shape_error(name: str, array: NDArray, desired_shape: str) -> ValueError
     return ValueError(f"{name} has wrong shape: {shape_spec}")
 
 
-def verify_ndarray(name: str, array: NDArray) -> None:
+def verify_ndarray(name: str, array: NDArray[Any]) -> None:
     """Verify type of NDArray .
 
     :meta private: We should avoid calling this function wherever possible (EATF)
@@ -84,7 +84,7 @@ def verify_ndarray(name: str, array: NDArray) -> None:
 
 
 def verify_ndarray_shape(
-    name: str, array: NDArray, shape: Sequence[int | None]
+    name: str, array: NDArray[Any], shape: Sequence[int | None]
 ) -> None:
     """Verify an NDArray's shape.
 
@@ -123,7 +123,7 @@ def verify_list_len(name: str, array: list[Any], length: int | None) -> None:
         raise ValueError(f"{name} has wrong length: {len(array)} != length")
 
 
-def verify_positions(name: str, array: NDArray) -> None:
+def verify_positions(name: str, array: NDArray[Any]) -> None:
     """Verify fractional positions according to dimensions and boundary conditions.
 
     :meta private:
@@ -136,5 +136,10 @@ def verify_positions(name: str, array: NDArray) -> None:
 
 def get_torch_missing_error() -> UserError:
     """Get error indicating that torch is not installed."""
-    required_modules = "'torch', 'torch-scatter', and 'torch-sparse' modules"
+    required_modules = "'torch', 'torch-scatter', and 'torch-sparse' packages"
     return UserError(f"torch functionality requires {required_modules}")
+
+
+def get_pymatgen_missing_error() -> UserError:
+    """Get error indicating that pymatgen is not installed."""
+    return UserError("pymatgen functionality requires pymatgen package")
