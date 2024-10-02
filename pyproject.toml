@@ -47,16 +47,22 @@ torch = [
 ]
 pymatgen = [
     "matplotlib >= 3.7.0", # min recommended
+    "mpmath >= 1.2.0",
     "pandas >= 2.0.0", # min recommended
-    "pillow >= 8.3.2", # min recommended
-    "pymatgen >= 2022.2.10;python_version=='3.10'", # min recommended
-    "pymatgen >= 2022.2.10;python_version=='3.11'", # min recommended
-    "pymatgen >= 2022.2.10;python_version=='3.12'", # min recommended
+    'pillow >= 8.3.2;python_version=="3.10" and sys_platform=="darwin"',  # working
+    'pillow >= 8.3.2;python_version=="3.10" and sys_platform=="win32"',   # working
+    'pillow >= 8.3.2;python_version=="3.10" and sys_platform=="linux"',   # min recommended
+    'pillow >= 8.3.2;python_version=="3.11" and sys_platform=="darwin"',  # min recommended
+    'pillow >= 10.0.0;python_version=="3.11" and sys_platform=="win32"',  # working
+    'pillow >= 8.3.2;python_version=="3.11" and sys_platform=="linux"',   # min recommended
+    'pillow >= 10.1.0;python_version=="3.12" and sys_platform=="darwin"',  # working
+    'pillow >= 10.1.0;python_version=="3.12" and sys_platform=="win32"',  # working
+    'pillow >= 10.1.0;python_version=="3.12" and sys_platform=="linux"',   # min recommended
+    "pymatgen >= 2024.8.9", # min working
     "pyparsing >= 3.0.0", # min working
     "ruamel-yaml >= 0.17.2",
-    "sympy >= 1.10;python_version=='3.10'", # min working
-    "sympy >= 1.11;python_version=='3.11'", # min working
-    "sympy >= 1.13.1;python_version=='3.12'", # min working
+    'sympy >= 1.13.3;python_version=="3.12"',
+    "uncertainties >= 3.1.7",
 ]
 
 [project.urls]

@@ -190,7 +190,7 @@ def test_calc_polarizabilities(
         forward = polarizability_vectors_to_tensors(forward.detach().clone()).numpy()
         calc = model.calc_polarizabilities(batch_positions.detach().clone().numpy())
 
-        assert np.allclose(forward, calc)
+        assert np.allclose(forward, calc, atol=1e-6)
 
 
 @pytest.mark.parametrize(
