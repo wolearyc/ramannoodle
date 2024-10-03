@@ -9,7 +9,6 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-    target-branch: "dev"
     groups:
       python-packages:
         patterns:
