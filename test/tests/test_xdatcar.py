@@ -32,10 +32,12 @@ def test_read_write_xdatcar(
         ref_structure.lattice,
         ref_structure.atomic_numbers,
         trajectory.positions_ts,
-        "test/data/temp",
+        "test/data/temp/WRITE_XDATCAR",
         file_format="xdatcar",
         overwrite=True,
     )
-    written_trajectory = vasp_io.xdatcar.read_trajectory("test/data/temp", 1.0)
+    written_trajectory = vasp_io.xdatcar.read_trajectory(
+        "test/data/temp/WRITE_XDATCAR", 1.0
+    )
     assert np.allclose(written_trajectory.positions_ts, trajectory.positions_ts)
     assert written_trajectory.timestep == trajectory.timestep
