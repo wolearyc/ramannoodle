@@ -3,4 +3,6 @@
 # flake8: noqa: F401
 from ramannoodle.io import generic
 from ramannoodle.io import vasp
-from ramannoodle.io import utils
+from ramannoodle.io import _utils
+
+__all__ = ["generic", "vasp", "_utils"]

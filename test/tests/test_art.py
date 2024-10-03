@@ -7,9 +7,9 @@ import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.pmodel.art import ARTModel
+from ramannoodle.pmodel._art import ARTModel
 from ramannoodle.exceptions import InvalidDOFException, UserError
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.structure._reference import ReferenceStructure
 
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments

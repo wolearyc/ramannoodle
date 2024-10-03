@@ -9,8 +9,8 @@ from numpy.typing import NDArray
 import pytest
 
 import ramannoodle.io.vasp as vasp_io
-from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.structure.displace import (
+from ramannoodle.structure._reference import ReferenceStructure
+from ramannoodle.structure._displace import (
     write_ast_displaced_structures,
     get_ast_displaced_positions,
     write_displaced_structures,
@@ -53,14 +53,14 @@ def test_write_ast_displaced_structures(
         atom_index,
         cart_direction,
         amplitudes,
-        ["test/data/temp.vasp"],
+        ["test/data/scratch/AST_POSCAR"],
         "poscar",
         overwrite=True,
     )
 
     known_positions = vasp_io.outcar.read_positions(outcar_known)
     assert np.isclose(
-        vasp_io.poscar.read_positions("test/data/temp.vasp"), known_positions
+        vasp_io.poscar.read_positions("test/data/scratch/AST_POSCAR"), known_positions
     ).all()
 
 
@@ -88,14 +88,15 @@ def test_write_displaced_structures(
         outcar_ref_structure_fixture,
         cart_displacement,
         amplitudes,
-        ["test/data/temp.vasp"],
+        ["test/data/scratch/DISPLACE_POSCAR"],
         "poscar",
         overwrite=True,
     )
 
     known_positions = vasp_io.poscar.read_positions(poscar_known)
     assert np.isclose(
-        vasp_io.poscar.read_positions("test/data/temp.vasp"), known_positions
+        vasp_io.poscar.read_positions("test/data/scratch/DISPLACE_POSCAR"),
+        known_positions,
     ).all()
 
 

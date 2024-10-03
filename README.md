@@ -45,7 +45,13 @@ $ pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.4.0
 $ pip install ramannoodle[torch]
 ```
 
-## Documentation
+Ramannoodle includes interfaces with [pymatgen](https://pymatgen.org/). To use these interfaces, ramannoodle should be installed with the `pymatgen` options group:
+
+```
+$ pip install ramannoodle[pymatgen]
+```
+
+## Tutorials and docs
 
 [https://ramannoodle.readthedocs.io/](https://ramannoodle.readthedocs.io/)
 

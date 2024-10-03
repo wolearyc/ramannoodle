@@ -9,6 +9,7 @@ python:
   install:
     - requirements: docs/requirements.txt
     - requirements: deps/requirements.txt
+    - requirements: deps/pymatgen_requirements.txt
     - requirements: deps/torch_requirements.txt
     - requirements: deps/torch_geometric_requirements.txt
     - requirements: deps/torch_extra_requirements.txt

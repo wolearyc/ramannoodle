@@ -38,6 +38,7 @@ intersphinx_mapping = {
     'numpy': ('http://docs.scipy.org/doc/numpy', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
+    'pymatgen': ('https://pymatgen.org', None),
 }
 
 intersphinx_disabled_domains = ['std']
@@ -51,6 +52,7 @@ autodoc_member_order = 'groupwise'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'furo'
+html_title = 'ramannoodle'
 html_static_path = ['_static']
 html_theme_options = {
     "light_logo": "logo.png",

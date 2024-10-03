@@ -9,9 +9,9 @@ from numpy.typing import NDArray
 import pytest
 
 import ramannoodle.io.generic
-from ramannoodle.dynamics.phonon import Phonons
-from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.pmodel.art import ARTModel
+from ramannoodle.dynamics._phonon import Phonons
+from ramannoodle.structure._reference import ReferenceStructure
+from ramannoodle.pmodel._art import ARTModel
 
 
 @pytest.mark.parametrize(

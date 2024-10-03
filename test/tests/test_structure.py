@@ -8,13 +8,13 @@ from numpy.typing import NDArray
 import pytest
 
 from ramannoodle.structure.utils import apply_pbc, apply_pbc_displacement
-from ramannoodle.structure.symmetry_utils import (
+from ramannoodle.structure._symmetry_utils import (
     is_collinear_with_all,
     is_non_collinear_with_all,
     are_collinear,
     is_orthogonal_to_all,
 )
-from ramannoodle.structure.reference import (
+from ramannoodle.structure._reference import (
     ReferenceStructure,
     _get_positions_permutation_matrix,
 )

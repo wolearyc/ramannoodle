@@ -1,4 +1,4 @@
-# CD must be the reports directory!
+# CD must be the docs directory!
 cd ..
 coverage run -m pytest --junitxml=reports/junit/junit.xml test
 coverage xml -o  reports/coverage/coverage.xml

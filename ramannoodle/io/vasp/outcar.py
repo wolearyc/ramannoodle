@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from ramannoodle.io.utils import (
+from ramannoodle.io._utils import (
     _skip_file_until_line_contains,
     pathify,
     _read_polarizability_dataset,
@@ -13,12 +13,12 @@ from ramannoodle.io.utils import (
 from ramannoodle.exceptions import InvalidFileException, NoMatchingLineFoundException
 from ramannoodle.constants import ATOMIC_WEIGHTS, ATOMIC_NUMBERS
 from ramannoodle.exceptions import get_type_error, UserError
-from ramannoodle.dynamics.phonon import Phonons
-from ramannoodle.dynamics.trajectory import Trajectory
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.dynamics._phonon import Phonons
+from ramannoodle.dynamics._trajectory import Trajectory
+from ramannoodle.structure._reference import ReferenceStructure
 
 try:
-    from ramannoodle.dataset.torch.dataset import PolarizabilityDataset
+    from ramannoodle.dataset.torch._dataset import PolarizabilityDataset
 except UserError:
     pass
 

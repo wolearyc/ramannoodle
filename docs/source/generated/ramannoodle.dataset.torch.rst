@@ -1,29 +1,18 @@
-ramannoodle.dataset.torch package
-=================================
+ramannoodle.dataset.torch
+==========================
 
-Submodules
-----------
-
-ramannoodle.dataset.torch.dataset module
-----------------------------------------
-
-.. automodule:: ramannoodle.dataset.torch.dataset
+.. automodule:: ramannoodle.dataset.torch
    :members:
    :undoc-members:
    :show-inheritance:
+
+Submodules
+----------
 
 ramannoodle.dataset.torch.utils module
 --------------------------------------
 
 .. automodule:: ramannoodle.dataset.torch.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: ramannoodle.dataset.torch
    :members:
    :undoc-members:
    :show-inheritance:

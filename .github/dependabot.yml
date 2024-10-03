@@ -9,11 +9,12 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
-    target-branch: "dev"
     groups:
       python-packages:
         patterns:
           - "*"
+        exclude-patterns:
+          - "*torch*"
 
   - package-ecosystem: github-actions
     directory: "/"

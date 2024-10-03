@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 from ramannoodle.abstract import Dynamics
 from ramannoodle.abstract import PolarizabilityModel
 from ramannoodle.exceptions import verify_ndarray_shape, get_type_error
-from ramannoodle.spectrum.raman import MDRamanSpectrum
+from ramannoodle.spectrum._raman import MDRamanSpectrum
 from ramannoodle.structure.utils import apply_pbc
 
 

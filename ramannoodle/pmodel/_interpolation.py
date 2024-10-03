@@ -17,11 +17,11 @@ from scipy.interpolate import make_interp_spline, BSpline
 from ramannoodle.constants import ANSICOLORS
 from ramannoodle.abstract import PolarizabilityModel
 from ramannoodle.structure.utils import calc_displacement
-from ramannoodle.structure.symmetry_utils import (
+from ramannoodle.structure._symmetry_utils import (
     is_orthogonal_to_all,
     is_collinear_with_all,
 )
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.structure._reference import ReferenceStructure
 from ramannoodle.exceptions import (
     InvalidDOFException,
     get_type_error,
@@ -29,9 +29,18 @@ from ramannoodle.exceptions import (
     verify_ndarray_shape,
     DOFWarning,
     UserError,
+    verify_list_len,
+    get_pymatgen_missing_error,
 )
 import ramannoodle.io.generic as generic_io
-from ramannoodle.io.utils import pathify_as_list
+from ramannoodle.io._utils import pathify_as_list
+
+PYMATGEN_PRESENT = True
+try:
+    import ramannoodle.io.pymatgen as pymatgen_io
+    import pymatgen.core
+except (UserError, ImportError):
+    PYMATGEN_PRESENT = False
 
 
 def get_amplitude(
@@ -508,6 +517,107 @@ class InterpolationModel(PolarizabilityModel):
             filepaths, file_format
         )
 
+        # Checks amplitudes
+        self.add_dof(
+            self.ref_structure.get_cart_displacement(displacements[0]),
+            amplitudes,
+            polarizabilities,
+            interpolation_order,
+        )
+
+    def _get_displacement_amplitudes_pymatgen(
+        self,
+        pymatgen_structures: "list[pymatgen.core.Structure]",
+    ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+        """Get displacement and amplitudes from pymatgen Structures.
+
+        Parameters
+        ----------
+        pymatgen_structures
+            List of length M.
+
+        Returns
+        -------
+        :
+            0.  displacements -- (fractional) Array with shape (M,N,3) where N is the
+                number of atoms.
+            #.  amplitudes -- Array with shape (M,2).
+
+        Raises
+        ------
+        InvalidDOFException
+            DOF assembled from supplied Structures was invalid. See :meth:`add_dof` for
+            restrictions.
+        """
+        if not PYMATGEN_PRESENT:
+            raise get_pymatgen_missing_error()
+
+        # Calculate displacements and basis vector
+        displacements = []
+        for i, structure in enumerate(pymatgen_structures):
+            positions = pymatgen_io.get_positions(structure)
+            try:
+                displacement = calc_displacement(
+                    self._ref_structure.positions,
+                    positions,
+                )
+            except ValueError as exc:
+                invalid = f"pymatgen_structures[{i}]"
+                raise InvalidDOFException(f"incompatible structure: {invalid}") from exc
+            displacements.append(displacement)
+        result = is_collinear_with_all(displacements[0], displacements)
+        if result != -1:
+            invalid = f"pymatgen_structures[{result}]"
+            raise InvalidDOFException(f"displacement ({invalid}) is not collinear")
+        cart_basis_vector = self._ref_structure.get_cart_displacement(displacements[0])
+        cart_basis_vector /= np.linalg.norm(cart_basis_vector)
+
+        # Calculate amplitudes
+        amplitudes = []
+        for displacement in displacements:
+            cart_displacement = self._ref_structure.get_cart_displacement(displacement)
+            amplitudes.append(get_amplitude(cart_basis_vector, cart_displacement))
+        return (
+            np.array(displacements),
+            np.array(amplitudes),
+        )
+
+    def add_dof_from_pymatgen(
+        self,
+        pymatgen_structures: list[pymatgen.core.Structure],
+        polarizabilities: NDArray[np.float64],
+        interpolation_order: int,
+    ) -> None:
+        """
+        Add a degree of freedom from a list of pymatgen Structures and polarizabilities.
+
+        Parameters
+        ----------
+        pymatgen_structures
+            List of length M.
+        polarizabilities
+            Array with shape (M,3,3).
+        interpolation_order
+            Must be less than the number of total number of amplitudes after
+            symmetry considerations.
+
+        Raises
+        ------
+        InvalidDOFException
+            DOF assembled from supplied structures was invalid. See :meth:`add_dof` for
+            restrictions.
+        UserError
+            pymatgen is not installed.
+
+        """
+        if not PYMATGEN_PRESENT:
+            raise get_pymatgen_missing_error()
+        verify_list_len("pymatgen_structures", pymatgen_structures, None)
+
+        # Checks displacements
+        displacements, amplitudes = self._get_displacement_amplitudes_pymatgen(
+            pymatgen_structures
+        )
         # Checks amplitudes
         self.add_dof(
             self.ref_structure.get_cart_displacement(displacements[0]),

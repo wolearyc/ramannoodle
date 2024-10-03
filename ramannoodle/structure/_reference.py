@@ -20,7 +20,7 @@ from ramannoodle.structure.utils import (
     calc_displacement,
 )
 from ramannoodle.constants import ATOM_SYMBOLS
-from ramannoodle.structure import symmetry_utils
+from ramannoodle.structure import _symmetry_utils
 
 
 def _compute_permutation_matrices(
@@ -223,7 +223,7 @@ class ReferenceStructure:
                 candidate_positions,
             )
 
-            orthogonal_result = symmetry_utils.is_orthogonal_to_all(
+            orthogonal_result = _symmetry_utils.is_orthogonal_to_all(
                 candidate_displacement.flatten(),
                 [item.flatten() for item in orthogonal_displacements],
             )
@@ -239,7 +239,7 @@ class ReferenceStructure:
                 orthogonal_displacements.append(candidate_displacement)
             else:
                 # Candidate can be collinear to maximum of one orthogonal vector
-                collinear_result = symmetry_utils.is_non_collinear_with_all(
+                collinear_result = _symmetry_utils.is_non_collinear_with_all(
                     candidate_displacement,
                     orthogonal_displacements,
                 )

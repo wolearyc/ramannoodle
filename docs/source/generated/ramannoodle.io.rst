@@ -1,5 +1,10 @@
-ramannoodle.io package
-======================
+ramannoodle.io
+===============
+
+.. automodule:: ramannoodle.io
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Subpackages
 -----------
@@ -20,18 +25,10 @@ ramannoodle.io.generic module
    :undoc-members:
    :show-inheritance:
 
-ramannoodle.io.utils module
----------------------------
+ramannoodle.io.pymatgen module
+------------------------------
 
-.. automodule:: ramannoodle.io.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: ramannoodle.io
+.. automodule:: ramannoodle.io.pymatgen
    :members:
    :undoc-members:
    :show-inheritance:

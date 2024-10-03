@@ -1,2 +1,2 @@
-# CD must be the reports directory!
-sphinx-apidoc -o source/generated ../ramannoodle
+# CD must be the docs directory
+sphinx-apidoc --module-first --remove-old -f --templatedir=source/_templates -f  --remove-old -o source/generated ../ramannoodle

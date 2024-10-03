@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 from ramannoodle.abstract import Dynamics
 from ramannoodle.constants import RAMAN_TENSOR_CENTRAL_DIFFERENCE
 from ramannoodle.abstract import PolarizabilityModel
-from ramannoodle.spectrum.raman import PhononRamanSpectrum
+from ramannoodle.spectrum._raman import PhononRamanSpectrum
 from ramannoodle.exceptions import verify_ndarray_shape
 
 
