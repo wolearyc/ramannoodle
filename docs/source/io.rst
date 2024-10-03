@@ -1,10 +1,10 @@
-Interfacing with first-principles software
-==========================================
-
-Ramannoodle includes functions for reading and writing files used by quantum chemistry software. Currently, ramannoodle only supports VASP. We hope to include community-contributed interfaces with other codes in future versions.
-
 IO
----
+====
+
+Ramannoodle includes functions for reading and writing files used by quantum chemistry software. Currently, ramannoodle includes build-in interfaces with VASP. Ramannoodle also includes an interface with `pymatgen <https://pymatgen.org/>`_, allowing spectra to be calculated using `a wide array of DFT packages <https://pymatgen.org/pymatgen.io.html>`_.
+
+File IO
+-------
 
 IO operations are implemented in ramannoodle as functions. These are organized into packages and modules under :mod:`ramannoodle.io`. For example, VASP POSCAR IO functions are contained in :mod:`ramannoodle.io.vasp.poscar` while OUTCAR files can be read with functions in :mod:`ramannoodle.io.vasp.outcar`. Using this structure, files of various types can be interacted with in an intuitive and readable way:
 
@@ -37,8 +37,8 @@ These generic functions are less flexible than those first mentioned, and theref
 
 .. _Supported formats:
 
-Supported formats
------------------
+Supported file formats
+----------------------
 
 The following table reviews which file types and properties are currently supported by ramannoodle's IO functions:
 
@@ -56,3 +56,8 @@ The following table reviews which file types and properties are currently suppor
 
 :sup:`1` Uses initial structure.
 :sup:`2` Not available in :mod:`ramannoodle.io.generic`
+
+Pymatgen integration
+--------------------
+
+Ramannoodle includes interfaces with `pymatgen <https://pymatgen.org/>`_. By taking advantage of pymatgen's IO functionality, one can use ramannoodle with a wide variety of popular DFT software packages. :mod:`ramannoodle.io.pymatgen` contains various useful functions for loading pymatgen data into ramannoodle. In addition :class:`InterpolationModel` and :class:`ARTModel` implement :meth:`.add_dof_from_pymatgen` and :meth:`.add_art_from_pymatgen` methods, allowing one to build up these models using pymatgen objects.
