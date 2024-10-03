@@ -18,6 +18,12 @@ from ramannoodle.exceptions import (
     UserError,
 )
 
+PYMATGEN_PRESENT = True
+try:
+    import pymatgen.core
+except (UserError, ImportError):
+    PYMATGEN_PRESENT = False
+
 
 def _get_directions_str(directions: list[NDArray[np.float64]]) -> str:
     """Return easy-to-read string for directions."""
@@ -109,6 +115,25 @@ class ARTModel(InterpolationModel):
             "add_dof_from_files should not be used; use add_art_from_files instead"
         )
 
+    def add_dof_from_pymatgen(
+        self,
+        pymatgen_structures: "list[pymatgen.core.Structure]",
+        polarizabilities: NDArray[np.float64],
+        interpolation_order: int,
+    ) -> None:
+        """Disable add_dof_from_pymatgen.
+
+        Raises
+        ------
+        UserError
+
+        :meta private:
+        """
+        raise UserError(
+            "add_dof_from_pymatgen should not be used; use add_art_from_pymatgen "
+            "instead"
+        )
+
     def add_art(
         self,
         atom_index: int,
@@ -189,8 +214,6 @@ class ARTModel(InterpolationModel):
             Supports ``"outcar"`` and ``"vasprun.xml"``. If dummy model, supports
             ``"poscar"`` and ``"xdatcar"`` as well (see :ref:`Supported formats`).
 
-
-
         Raises
         ------
         FileNotFoundError
@@ -205,6 +228,58 @@ class ARTModel(InterpolationModel):
         displacements, amplitudes, polarizabilities = super()._read_dof(
             filepaths, file_format
         )
+        # Check whether only one atom is displaced.
+        _displacement = displacements[0].copy()
+        atom_index = int(np.argmax(np.sum(_displacement**2, axis=1)))
+        _displacement[atom_index] = np.zeros(3)
+        if not np.allclose(_displacement, 0.0, atol=1e-6):
+            raise InvalidDOFException("multiple atoms displaced simultaneously")
+
+        # Checks displacement
+        basis_vectors_to_add, interpolation_xs, interpolation_ys = super()._get_dof(
+            displacements[0], amplitudes, polarizabilities, False
+        )
+
+        num_amplitudes = len(interpolation_xs[0])
+        if num_amplitudes != 2:
+            raise InvalidDOFException(
+                f"wrong number of amplitudes: {num_amplitudes} != 2"
+            )
+
+        # Checks amplitudes
+        super()._construct_and_add_interpolations(
+            basis_vectors_to_add, interpolation_xs, interpolation_ys, 1
+        )
+
+    def add_art_from_pymatgen(
+        self,
+        pymatgen_structures: list[pymatgen.core.Structure],
+        polarizabilities: NDArray[np.float64],
+    ) -> None:
+        """
+        Add an atomic Raman tensor (ART) from pymatgen Structures and polarizabilities.
+
+        Required directions, amplitudes, and polarizabilities are automatically
+        determined from provided structures. Structures should be chosen such that the
+        resulting ARTs are valid under the same restrictions of :meth:`add_art`.
+
+        Parameters
+        ----------
+        pymatgen_structures
+            List of length M.
+        polarizabilities
+            Array with shape (M,3,3).
+
+        Raises
+        ------
+        InvalidDOFException
+            ART assembled from supplied Structures was invalid. See :meth:`add_art` for
+            restrictions.
+        """
+        displacements, amplitudes = super()._get_displacement_amplitudes_pymatgen(
+            pymatgen_structures
+        )
+
         # Check whether only one atom is displaced.
         _displacement = displacements[0].copy()
         atom_index = int(np.argmax(np.sum(_displacement**2, axis=1)))

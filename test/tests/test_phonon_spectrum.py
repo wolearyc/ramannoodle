@@ -249,6 +249,83 @@ def test_art_spectrum(
 
 
 @pytest.mark.parametrize(
+    "outcar_ref_structure_fixture,data_directory,dof_eps_outcars",
+    [
+        (
+            "test/data/TiO2/phonons_OUTCAR",
+            "test/data/TiO2/",
+            [
+                ["Ti5_0.1z_eps_OUTCAR"],
+                ["Ti5_0.1x_eps_OUTCAR"],
+                [
+                    "O43_0.1z_eps_OUTCAR",
+                    "O43_m0.1z_eps_OUTCAR",
+                ],
+                ["O43_0.1x_eps_OUTCAR"],
+                ["O43_0.1y_eps_OUTCAR"],
+            ],
+        ),
+    ],
+    indirect=["outcar_ref_structure_fixture"],
+)
+def test_art_spectrum_pymatgen(
+    outcar_ref_structure_fixture: ReferenceStructure,
+    data_directory: str,
+    dof_eps_outcars: list[str],
+) -> None:
+    """Test a full spectrum calculation using ARTModel and pymatgen."""
+    # Setup model
+    ref_structure = outcar_ref_structure_fixture
+    _, polarizability = ramannoodle.io.generic.read_positions_and_polarizability(
+        f"{data_directory}/ref_eps_OUTCAR", file_format="outcar"
+    )
+    model = ARTModel(ref_structure, polarizability)
+    for outcar_names in dof_eps_outcars:
+        pymatgen_structures = []
+        polarizabilities = []
+        for outcar_name in outcar_names:
+            positions, polarizability = (
+                ramannoodle.io.generic.read_positions_and_polarizability(
+                    f"{data_directory}/{outcar_name}", file_format="outcar"
+                )
+            )
+            ramannoodle.io.vasp.poscar.write_structure(
+                ref_structure.lattice,
+                ref_structure.atomic_numbers,
+                positions,
+                "test/data/scratch/PYMATGEN_ART_POSCAR",
+                overwrite=True,
+            )
+            pymatgen_structures.append(
+                pymatgen.core.Structure.from_file(
+                    "test/data/scratch/PYMATGEN_ART_POSCAR"
+                )
+            )
+            polarizabilities.append(polarizability)
+
+        model.add_art_from_pymatgen(pymatgen_structures, np.array(polarizabilities))
+
+    # Spectrum test
+    with np.load(f"{data_directory}/known_art_spectrum.npz") as known_spectrum:
+        phonons = ramannoodle.io.generic.read_phonons(
+            f"{data_directory}/phonons_OUTCAR", file_format="outcar"
+        )
+        spectrum = phonons.get_raman_spectrum(model)
+        wavenumbers, intensities = spectrum.measure(
+            laser_correction=True,
+            laser_wavelength=532,
+            bose_einstein_correction=True,
+            temperature=300,
+        )
+
+        known_wavenumbers = known_spectrum["wavenumbers"]
+        known_intensities = known_spectrum["intensities"]
+
+        assert np.allclose(wavenumbers, known_wavenumbers)
+        assert np.allclose(intensities, known_intensities, atol=1e-4)
+
+
+@pytest.mark.parametrize(
     "outcar_ref_structure_fixture,data_directory,dof_eps_outcars,atoms_to_mask,"
     "known_spectrum_file",
     [
