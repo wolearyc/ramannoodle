@@ -1,5 +1,10 @@
-ramannoodle.io.vasp package
-===========================
+ramannoodle.io.vasp
+====================
+
+.. automodule:: ramannoodle.io.vasp
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------
@@ -32,14 +37,6 @@ ramannoodle.io.vasp.xdatcar module
 ----------------------------------
 
 .. automodule:: ramannoodle.io.vasp.xdatcar
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: ramannoodle.io.vasp
    :members:
    :undoc-members:
    :show-inheritance:

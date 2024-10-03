@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.structure._reference import ReferenceStructure
 from ramannoodle.structure.utils import displace_positions
 from ramannoodle.exceptions import (
     get_type_error,
@@ -24,7 +24,7 @@ from ramannoodle.exceptions import (
     verify_ndarray_shape,
     verify_list_len,
 )
-from ramannoodle.io.utils import pathify_as_list
+from ramannoodle.io._utils import pathify_as_list
 import ramannoodle.io.generic as generic_io
 
 

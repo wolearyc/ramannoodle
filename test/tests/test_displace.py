@@ -9,8 +9,8 @@ from numpy.typing import NDArray
 import pytest
 
 import ramannoodle.io.vasp as vasp_io
-from ramannoodle.structure.reference import ReferenceStructure
-from ramannoodle.structure.displace import (
+from ramannoodle.structure._reference import ReferenceStructure
+from ramannoodle.structure._displace import (
     write_ast_displaced_structures,
     get_ast_displaced_positions,
     write_displaced_structures,

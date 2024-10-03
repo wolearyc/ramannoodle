@@ -1,5 +1,10 @@
-ramannoodle.dataset package
-===========================
+ramannoodle.dataset
+====================
+
+.. automodule:: ramannoodle.dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Subpackages
 -----------
@@ -8,11 +13,3 @@ Subpackages
    :maxdepth: 4
 
    ramannoodle.dataset.torch
-
-Module contents
----------------
-
-.. automodule:: ramannoodle.dataset
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -14,8 +14,8 @@ try:
     from torch.nn.modules.loss import _Loss
     from torch.optim.optimizer import Optimizer
 
-    from ramannoodle.pmodel.torch.gnn import PotGNN
-    from ramannoodle.dataset.torch.dataset import PolarizabilityDataset
+    from ramannoodle.pmodel.torch._gnn import PotGNN
+    from ramannoodle.dataset.torch._dataset import PolarizabilityDataset
 except (ModuleNotFoundError, UserError) as exc:
     raise get_torch_missing_error() from exc
 

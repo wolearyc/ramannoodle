@@ -1,27 +1,5 @@
-ramannoodle.dynamics package
-============================
-
-Submodules
-----------
-
-ramannoodle.dynamics.phonon module
-----------------------------------
-
-.. automodule:: ramannoodle.dynamics.phonon
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ramannoodle.dynamics.trajectory module
---------------------------------------
-
-.. automodule:: ramannoodle.dynamics.trajectory
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
+ramannoodle.dynamics
+=====================
 
 .. automodule:: ramannoodle.dynamics
    :members:

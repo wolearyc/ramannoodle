@@ -9,7 +9,7 @@ from numpy.typing import NDArray
 
 from tqdm import tqdm
 
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.structure._reference import ReferenceStructure
 from ramannoodle.exceptions import (
     get_torch_missing_error,
     UserError,
@@ -32,7 +32,7 @@ try:
     from torch_geometric.nn.inits import reset
     from torch_geometric.nn.models.schnet import ShiftedSoftplus
     from torch_geometric.utils import scatter
-    import ramannoodle.pmodel.torch.utils as rn_torch_utils
+    import ramannoodle.pmodel.torch._utils as rn_torch_utils
     from ramannoodle.dataset.torch.utils import (
         polarizability_vectors_to_tensors,
         polarizability_tensors_to_vectors,

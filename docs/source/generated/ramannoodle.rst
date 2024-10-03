@@ -1,5 +1,10 @@
-ramannoodle package
-===================
+ramannoodle
+============
+
+.. automodule:: ramannoodle
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Subpackages
 -----------
@@ -37,14 +42,6 @@ ramannoodle.exceptions module
 -----------------------------
 
 .. automodule:: ramannoodle.exceptions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: ramannoodle
    :members:
    :undoc-members:
    :show-inheritance:

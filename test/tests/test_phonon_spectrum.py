@@ -12,13 +12,13 @@ from numpy.typing import NDArray
 import pymatgen.core
 
 import ramannoodle.io.generic
-from ramannoodle.pmodel.interpolation import InterpolationModel
-from ramannoodle.pmodel.art import ARTModel
-from ramannoodle.spectrum.raman import (
+from ramannoodle.pmodel._interpolation import InterpolationModel
+from ramannoodle.pmodel._art import ARTModel
+from ramannoodle.spectrum._raman import (
     get_bose_einstein_correction,
     get_laser_correction,
 )
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.structure._reference import ReferenceStructure
 from ramannoodle.spectrum.utils import convolve_spectrum
 
 # pylint: disable=protected-access,too-many-locals

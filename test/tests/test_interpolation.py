@@ -7,10 +7,10 @@ import numpy as np
 from numpy.typing import NDArray
 import pytest
 
-from ramannoodle.pmodel.interpolation import find_duplicates
-from ramannoodle.pmodel.interpolation import InterpolationModel
+from ramannoodle.pmodel._interpolation import find_duplicates
+from ramannoodle.pmodel._interpolation import InterpolationModel
 from ramannoodle.exceptions import InvalidDOFException
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.structure._reference import ReferenceStructure
 
 # pylint: disable=protected-access
 # pylint: disable=too-many-arguments

@@ -11,11 +11,11 @@ from ramannoodle.exceptions import (
     get_type_error,
     IncompatibleStructureException,
 )
-from ramannoodle.dynamics.trajectory import Trajectory
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.dynamics._trajectory import Trajectory
+from ramannoodle.structure._reference import ReferenceStructure
 
 try:
-    from ramannoodle.dataset.torch.dataset import PolarizabilityDataset
+    from ramannoodle.dataset.torch._dataset import PolarizabilityDataset
 except UserError:
     pass
 

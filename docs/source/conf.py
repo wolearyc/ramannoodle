@@ -38,6 +38,7 @@ intersphinx_mapping = {
     'numpy': ('http://docs.scipy.org/doc/numpy', None),
     'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
     'torch': ('https://pytorch.org/docs/stable/', None),
+    'pymatgen': ('https://pymatgen.org', None),
 }
 
 intersphinx_disabled_domains = ['std']

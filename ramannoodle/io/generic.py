@@ -13,15 +13,15 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
-from ramannoodle.dynamics.phonon import Phonons
-from ramannoodle.dynamics.trajectory import Trajectory
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.dynamics._phonon import Phonons
+from ramannoodle.dynamics._trajectory import Trajectory
+from ramannoodle.structure._reference import ReferenceStructure
 from ramannoodle.exceptions import UserError, get_torch_missing_error
 import ramannoodle.io.vasp as vasp_io
 
 TORCH_PRESENT = True
 try:
-    from ramannoodle.dataset.torch.dataset import PolarizabilityDataset
+    from ramannoodle.dataset.torch._dataset import PolarizabilityDataset
 except UserError:
     TORCH_PRESENT = False
 

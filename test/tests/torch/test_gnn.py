@@ -12,18 +12,18 @@ import torch
 
 import ramannoodle as rn
 
-from ramannoodle.pmodel.torch.gnn import PotGNN
-from ramannoodle.pmodel.torch.utils import (
+from ramannoodle.pmodel.torch._gnn import PotGNN
+from ramannoodle.pmodel.torch._utils import (
     _radius_graph_pbc,
     get_rotations,
 )
-from ramannoodle.pmodel.torch.train import train_single_epoch
+from ramannoodle.pmodel.torch._train import train_single_epoch
 from ramannoodle.dataset.torch.utils import polarizability_vectors_to_tensors
 
 
 # import ramannoodle.io.vasp as vasp_io
 # from ramannoodle.structure.structure_utils import apply_pbc
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.structure._reference import ReferenceStructure
 
 # pylint: disable=protected-access, too-many-arguments, not-callable
 

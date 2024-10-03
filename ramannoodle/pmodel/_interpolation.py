@@ -17,11 +17,11 @@ from scipy.interpolate import make_interp_spline, BSpline
 from ramannoodle.constants import ANSICOLORS
 from ramannoodle.abstract import PolarizabilityModel
 from ramannoodle.structure.utils import calc_displacement
-from ramannoodle.structure.symmetry_utils import (
+from ramannoodle.structure._symmetry_utils import (
     is_orthogonal_to_all,
     is_collinear_with_all,
 )
-from ramannoodle.structure.reference import ReferenceStructure
+from ramannoodle.structure._reference import ReferenceStructure
 from ramannoodle.exceptions import (
     InvalidDOFException,
     get_type_error,
@@ -33,7 +33,7 @@ from ramannoodle.exceptions import (
     get_pymatgen_missing_error,
 )
 import ramannoodle.io.generic as generic_io
-from ramannoodle.io.utils import pathify_as_list
+from ramannoodle.io._utils import pathify_as_list
 
 PYMATGEN_PRESENT = True
 try:
