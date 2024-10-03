@@ -39,7 +39,7 @@ PYMATGEN_PRESENT = True
 try:
     import ramannoodle.io.pymatgen as pymatgen_io
     import pymatgen.core
-except ImportError:
+except (UserError, ImportError):
     PYMATGEN_PRESENT = False
 
 
