@@ -86,12 +86,12 @@ def test_write_read_poscar(
         lattice,
         atomic_numbers,
         positions,
-        "test/data/temp/WRITE_POSCAR",
+        "test/data/scratch/WRITE_POSCAR",
         file_format="poscar",
         overwrite=True,
     )
     reference_structure = ramannoodle.io.generic.read_ref_structure(
-        "test/data/temp/WRITE_POSCAR", file_format="poscar"
+        "test/data/scratch/WRITE_POSCAR", file_format="poscar"
     )
     assert np.allclose(reference_structure._lattice, lattice)
     assert np.allclose(reference_structure._atomic_numbers, atomic_numbers)
@@ -114,7 +114,7 @@ def test_write_read_poscar(
             np.ones((2, 3)),
             [1, 1, 1, 3, 4, 4, 4, 30, 30],
             np.zeros((9, 3)),
-            "test/data/temp/WRITE_POSCAR",
+            "test/data/scratch/WRITE_POSCAR",
             ValueError,
             "lattice has wrong shape: (2,3) != (3,3)",
             False,
@@ -123,7 +123,7 @@ def test_write_read_poscar(
             np.ones((3, 3)),
             [1, 1, 1, 3, 4, 4, 4, 30, 4],
             np.zeros((9, 3)),
-            "test/data/temp/WRITE_POSCAR",
+            "test/data/scratch/WRITE_POSCAR",
             ValueError,
             "atomic number not grouped: 4",
             True,
@@ -132,7 +132,7 @@ def test_write_read_poscar(
             np.ones((3, 3)),
             [1, 1, 1, 3, 4, 4, 4, 30],
             np.zeros((9, 3)),
-            "test/data/temp/WRITE_POSCAR",
+            "test/data/scratch/WRITE_POSCAR",
             ValueError,
             "positions has wrong shape: (9,3) != (8,3)",
             True,

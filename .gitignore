@@ -269,3 +269,4 @@ test/data/temp
 test/data/temp.vasp
 docs/source/notebooks/*POSCAR
 test/Testing.ipynb
+test/data/scratch/*
