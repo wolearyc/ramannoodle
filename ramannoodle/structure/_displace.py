@@ -80,7 +80,7 @@ def write_displaced_structures(
     cart_displacement: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
     filepaths: str | Path | list[str] | list[Path],
-    file_format: str,
+    file_format: str = "auto",
     overwrite: bool = False,
 ) -> None:
     """Write displaced structures to files.
@@ -96,7 +96,8 @@ def write_displaced_structures(
         (Å) Array with shape (M,).
     filepaths
     file_format
-        Supports ``"poscar"`` (see :ref:`Supported formats`). Not case sensitive.
+        Supports ``"poscar"`` and ``"auto"`` (see :ref:`Supported formats`). Not case
+        sensitive.
     overwrite
         If ``True``, overwrite the file if it exists.
     """
@@ -163,7 +164,7 @@ def write_ast_displaced_structures(
     cart_direction: NDArray[np.float64],
     amplitudes: NDArray[np.float64],
     filepaths: str | Path | list[str] | list[Path],
-    file_format: str,
+    file_format: str = "auto",
     overwrite: bool = False,
 ) -> None:
     """Write displaced structures with a single atom displaced along a direction.
@@ -180,7 +181,8 @@ def write_ast_displaced_structures(
         (Å) Array with shape (M,).
     filepaths
     file_format
-        Supports ``"poscar"`` (see :ref:`Supported formats`). Not case sensitive.
+        Supports ``"poscar"`` and ``"auto"`` (see :ref:`Supported formats`). Not case
+        sensitive.
     overwrite
         Overwrite the file if it exists.
     """

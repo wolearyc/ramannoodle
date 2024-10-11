@@ -624,7 +624,9 @@ class InterpolationModel(PolarizabilityModel):
         )
 
     def _read_dof(
-        self, filepaths: str | Path | list[str] | list[Path], file_format: str
+        self,
+        filepaths: str | Path | list[str] | list[Path],
+        file_format: str,
     ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
         """Read displacements, amplitudes, and polarizabilities from file(s).
 
