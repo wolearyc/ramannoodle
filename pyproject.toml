@@ -86,7 +86,6 @@ force-exclude = '''
 (
   /(
       \.git          # root of the project
-    | docs
   )/
   | setup.py
 )
