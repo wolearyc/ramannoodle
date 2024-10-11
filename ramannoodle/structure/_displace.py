@@ -96,7 +96,7 @@ def write_displaced_structures(
         (Å) Array with shape (M,).
     filepaths
     file_format
-        Supports ``"poscar"`` (see :ref:`Supported formats`).
+        Supports ``"poscar"`` (see :ref:`Supported formats`). Not case sensitive.
     overwrite
         If ``True``, overwrite the file if it exists.
     """
@@ -180,7 +180,7 @@ def write_ast_displaced_structures(
         (Å) Array with shape (M,).
     filepaths
     file_format
-        Supports ``"poscar"`` (see :ref:`Supported formats`).
+        Supports ``"poscar"`` (see :ref:`Supported formats`). Not case sensitive.
     overwrite
         Overwrite the file if it exists.
     """

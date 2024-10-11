@@ -26,6 +26,7 @@ except UserError:
     TORCH_PRESENT = False
 
 # These  map between file formats and appropriate IO functions.
+# Keys must be lower case.
 _PHONON_READERS = {
     "outcar": vasp_io.outcar.read_phonons,
     "vasprun.xml": vasp_io.vasprun.read_phonons,
@@ -72,7 +73,8 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
     ----------
     filepath
     file_format
-        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`).
+        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`). Not
+        case sensitive.
 
     Returns
     -------
@@ -86,7 +88,7 @@ def read_phonons(filepath: str | Path, file_format: str) -> Phonons:
         Invalid file.
     """
     try:
-        return _PHONON_READERS[file_format](filepath)
+        return _PHONON_READERS[file_format.lower()](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
@@ -98,9 +100,9 @@ def read_trajectory(filepath: str | Path, file_format: str) -> Trajectory:
     ----------
     filepath
     file_format
-        Supports ``"outcar"``, ``"vasprun.xml"``, (see :ref:`Supported formats`).
-        Use :func:`.vasp.xdatcar.read_trajectory` to read a trajectory from an
-        XDATCAR.
+        Supports ``"outcar"``, ``"vasprun.xml"``, (see :ref:`Supported formats`). Not
+        case sensitive. Use :func:`.vasp.xdatcar.read_trajectory` to read a trajectory
+        from an XDATCAR.
 
     Returns
     -------
@@ -114,7 +116,7 @@ def read_trajectory(filepath: str | Path, file_format: str) -> Trajectory:
         Invalid file.
     """
     try:
-        return _TRAJECTORY_READERS[file_format](filepath)
+        return _TRAJECTORY_READERS[file_format.lower()](filepath)
     except KeyError as exc:
         if file_format == "xdatcar":
             raise ValueError(
@@ -133,7 +135,8 @@ def read_positions_and_polarizability(
     ----------
     filepath
     file_format
-        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`).
+        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`). Not
+        case sensitive.
 
     Returns
     -------
@@ -150,7 +153,7 @@ def read_positions_and_polarizability(
         Invalid file.
     """
     try:
-        return _POSITION_AND_POLARIZABILITY_READERS[file_format](filepath)
+        return _POSITION_AND_POLARIZABILITY_READERS[file_format.lower()](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
@@ -165,7 +168,8 @@ def read_structure_and_polarizability(
     ----------
     filepath
     file_format
-        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
+        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`). Not
+        case sensitive.
 
     Returns
     -------
@@ -184,7 +188,7 @@ def read_structure_and_polarizability(
         Invalid file.
     """
     try:
-        return _STRUCTURE_AND_POLARIZABILITY_READERS[file_format](filepath)
+        return _STRUCTURE_AND_POLARIZABILITY_READERS[file_format.lower()](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
@@ -199,7 +203,8 @@ def read_polarizability_dataset(
     ----------
     filepaths
     file_format
-        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`)
+        Supports ``"outcar"``, ``"vasprun.xml"`` (see :ref:`Supported formats`). Not
+        case sensitive.
 
     Returns
     -------
@@ -217,7 +222,7 @@ def read_polarizability_dataset(
     if not TORCH_PRESENT:
         raise get_torch_missing_error()
     try:
-        return _POLARIZABILITY_DATASET_READERS[file_format](filepaths)
+        return _POLARIZABILITY_DATASET_READERS[file_format.lower()](filepaths)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
@@ -233,7 +238,7 @@ def read_positions(
     filepath
     file_format
         Supports ``"outcar"``, ``"poscar"``, ``"xdatcar"``, ``"vasprun.xml"``  (see
-        :ref:`Supported formats`).
+        :ref:`Supported formats`). Not case sensitive.
 
     Returns
     -------
@@ -249,7 +254,7 @@ def read_positions(
 
     """
     try:
-        return _POSITION_READERS[file_format](filepath)
+        return _POSITION_READERS[file_format.lower()](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
@@ -278,7 +283,7 @@ def read_ref_structure(filepath: str | Path, file_format: str) -> ReferenceStruc
         Structural symmetry determination failed.
     """
     try:
-        return _REFERENCE_STRUCTURE_READERS[file_format](filepath)
+        return _REFERENCE_STRUCTURE_READERS[file_format.lower()](filepath)
     except KeyError as exc:
         raise ValueError(f"unsupported format: {file_format}") from exc
 
@@ -303,7 +308,7 @@ def write_structure(  # pylint: disable=too-many-arguments,too-many-positional-a
         (fractional) Array with shape (N,3).
     filepath
     file_format
-        Supports ``"poscar"`` (see :ref:`Supported formats`).
+        Supports ``"poscar"`` (see :ref:`Supported formats`). Not case sensitive.
     overwrite
         Overwrite the file if it exists.
     label
@@ -315,7 +320,7 @@ def write_structure(  # pylint: disable=too-many-arguments,too-many-positional-a
         File exists and ``overwrite == False``.
     """
     try:
-        _STRUCTURE_WRITERS[file_format](
+        _STRUCTURE_WRITERS[file_format.lower()](
             lattice=lattice,
             atomic_numbers=atomic_numbers,
             positions=positions,
@@ -348,7 +353,7 @@ def write_trajectory(
         configurations.
     filepath
     file_format
-        Supports ``"xdatcar"`` (see :ref:`Supported formats`).
+        Supports ``"xdatcar"`` (see :ref:`Supported formats`). Not case sensitive.
     overwrite
         Overwrite the file if it exists.
 
@@ -358,7 +363,7 @@ def write_trajectory(
         File exists and ``overwrite == False``.
     """
     try:
-        _TRAJECTORY_WRITERS[file_format](
+        _TRAJECTORY_WRITERS[file_format.lower()](
             lattice=lattice,
             atomic_numbers=atomic_numbers,
             positions_ts=positions_ts,

@@ -496,9 +496,8 @@ class InterpolationModel(PolarizabilityModel):
         filepaths
         file_format
             Supports ``"outcar"`` and ``"vasprun.xml"``. If dummy model, supports
-            ``"poscar"`` and ``"xdatcar"`` as well (see :ref:`Supported formats`).
-
-
+            ``"poscar"`` and ``"xdatcar"`` as well (see :ref:`Supported formats`). Not
+            case sensitive.
 
         Raises
         ------
@@ -509,8 +508,6 @@ class InterpolationModel(PolarizabilityModel):
         InvalidDOFException
             DOF assembled from supplied files was invalid. See :meth:`add_dof` for
             restrictions.
-
-
         """
         # Checks displacements
         displacements, amplitudes, polarizabilities = self._read_dof(

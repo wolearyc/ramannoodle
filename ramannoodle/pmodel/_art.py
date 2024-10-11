@@ -212,7 +212,8 @@ class ARTModel(InterpolationModel):
         filepaths
         file_format
             Supports ``"outcar"`` and ``"vasprun.xml"``. If dummy model, supports
-            ``"poscar"`` and ``"xdatcar"`` as well (see :ref:`Supported formats`).
+            ``"poscar"`` and ``"xdatcar"`` as well (see :ref:`Supported formats`). Not
+            case sensitive.
 
         Raises
         ------
