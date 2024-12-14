@@ -1,4 +1,5 @@
 """Sphinx conf.py."""
+
 # pylint: skip-file
 # flake-8: noqa
 # cspell: disable
@@ -13,47 +14,47 @@
 import sys
 import os
 
-project = 'ramannoodle'
+project = "ramannoodle"
 copyright = "2023-present, Willis O'Leary"
 author = "Willis O'Leary"
-release = '0.5.0'
+release = "0.5.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.napoleon',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
-    'nbsphinx',
-    'IPython.sphinxext.ipython_console_highlighting',
+    "nbsphinx",
+    "IPython.sphinxext.ipython_console_highlighting",
 ]
-autodoc_typehints = 'description'
+autodoc_typehints = "description"
 nbsphinx_allow_errors = True
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3/', None),
-    'numpy': ('http://docs.scipy.org/doc/numpy', None),
-    'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
-    'torch': ('https://pytorch.org/docs/stable/', None),
-    'pymatgen': ('https://pymatgen.org', None),
+    "python": ("https://docs.python.org/3/", None),
+    "numpy": ("http://docs.scipy.org/doc/numpy", None),
+    "scipy": ("http://docs.scipy.org/doc/scipy/reference", None),
+    "torch": ("https://pytorch.org/docs/stable/", None),
+    "pymatgen": ("https://pymatgen.org", None),
 }
 
-intersphinx_disabled_domains = ['std']
+intersphinx_disabled_domains = ["std"]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
-autodoc_member_order = 'groupwise'
+autodoc_member_order = "groupwise"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
-html_title = 'ramannoodle'
-html_static_path = ['_static']
+html_theme = "furo"
+html_title = "ramannoodle"
+html_static_path = ["_static"]
 html_theme_options = {
     "light_logo": "logo.png",
     "dark_logo": "logo_dark.png",
@@ -61,4 +62,4 @@ html_theme_options = {
 }
 html_extra_path = ["robots.txt"]
 
-sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath("../../"))

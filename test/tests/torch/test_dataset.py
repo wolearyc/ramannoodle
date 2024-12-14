@@ -27,7 +27,8 @@ from ramannoodle.dataset.torch._dataset import PolarizabilityDataset
     ],
 )
 def test_load_polarizability_dataset(
-    filepaths: str | list[str], file_format: str
+    filepaths: str | list[str],
+    file_format: str,
 ) -> None:
     """Test of generic load_polarizability_dataset (normal)."""
     dataset = generic_io.read_polarizability_dataset(filepaths, file_format)

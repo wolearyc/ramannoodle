@@ -199,7 +199,7 @@ class ARTModel(InterpolationModel):
     def add_art_from_files(
         self,
         filepaths: str | Path | list[str] | list[Path],
-        file_format: str,
+        file_format: str = "auto",
     ) -> None:
         """Add an atomic Raman tensor (ART) from file(s).
 
@@ -211,8 +211,9 @@ class ARTModel(InterpolationModel):
         ----------
         filepaths
         file_format
-            Supports ``"outcar"`` and ``"vasprun.xml"``. If dummy model, supports
-            ``"poscar"`` and ``"xdatcar"`` as well (see :ref:`Supported formats`).
+            Supports ``"outcar"``, ``"vasprun.xml"``, and ``"auto"``. If dummy model,
+            supports ``"poscar"`` and ``"xdatcar"`` as well (see :ref:`Supported
+            formats`). Not case sensitive.
 
         Raises
         ------
@@ -412,5 +413,4 @@ class ARTModel(InterpolationModel):
             DOF indexes associated with specific atoms can be retrieved using
             :meth:`get_dof_indexes`.
         """
-        # We "cast" here due to how typing is done to support Python 3.10.
         return cast(ARTModel, super().get_masked_model(dof_indexes_to_mask))

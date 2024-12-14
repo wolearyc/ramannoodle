@@ -33,7 +33,7 @@ These generic functions are less flexible than those first mentioned, and theref
       model = rn.pmodel.InterpolationModel(...)
       model.add_dof_from_files(..., file_format = "outcar")
 
-:meth:`.InterpolationModel.add_dof_from_files` and other methods like it rely on these generic methods, as apparent from the ``file_format`` argument.
+:meth:`.InterpolationModel.add_dof_from_files` and other methods like it rely on these generic methods, as apparent from the ``file_format`` argument. When ``file_format=="auto"``, ramannoodle will guess the file format based on the filename. Otherwise, ``file_format`` should be set according to the next section.
 
 .. _Supported formats:
 

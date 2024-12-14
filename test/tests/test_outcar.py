@@ -89,6 +89,6 @@ def test_read_trajectory_from_outcar(
     path_fixture: Path, trajectory_length: int, last_position: NDArray[np.float64]
 ) -> None:
     """Test read_trajectory for outcar (normal)."""
-    trajectory = generic_io.read_trajectory(path_fixture, file_format="outcar")
+    trajectory = generic_io.read_trajectory(path_fixture)
     assert len(trajectory) == trajectory_length
     assert np.allclose(last_position, trajectory[-1][-1])

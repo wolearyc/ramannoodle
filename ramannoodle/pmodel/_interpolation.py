@@ -1,7 +1,5 @@
 """Polarizability model based on interpolation around degrees of freedom."""
 
-# This is not ideal, but is required for Python 3.10 support.
-# In future versions, we can use "from typing import Self"
 from __future__ import annotations
 
 from pathlib import Path
@@ -496,9 +494,8 @@ class InterpolationModel(PolarizabilityModel):
         filepaths
         file_format
             Supports ``"outcar"`` and ``"vasprun.xml"``. If dummy model, supports
-            ``"poscar"`` and ``"xdatcar"`` as well (see :ref:`Supported formats`).
-
-
+            ``"poscar"`` and ``"xdatcar"`` as well (see :ref:`Supported formats`). Not
+            case sensitive.
 
         Raises
         ------
@@ -509,8 +506,6 @@ class InterpolationModel(PolarizabilityModel):
         InvalidDOFException
             DOF assembled from supplied files was invalid. See :meth:`add_dof` for
             restrictions.
-
-
         """
         # Checks displacements
         displacements, amplitudes, polarizabilities = self._read_dof(
@@ -627,7 +622,9 @@ class InterpolationModel(PolarizabilityModel):
         )
 
     def _read_dof(
-        self, filepaths: str | Path | list[str] | list[Path], file_format: str
+        self,
+        filepaths: str | Path | list[str] | list[Path],
+        file_format: str,
     ) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
         """Read displacements, amplitudes, and polarizabilities from file(s).
 
