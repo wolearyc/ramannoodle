@@ -413,5 +413,4 @@ class ARTModel(InterpolationModel):
             DOF indexes associated with specific atoms can be retrieved using
             :meth:`get_dof_indexes`.
         """
-        # We "cast" here due to how typing is done to support Python 3.10.
         return cast(ARTModel, super().get_masked_model(dof_indexes_to_mask))

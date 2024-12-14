@@ -1,7 +1,5 @@
 """Polarizability model based on interpolation around degrees of freedom."""
 
-# This is not ideal, but is required for Python 3.10 support.
-# In future versions, we can use "from typing import Self"
 from __future__ import annotations
 
 from pathlib import Path
