@@ -11,7 +11,6 @@ from ramannoodle.structure._displace import (
 from ramannoodle.structure import _symmetry_utils
 from ramannoodle.structure import utils
 
-
 __all__ = [
     "ReferenceStructure",
     "write_ast_displaced_structures",
