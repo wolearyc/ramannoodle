@@ -20,7 +20,6 @@ from ramannoodle.pmodel.torch._utils import (
 from ramannoodle.pmodel.torch._train import train_single_epoch
 from ramannoodle.dataset.torch.utils import polarizability_vectors_to_tensors
 
-
 # import ramannoodle.io.vasp as vasp_io
 # from ramannoodle.structure.structure_utils import apply_pbc
 from ramannoodle.structure._reference import ReferenceStructure

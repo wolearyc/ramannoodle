@@ -14,7 +14,6 @@ import ramannoodle.io.vasp as vasp_io
 from ramannoodle.io.vasp import poscar
 from ramannoodle.exceptions import InvalidFileException
 
-
 # pylint: disable=protected-access
 
 

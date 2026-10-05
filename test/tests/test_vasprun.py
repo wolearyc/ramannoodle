@@ -13,7 +13,6 @@ import ramannoodle.io.generic as generic_io
 import ramannoodle.io.vasp as vasp_io
 from ramannoodle.exceptions import InvalidFileException
 
-
 # pylint: disable=protected-access
 
 
