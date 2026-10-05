@@ -9,7 +9,6 @@ import pytest
 import ramannoodle.io.vasp as vasp_io
 import ramannoodle.io.generic as generic_io
 
-
 # pylint: disable=protected-access
 
 
